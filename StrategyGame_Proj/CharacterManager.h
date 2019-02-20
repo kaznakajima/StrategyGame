@@ -15,6 +15,9 @@ public:
 	// 攻撃判定
 	bool attack;
 
+	// 全体の攻撃回数
+	int attackCount = 0;
+
 	// 初期化
 	void Initialize();
 	// 更新
@@ -37,8 +40,10 @@ public:
 
 	// 攻撃範囲表示
 	void GetAttackArea(int x, int y);
-	// 攻撃
-	void Attack(int x, int y);
+	// 攻撃の対象を選択
+	void ChoiseAttack(int x, int y);
+	// 攻撃の処理
+	void Attack();
 
 	// カメラとのオフセット計算
 	void SetCameraOffset(int dir, bool horizontal);

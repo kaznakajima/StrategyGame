@@ -84,6 +84,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		characterMgr->Update();
 
 		if (isSelect == false) characterMgr->CharacterMove(xPos, yPos);
+
+		if (characterMgr->attack) characterMgr->Attack();
 	}
 
 	// I—¹

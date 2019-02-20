@@ -114,17 +114,7 @@ void Character::CharacterAnim(STATUS* status)
 	}
 
 	// xPos, yPosの位置にキャラクターを描画
-	if (status->isAttack) {
-		DrawGraph(status->PosX + (sin(PI * 2 / 120 * Count) + 1) / 2 * CHIP_SIZE, status->PosY, status->Image[(int)status->AnimHandle], true);
-		Count++;
-		if (Count == 60) {
-			Count = 0;
-			status->isAttack = false;
-		}
-	}
-	else {
-		DrawGraph(status->PosX, status->PosY, status->Image[(int)status->AnimHandle], true);
-	}
+	DrawGraph(status->PosX, status->PosY, status->Image[(int)status->AnimHandle], true);
 
 	// 選択中でないユニットの位置にチェック
 	if (status->isSelect == false) stage->onUnit[status->PosY / CHIP_SIZE][status->PosX / CHIP_SIZE] = true;
@@ -429,18 +419,75 @@ void Character::GetAttackDetail(STATUS* myStatus, STATUS* eStatus)
 	DrawFormatString(45, 150, GetColor(0, 0, 255), "%d", eHitness);
 }
 
+// 攻撃アニメーション
+bool Character::AttackAnimation(STATUS* myStatus, STATUS* eStatus, int count)
+{
+	// 攻撃方向を取得
+	int moveX = eStatus->PosX - myStatus->_PosX;
+	int moveY = eStatus->PosY - myStatus->_PosY;
+
+	if (moveX > 0) {
+		// 攻撃アニメーション
+		if(myStatus->animReset) myStatus->PosX -= 6;
+		else myStatus->PosX += 6;
+		
+		if (myStatus->PosX - myStatus->_PosX == CHIP_SIZE) myStatus->animReset = true;
+		if (myStatus->PosX == myStatus->_PosX) {
+			CharacterAttack(myStatus, eStatus, count);
+			myStatus->animReset = false;
+			return false;
+		}
+	}
+	else if (moveX < 0) {
+		// 攻撃アニメーション
+		if (myStatus->animReset) myStatus->PosX += 6;
+		else myStatus->PosX -= 6;
+
+		if (myStatus->PosX - myStatus->_PosX == -CHIP_SIZE) myStatus->animReset = true;
+		if (myStatus->PosX == myStatus->_PosX) {
+			CharacterAttack(myStatus, eStatus, count);
+			myStatus->animReset = false;
+			return false;
+		}
+	}
+	if (moveY > 0) {
+		// 攻撃アニメーション
+		if (myStatus->animReset) myStatus->PosY -= 6;
+		else myStatus->PosY += 6;
+
+		if (myStatus->PosY - myStatus->_PosY == CHIP_SIZE) myStatus->animReset = true;
+		if (myStatus->PosY == myStatus->_PosY) {
+			CharacterAttack(myStatus, eStatus, count);
+			myStatus->animReset = false;
+			return false;
+		}
+	}
+	else if (moveY < 0) {
+		// 攻撃アニメーション
+		if (myStatus->animReset) myStatus->PosY += 6;
+		else myStatus->PosY -= 6;
+
+		if (myStatus->PosY - myStatus->_PosY == -CHIP_SIZE) myStatus->animReset = true;
+		if (myStatus->PosY == myStatus->_PosY) {
+			CharacterAttack(myStatus, eStatus, count);
+			myStatus->animReset = false;
+			return false;
+		}
+	}
+
+	return true;
+}
+
 // キャラクターの攻撃
 void Character::CharacterAttack(STATUS* myStatus, STATUS* eStatus, int count) 
 {
-	myStatus->isAttack = true;
-
 	// ダメージ計算
 	int damage = myStatus->myParam.POWER - eStatus->myParam.DEFENCE;
 	// マイナスは0
 	if (damage < 0) damage = 0;
 
 	// 速さ判定(4以上大きければ2回攻撃)
-	int mySPD = myStatus->myParam.SPEED - eStatus->myParam.SPEED;
+	myStatus->myParam.ATTACK_SPEED = myStatus->myParam.SPEED - eStatus->myParam.SPEED;
 
 	// 命中力 (攻撃側の命中率 - 守備側の回避率)
 	int myHitness = myStatus->myParam.ATTACK_HIT - eStatus->myParam.ATTACK_AVO;
@@ -451,42 +498,48 @@ void Character::CharacterAttack(STATUS* myStatus, STATUS* eStatus, int count)
 	// 乱数の初期化
 	srand((unsigned)time(NULL));
 	if (GetRand(100) <= probability) {
-		CharacterDamage(myStatus, eStatus, probability, damage);
-		// 攻撃した相手を倒せたら戦闘終了
-		if (eStatus->isDeath == true) {
-			myStatus->canAttack = false;
+		CharacterDamage(myStatus, eStatus, damage);
+		// 敵が倒せたらその時点で戦闘終了
+		if (eStatus->isDeath) {
 			myStatus->isAttack = false;
 			return;
 		}
 	}
 
-	// 反撃
-	if(count < 2 && myStatus->AttackRange == eStatus->AttackRange) CharacterAttack(eStatus, myStatus, 2);
-	else if (count <= 2) {
+	// 攻撃終了
+	myStatus->isAttack = false;
+
+	// 敵の反撃
+	if (count < 2 && myStatus->AttackRange == eStatus->AttackRange) { 
+		eStatus->isAttack = true; 
+		return;
+	}
+	else if (count >= 2) {
 		//	自分からの追撃
-		if (mySPD >= 4) {
-			CharacterAttack(myStatus, eStatus, 3);
+		if (myStatus->myParam.ATTACK_SPEED >= 4) {
+			myStatus->isAttack = true;
 			return;
 		}
 		// 敵からの追撃
-		else if (mySPD <= -4 && myStatus->AttackRange == eStatus->AttackRange) {
-			CharacterAttack(eStatus, myStatus, 3);
+		else if (eStatus->myParam.ATTACK_SPEED >= 4 && myStatus->AttackRange == eStatus->AttackRange) {
+			eStatus->isAttack = true;
 			return;
 		}
 	}
 
 	// 追撃が出ないなら戦闘終了
-	if (mySPD < 4 || mySPD > -4 || count < 2) myStatus->canAttack = false;
+	if (myStatus->myParam.ATTACK_SPEED < 4 || eStatus->myParam.ATTACK_SPEED < 4 || count < 2) myStatus->canAttack = false;
 }
 
 // 攻撃の処理
-void Character::CharacterDamage(STATUS* myStatus, STATUS* eStatus, double probability, int damage)
+void Character::CharacterDamage(STATUS* myStatus, STATUS* eStatus, int damage)
 {
 	eStatus->myParam.HP -= damage;
 
 	if (eStatus->myParam.HP < 0) {
 		eStatus->isDeath = true;
 	}
+	myStatus->canAttack = false;
 }
 
 // 疑似的カメラとのオフセットの計算

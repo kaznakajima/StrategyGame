@@ -48,6 +48,7 @@ public:
 		int ATTACK_CLT;  // 必殺
 		int ATTACK_AVO; // 回避力
 		int ATTACK_HIT;  // 命中力
+		int ATTACK_SPEED;
 	} PARAM;
 
 	// キャラクターのステータス
@@ -60,6 +61,8 @@ public:
 		int Image[20];    // キャラクター用画像
 		float AnimHandle;  // アニメーション用変数
 		int AttackRange;    // 攻撃範囲
+		double Count;            // アニメーションカウント
+		bool animReset;  // アニメーションのリセット 
 		bool isSelect;      // 選択されているか
 		bool isMove;       // 移動中か
 		bool isAttack;     // 攻撃中か
@@ -70,9 +73,6 @@ public:
 	// 道筋
 	vector<int> OldPosX;
 	vector<int> OldPosY;
-
-	// カウント
-	int Count;
 
 	// 移動値
 	int moveCount;
@@ -102,10 +102,12 @@ public:
 	void AttackableDraw(STATUS* status);
 	// 攻撃の詳細情報表示
 	void GetAttackDetail(STATUS* myStatus, STATUS* eStatus);
+	// 攻撃アニメーション
+	bool AttackAnimation(STATUS* myStatus, STATUS* eStatus, int count);
 	// 攻撃の計算
 	void CharacterAttack(STATUS* myStatus, STATUS* eStatus, int count);
 	// 攻撃の処理
-	void CharacterDamage(STATUS* myStatus, STATUS* eStatus, double probability, int damage);
+	void CharacterDamage(STATUS* myStatus, STATUS* eStatus, int damage);
 
 	// カメラとのオフセット計算
 	void SetCameraOffset(STATUS* status, int dir, bool horizontal);

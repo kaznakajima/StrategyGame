@@ -9,6 +9,10 @@ Character::STATUS status[PlayerNum];
 
 // キャラクターのインスタンス
 Character* character;
+// 攻撃するユニット
+Character::STATUS* myStatus = nullptr;
+// 攻撃されるユニット
+Character::STATUS* eStatus = nullptr;
 
 // 初期化
 void CharacterManager::Initialize()
@@ -43,7 +47,7 @@ void CharacterManager::DrawCheck(int x, int y)
 {
 	// 攻撃中はリターン
 	if (attack == true) {
-		Attack(x, y);
+		ChoiseAttack(x, y);
 		return;
 	}
 
@@ -130,26 +134,61 @@ void CharacterManager::GetAttackArea(int x, int y)
 	}
 }
 
-// 攻撃
-void CharacterManager::Attack(int x, int y)
+// 攻撃の対象を選択
+void CharacterManager::ChoiseAttack(int x, int y)
 {
-	// 攻撃するユニット
-	Character::STATUS* myStatus = nullptr;
-
+	// 現在攻撃可能なユニットのリファレンス
 	for (unsigned int num = 0; num < statusList.size(); num++) {
 		if(statusList[num].canAttack)
 			myStatus = &statusList[num];
 	}
 
+	// 選択した位置に敵がいたら攻撃対象のリファレンスを作成
 	for (unsigned int num = 0; num < statusList.size(); num++) {
 		if (myStatus != &statusList[num]) {
-			if (statusList[num].PosX == x && statusList[num].PosY == y)
-				character->CharacterAttack(myStatus, &statusList[num], 1);
+			if (statusList[num].PosX == x && statusList[num].PosY == y) {
+				eStatus = &statusList[num];
+				myStatus->isAttack = true;
+			}
 		}
 	}
 
+	// 攻撃可能なユニットがいなかったら終了
 	if(myStatus != nullptr) myStatus->canAttack = false;
-	attack = false;
+	// 選択した位置に敵がいないなら終了
+	if (eStatus == nullptr) attack = false;
+}
+
+// 攻撃のアニメーション
+void CharacterManager::Attack()
+{
+	// 1回目の攻撃
+	if (myStatus != nullptr && eStatus != nullptr && attackCount < 2) {
+		if (myStatus->isAttack) attack = character->AttackAnimation(myStatus, eStatus, 1);
+		if (eStatus->isAttack) attack = character->AttackAnimation(eStatus, myStatus, 2);
+
+		// アニメーションが終わっていないならリターン
+		if (attack) return;
+	}
+
+	// アニメーションが終わっているなら攻撃の回数を記録
+	if(attack == false) attackCount = 3;
+
+	// 2回目の攻撃
+	if (myStatus != nullptr && eStatus != nullptr && attackCount > 2) {
+		if (myStatus->isAttack) attack = character->AttackAnimation(myStatus, eStatus, 3);
+		if (eStatus->isAttack) attack = character->AttackAnimation(eStatus, myStatus, 4);
+		
+		// アニメーションが終わっていないならリターン
+		if (attack) return;
+	}
+
+	// アニメーションが終わったなら攻撃終了
+	if (attack == false) {
+		attackCount = 0;
+		myStatus = nullptr;
+		eStatus = nullptr;
+	}
 }
 
 // カメラとのオフセットの計算
