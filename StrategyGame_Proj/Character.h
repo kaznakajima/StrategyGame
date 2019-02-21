@@ -28,7 +28,8 @@ public:
 		DEFENCE,
 		MAGIC_DEFENCE,
 		PHYSIQUE,
-		MOVERANGE
+		MOVERANGE,
+		TEAM
 	};
 
 	// キャラクターのパラメータ
@@ -54,6 +55,7 @@ public:
 	// キャラクターのステータス
 	typedef struct {
 		PARAM myParam;  // 自身のパラメータ
+		string myTeam;  // 自身の陣営
 		int PosX;             // 現在のx座標
 		int PosY;             // 現在のy座標
 		int _PosX;           // 移動前のx座標
@@ -64,7 +66,7 @@ public:
 		double Count;            // アニメーションカウント
 		bool animReset;  // アニメーションのリセット 
 		bool isSelect;      // 選択されているか
-		bool isMove;       // 移動中か
+		bool canMove = true;       // 移動可能か
 		bool isAttack;     // 攻撃中か
 		bool canAttack;   // 攻撃可能か
 		bool isDeath;      // 死亡判定
@@ -78,7 +80,7 @@ public:
 	int moveCount;
 
 	// 初期化
-	void Character_Initialize(STATUS* status, string pass, int posX, int posY);
+	void Character_Initialize(STATUS* status, string pass, string team, int posX, int posY);
 	// パラメータ取得
 	void GetCharacterParam(string pass);
 

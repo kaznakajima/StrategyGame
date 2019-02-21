@@ -31,10 +31,8 @@
 *.out
 *.app
 
-#solution
-*.sln
-
 #デバッグ
+.vs/StrategyGame_Proj/v15/*
 Debug/*
 x64/*
 StrategyGame_Proj/x64/*

@@ -37,7 +37,7 @@ int KeyInput::UpdateInput()
 // 移動量計算
 void KeyInput::InputCalc(CharacterManager* characterMgr)
 {
-	if (characterMgr->isMove) return;
+	if (characterMgr->isMove || characterMgr->playerTurn == false) return;
 
 	// 押されたキー入力によって処理を実行
 	// 右キーが押されたら
