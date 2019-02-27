@@ -135,7 +135,13 @@ bool Character::CharacterMove(STATUS* status, int moveX, int moveY)
 
 	// 移動不能エリアを選択したらリターン
 	if (stage->checkMove[moveY / CHIP_SIZE][moveX / CHIP_SIZE] == false
-		|| stage->onUnit[moveY / CHIP_SIZE][moveX / CHIP_SIZE] == true) return false;
+		|| stage->onUnit[moveY / CHIP_SIZE][moveX / CHIP_SIZE] == true) {
+		status->isSelect = false;
+		status->AnimHandle = 0;
+		return false;
+	}
+
+	status->canMove = false;
 
 	// 現在の地点の二次元配列用データ
 	int valueX = moveX - status->_PosX;
@@ -164,7 +170,6 @@ bool Character::CharacterMove(STATUS* status, int moveX, int moveY)
 		// 最終地点に到達したら移動終了
 		if (status->PosX == moveX && status->PosY == moveY) {
 			status->isSelect = false;
-			status->canMove = false;
 			AttackCheck(status);
 			status->AnimHandle = 0.0f;
 			return false;
@@ -190,7 +195,6 @@ bool Character::CharacterMove(STATUS* status, int moveX, int moveY)
 		// 最終地点に到達したら移動終了
 		if (status->PosX == moveX && status->PosY == moveY) {
 			status->isSelect = false;
-			status->canMove = false;
 			AttackCheck(status);
 			status->AnimHandle = 0.0f;
 			return false;
@@ -216,7 +220,6 @@ bool Character::CharacterMove(STATUS* status, int moveX, int moveY)
 		// 最終地点に到達したら移動終了
 		if (status->PosX == moveX && status->PosY == moveY) {
 			status->isSelect = false;
-			status->canMove = false;
 			AttackCheck(status);
 			status->AnimHandle = 0.0f;
 			return false;
@@ -242,7 +245,6 @@ bool Character::CharacterMove(STATUS* status, int moveX, int moveY)
 		// 最終地点に到達したら移動終了
 		if (status->PosX == moveX && status->PosY == moveY) {
 			status->isSelect = false;
-			status->canMove = false;
 			AttackCheck(status);
 			status->AnimHandle = 0.0f;
 			return false;

@@ -30,9 +30,12 @@ void CharacterManager::Initialize()
 	StartTurn();
 }
 
-// アニメーション更新
-void CharacterManager::Update()
+// キャラクター更新
+void CharacterManager::Update(int x, int y)
 {
+	// 攻撃範囲検索
+	GetAttackArea(x, y);
+
 	for (unsigned int i = 0; i < statusList.size(); i++) {
 		// 死亡したユニットを除外する
 		if (statusList[i].isDeath) {
@@ -42,6 +45,10 @@ void CharacterManager::Update()
 
 		character->CharacterAnim(&statusList[i]);
 	}
+
+	if (isSelect == false) CharacterMove(x, y);
+
+	if (attack) Attack();
 }
 
 // ターン開始
@@ -104,7 +111,7 @@ void CharacterManager::CharacterMove(int x, int y)
 	for (unsigned int i = 0; i < statusList.size(); i++) {
 		if (statusList[i].isSelect) {
 			isMove = character->CharacterMove(&statusList[i], x, y);
-			if (isMove == false && statusList[i].canAttack == false) moveableUnit--;
+			if (isMove == false && statusList[i].canMove == false && statusList[i].canAttack == false) moveableUnit--;
 		}
 	}
 

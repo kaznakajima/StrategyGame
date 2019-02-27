@@ -24,7 +24,7 @@ public:
 	// 初期化
 	void Initialize();
 	// 更新
-	void Update();
+	void Update(int x, int y);
 
 	// ターン開始
 	void StartTurn();

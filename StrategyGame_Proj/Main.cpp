@@ -79,13 +79,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		// 描画
 		gpDraw();
 
-		characterMgr->GetAttackArea(xPos, yPos);
-
-		characterMgr->Update();
-
-		if (isSelect == false) characterMgr->CharacterMove(xPos, yPos);
-
-		if (characterMgr->attack) characterMgr->Attack();
+		// キャラクター更新
+		characterMgr->Update(xPos, yPos);
 	}
 
 	// 終了
