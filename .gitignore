@@ -31,6 +31,9 @@
 *.out
 *.app
 
+# sln
+*.sln
+
 #デバッグ
 .vs/StrategyGame_Proj/v15/*
 Debug/*
