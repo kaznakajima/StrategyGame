@@ -30,14 +30,14 @@ void AIManager::MoveSelect(Character::STATUS* status)
 void AIManager::ChoiseMovePoint()
 {
 	// 移動先の座標
-	int x, int y;
+	int x = 0, y = 0;
 }
 
 // プレイヤー側のキャラクターの取得
 int AIManager::SerchCharacter(Character::STATUS* status, vector<Character::STATUS> playerList)
 {
 	// プレイヤー側のキャラクターとの距離
-	int offsetX, int offsetY, offsetTotal;
+	int offsetX = 0, offsetY = 0, offsetTotal = 0;
 	// 最短距離
 	int minDistance = 100;
 

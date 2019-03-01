@@ -10,6 +10,9 @@
 using namespace std;
 
 #define CAN_MOVE_AREA "Resources\\image\\CanMove.png"
+#define CAN_ATTACK_AREA "Resources\\image\\CanAttack.png"
+#define ATTACK_DETAIL "Resources\\image\\AttackGraph.png"
+#define ARROW "Resources\\image\\Arrow.png"
 #define CHARACTER_IMG "Resources\\image\\Character_40Å~40.png"
 
 class Character

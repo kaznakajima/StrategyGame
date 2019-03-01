@@ -149,14 +149,14 @@ void CharacterManager::GetAttackArea(int x, int y)
 	for (unsigned int num = 0; num < statusList.size(); num++) {
 		if (statusList[num].canAttack) {
 			myStatus = &statusList[num];
-			character->AttackableDraw(&statusList[num]);
+			character->AttackableDraw(myStatus);
 			attack = true;
 		}
 	}
 
 	for (unsigned int num = 0; num < statusList.size(); num++) {
 		if (myStatus != nullptr && myStatus != &statusList[num]) {
-			if (statusList[num].PosX == x && statusList[num].PosY == y)
+			if (statusList[num].PosX == x && statusList[num].PosY == y && statusList[num].myTeam != myStatus->myTeam)
 				character->GetAttackDetail(myStatus, &statusList[num]);
 		}
 	}

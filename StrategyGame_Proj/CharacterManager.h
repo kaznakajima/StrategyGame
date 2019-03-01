@@ -16,16 +16,11 @@ public:
 	bool isMove;
 	// 攻撃判定
 	bool attack;
-	// 全体の攻撃回数
-	int attackCount = 0;
-	// 行動可能なユニット数
-	int moveableUnit = 0;
 
 	// 初期化
 	void Initialize();
 	// 更新
 	void Update(int x, int y);
-
 	// ターン開始
 	void StartTurn();
 
@@ -53,6 +48,12 @@ public:
 
 	// カメラとのオフセット計算
 	void SetCameraOffset(int dir, bool horizontal);
+
+private:
+	// 全体の攻撃回数
+	int attackCount = 0;
+	// 行動可能なユニット数
+	int moveableUnit = 0;
 
 	// 終了
 	void Finalize();

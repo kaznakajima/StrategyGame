@@ -1,16 +1,17 @@
 #include "DxLib.h"
 #include "BaseScene.h"
+#include "GameScene.h"
 
 BaseScene* Scene::c_Scene;
 
 Scene::Scene()
 {
-	ChangeScene(Scene::TITLE);
+	ChangeScene(Scene::GAME);
 }
 
 Scene::~Scene()
 {
-
+	
 }
 
 // シーン変更 (引数　変更先のシーン)
@@ -27,6 +28,7 @@ void Scene::ChangeScene(SCENE scene)
 	case SCENE::SELECT:
 		break;
 	case SCENE::GAME:
+		c_Scene = new GameScene();
 		break;
 	}
 }
@@ -47,7 +49,7 @@ void Scene::Draw() {
 void Scene::SceneFade(SCENE nextScene, int stageNum)
 {
 	// フェード用変数(透明度,フェード用画像)
-	int alpha;
+	int alpha, fadeImg = LoadGraph(FADE_IMAGE);
 
 	SetDrawScreen(DX_SCREEN_BACK);
 
@@ -60,33 +62,14 @@ void Scene::SceneFade(SCENE nextScene, int stageNum)
 
 		// フェードイン開始
 		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
-		//DrawGraph(0, 0, FileManager::Instance()->GetFileHandle(FADE_IMAGE), TRUE);
+		DrawGraph(0, 0, fadeImg, TRUE);
 		// 同時に音量もフェード
 		//AudioManager::Instance()->VolumeFade(alpha);
 		ScreenFlip();
 	}
 
 	// 次のシーンの初期化
-	c_Scene->UnLoadFile();
 	ChangeScene(nextScene);
-
-	// GAMEシーンならマップ読み込み
-	switch (nextScene)
-	{
-	case SCENE::GAME:
-		switch (stageNum)
-		{
-			// ステージ1を読み込む
-		case 0:
-			break;
-			// ステージ2を読み込む
-		case 1:
-			break;
-		}
-		break;
-	default:
-		break;
-	}
 
 	// フェードイン
 	for (alpha = 255; alpha > 0; alpha -= 3)
@@ -97,7 +80,7 @@ void Scene::SceneFade(SCENE nextScene, int stageNum)
 
 		// フェードアウト開始
 		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
-		//DrawGraph(0, 0, FileManager::Instance()->GetFileHandle(FADE_IMAGE), TRUE);
+		DrawGraph(0, 0, fadeImg, TRUE);
 		// 同時に音量もフェード
 		//AudioManager::Instance()->VolumeFade(alpha);
 		ScreenFlip();

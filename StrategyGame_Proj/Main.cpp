@@ -1,57 +1,18 @@
 #include "KeyInput.h"
 #include "StageCreate.h"
+#include "BaseScene.h"
 
-// ステージ画像
-int Handle;
-// カーソル画像
-int Cursor;
+// シーン管理クラスのインスタンス
+Scene* c_Scene;
 
-CharacterManager* characterMgr;
 KeyInput* _keyInput;
-
-// ユニットの選択状態
-bool isSelect;
-
-// 座標
-int xPos = 480, yPos = 240;
 
 // 情報の初期化
 void Init()
 {
-	// キャラクターマネージャーのインスタンス
-	characterMgr = new CharacterManager();
-
 	_keyInput = KeyInput::Instance();
 
-	Handle = LoadGraph("Field.png");
-	Cursor = LoadGraph("Cursor.png");
-}
-
-// 描画メソッド
-void gpDraw()
-{
-	// 座標更新
-	xPos = _keyInput->xPos;
-	yPos = _keyInput->yPos;
-
-	// 描画
-	DrawGraph(0 - _keyInput->cameraPos.x, 0 - _keyInput->cameraPos.y, Handle, true);
-
-	if (_keyInput->Key[KEY_INPUT_SPACE] == 1) {
-		characterMgr->KeyCheck(xPos, yPos);
-
-		if (isSelect == false) characterMgr->DrawCheck(xPos, yPos);
-
-		isSelect = characterMgr->isSelect;
-		_keyInput->isSelect = isSelect;
-	}
-
-	if (isSelect == true && characterMgr->attack == false) {
-		characterMgr->Draw();
-		characterMgr->GetMoveArrow(xPos, yPos);
-	}
-
-	DrawGraph(xPos, yPos, Cursor, true);
+	c_Scene = new Scene();
 }
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
@@ -69,18 +30,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	StageCreate::Instance()->Open(STAGE_FILE_1);
 
-	characterMgr->Initialize();
-
 	while (ScreenFlip() == 0 && ProcessMessage() == 0 && ClearDrawScreen() == 0 && _keyInput->UpdateInput() == 0)
 	{
-		// 移動量計算
-		_keyInput->InputCalc(characterMgr);
-
-		// 描画
-		gpDraw();
-
-		// キャラクター更新
-		characterMgr->Update(xPos, yPos);
+		c_Scene->Update();
 	}
 
 	// 終了

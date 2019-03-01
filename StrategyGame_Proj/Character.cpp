@@ -29,10 +29,10 @@ KeyInput* keyInput;
 
 Character::Character()
 {
-	MoveArea = LoadGraph("CanMove.png");
-	AttackArea = LoadGraph("CanAttack.png");
-	AttackDetail = LoadGraph("AttackGraph.png");
-	LoadDivGraph("Arrow.png", 6, 6, 1, CHIP_SIZE, CHIP_SIZE, ArrowImage);
+	MoveArea = LoadGraph(CAN_MOVE_AREA);
+	AttackArea = LoadGraph(CAN_ATTACK_AREA);
+	AttackDetail = LoadGraph(ATTACK_DETAIL);
+	LoadDivGraph(ARROW, 6, 6, 1, CHIP_SIZE, CHIP_SIZE, ArrowImage);
 
 	// インスタンス作成
 	stage = StageCreate::Instance();
@@ -59,7 +59,7 @@ Character::Character()
 	 status->AnimHandle = 0;
 	 status->AttackRange = 1;
 	 status->myTeam = team;
-	 LoadDivGraph("Character_40×40.png", 20, 4, 5, CHIP_SIZE, CHIP_SIZE, status->Image);
+	 LoadDivGraph(CHARACTER_IMG, 20, 4, 5, CHIP_SIZE, CHIP_SIZE, status->Image);
 
 	 // パラメータ設定
 	 status->myParam.HP = _param[(int)PLAYER_PARAM::HP];

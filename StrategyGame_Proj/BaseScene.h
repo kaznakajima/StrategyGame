@@ -1,6 +1,6 @@
 #pragma once
 
-#define FADE_IMAGE "test1.png"
+#define FADE_IMAGE "Resources\\image\\Fade.png"
 
 // シーンのもととなるクラス(継承させる)
 class BaseScene
