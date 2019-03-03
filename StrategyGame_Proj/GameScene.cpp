@@ -1,9 +1,11 @@
 #include "GameScene.h"
 #include "KeyInput.h"
 #include "CharacterManager.h"
+#include "AIManager.h"
 
 KeyInput* _key;
 CharacterManager* _characterMgr;
+AIManager* _AIMgr;
 
 // コンストラクタ
 GameScene::GameScene()
@@ -11,6 +13,8 @@ GameScene::GameScene()
 	// インスタンスの生成
 	_key = KeyInput::Instance();
 	_characterMgr = new CharacterManager();
+	_AIMgr = new AIManager();
+
 
 	Initialize();
 
@@ -38,11 +42,19 @@ void GameScene::UnLoadFile()
 // 更新
 void GameScene::Update()
 {
-	_key->InputCalc(_characterMgr);
+	if (_characterMgr->playerTurn) {
+		_key->InputCalc(_characterMgr);
 
-	Draw();
+		Draw();
 
-	_characterMgr->Update(xPos, yPos);
+		_characterMgr->Update(xPos, yPos);
+	}
+	else {
+		Draw();
+
+		_AIMgr->Update();
+	}
+	
 }
 
 // メインシーンの描画
