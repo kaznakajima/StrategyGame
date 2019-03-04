@@ -19,6 +19,13 @@ Character::STATUS* myStatus = nullptr;
 // 攻撃されるユニット
 Character::STATUS* eStatus = nullptr;
 
+// デストラクタ
+CharacterManager::~CharacterManager()
+{
+	delete AIMgr;
+	delete character;
+}
+
 // 初期化
 void CharacterManager::Initialize()
 {
@@ -164,11 +171,15 @@ void CharacterManager::GetMoveArrow(int x, int y)
 // 攻撃範囲表示
 void CharacterManager::GetAttackArea(int x, int y)
 {
+	// キャラクター情報観賞用
+	Character::STATUS _status;
+
 	// 攻撃可能なユニットの取得
 	for (Character::STATUS &status : statusList) {
 		if (status.canAttack) {
 			myStatus = &status;
-			character->AttackableDraw(myStatus);
+			_status = status;
+			character->AttackableDraw(status);
 			attack = true;
 		}
 	}
@@ -177,7 +188,7 @@ void CharacterManager::GetAttackArea(int x, int y)
 	for (Character::STATUS &status : statusList) {
 		if (myStatus != nullptr && myStatus != &status) {
 			if (status.PosX == x && status.PosY == y && status.myTeam != myStatus->myTeam) 
-				character->GetAttackDetail(myStatus, &status);
+				character->GetAttackDetail(_status, status);
 		}
 	}
 }

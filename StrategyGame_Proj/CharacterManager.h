@@ -8,6 +8,8 @@
 class CharacterManager
 {
 public:
+	~CharacterManager();
+
 	// プレイヤーのターンかどうか
 	bool playerTurn = false;
 	// 選択判定

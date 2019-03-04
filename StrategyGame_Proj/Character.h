@@ -19,6 +19,7 @@ class Character
 {
 public:
 	Character();
+	~Character();
 
 	// プレイヤーステータスの列挙
 	enum PLAYER_PARAM
@@ -104,9 +105,9 @@ public:
 	// 攻撃チェック
 	void AttackCheck(STATUS* status);
 	// 攻撃範囲描画
-	void AttackableDraw(STATUS* status);
+	void AttackableDraw(STATUS status);
 	// 攻撃の詳細情報表示
-	void GetAttackDetail(STATUS* myStatus, STATUS* eStatus);
+	void GetAttackDetail(STATUS myStatus, STATUS eStatus);
 	// 攻撃アニメーション
 	bool AttackAnimation(STATUS* myStatus, STATUS* eStatus, int count);
 	// 攻撃の計算

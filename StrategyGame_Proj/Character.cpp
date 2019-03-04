@@ -22,11 +22,12 @@ bool moveArrow[MAP_SIZEY][MAP_SIZEX];
 // ステージデータを読み込むクラスのインスタンス
 StageCreate* stage;
 
+KeyInput* keyInput;
+
 // パラメータ
 int _param[9];
 
-KeyInput* keyInput;
-
+// コンストラクタ
 Character::Character()
 {
 	MoveArea = LoadGraph(CAN_MOVE_AREA);
@@ -47,8 +48,17 @@ Character::Character()
 	}
 }
 
+// デストラクタ
+Character::~Character()
+{
+	delete stage;
+	delete keyInput;
+}
+
  void Character::Character_Initialize(STATUS* status, string pass, string team, int posX, int posY)
 {
+	 if (status == nullptr) return;
+
 	 GetCharacterParam(pass);
 
 	 // ステータス設定
@@ -107,6 +117,8 @@ Character::Character()
 // キャラクターアニメーション
 void Character::CharacterAnim(STATUS* status)
 {
+	if (status == nullptr) return;
+
 	// 選択状態ならアニメーション更新
 	if (status->isSelect) {
 		status->AnimHandle += 0.1f;
@@ -124,6 +136,8 @@ void Character::CharacterAnim(STATUS* status)
 // キャラクターの移動
 bool Character::CharacterMove(STATUS* status, int moveX, int moveY) 
 {
+	if (status == nullptr) return;
+
 	// 自分の位置を選択したら移動終了
 	if (status->PosX == moveX && status->PosY == moveY) {
 		status->isSelect = false;
@@ -259,6 +273,7 @@ bool Character::CharacterMove(STATUS* status, int moveX, int moveY)
 // 移動範囲計算
 void Character::MoveRange(STATUS* status, int x, int y, int moveCost)
 {
+	if (status == nullptr) return;
 
 	DrawFormatString(48, 48, GetColor(0, 255, 0), "HP [%d]", status->myParam.HP);
 
@@ -373,6 +388,8 @@ void Character::DrawMoveArrow(STATUS status, int x, int y, int moveValue)
 // 攻撃できるかチェック
 void Character::AttackCheck(STATUS* status)
 {
+	if (status == nullptr) return;
+
 	status->canAttack = false;
 
 	int valueX = status->PosX / CHIP_SIZE, valueY = status->PosY / CHIP_SIZE;
@@ -383,42 +400,42 @@ void Character::AttackCheck(STATUS* status)
 }
 
 // 攻撃範囲描画
-void Character::AttackableDraw(STATUS* status)
+void Character::AttackableDraw(STATUS status)
 {
-	int valueX = status->PosX / CHIP_SIZE, valueY = status->PosY / CHIP_SIZE;
-	if (stage->onUnit[valueY][valueX + 1] == true) SpriteDraw(status->PosX + CHIP_SIZE, status->PosY, AttackArea);
-	if (stage->onUnit[valueY][valueX - 1] == true) SpriteDraw(status->PosX - CHIP_SIZE, status->PosY, AttackArea);
-	if (stage->onUnit[valueY + 1][valueX] == true) SpriteDraw(status->PosX, status->PosY + CHIP_SIZE, AttackArea);
-	if (stage->onUnit[valueY - 1][valueX] == true) SpriteDraw(status->PosX, status->PosY - CHIP_SIZE, AttackArea);
+	int valueX = status.PosX / CHIP_SIZE, valueY = status.PosY / CHIP_SIZE;
+	if (stage->onUnit[valueY][valueX + 1] == true) SpriteDraw(status.PosX + CHIP_SIZE, status.PosY, AttackArea);
+	if (stage->onUnit[valueY][valueX - 1] == true) SpriteDraw(status.PosX - CHIP_SIZE, status.PosY, AttackArea);
+	if (stage->onUnit[valueY + 1][valueX] == true) SpriteDraw(status.PosX, status.PosY + CHIP_SIZE, AttackArea);
+	if (stage->onUnit[valueY - 1][valueX] == true) SpriteDraw(status.PosX, status.PosY - CHIP_SIZE, AttackArea);
 }
 
 // 攻撃の詳細表示
-void Character::GetAttackDetail(STATUS* myStatus, STATUS* eStatus)
+void Character::GetAttackDetail(STATUS myStatus, STATUS eStatus)
 {
 	// 威力 (攻撃側の力 - 守備側の守備力)
-	int mySTR = myStatus->myParam.POWER - eStatus->myParam.DEFENCE;
+	int mySTR = myStatus.myParam.POWER - eStatus.myParam.DEFENCE;
 	if (mySTR < 0) mySTR = 0;
-	int eSTR = eStatus->myParam.POWER - myStatus->myParam.DEFENCE;
+	int eSTR = eStatus.myParam.POWER - myStatus.myParam.DEFENCE;
 	if (eSTR < 0) eSTR = 0;
 
 	// 速さ判定(4以上大きければ2回攻撃)
-	int mySPD = myStatus->myParam.SPEED - eStatus->myParam.SPEED;
+	int mySPD = myStatus.myParam.SPEED - eStatus.myParam.SPEED;
 
 	// 命中力 (攻撃側の命中率 - 守備側の回避率)
-	int myHitness = myStatus->myParam.ATTACK_HIT - eStatus->myParam.ATTACK_AVO;
-	int eHitness = eStatus->myParam.ATTACK_HIT - myStatus->myParam.ATTACK_AVO;
+	int myHitness = myStatus.myParam.ATTACK_HIT - eStatus.myParam.ATTACK_AVO;
+	int eHitness = eStatus.myParam.ATTACK_HIT - myStatus.myParam.ATTACK_AVO;
 
 	SpriteDraw(0, 0, AttackDetail);
 	DrawFormatString(80, 100, GetColor(255, 255, 0), "HP");
 	DrawFormatString(80, 125, GetColor(255, 255, 0), "威力");
 	DrawFormatString(80, 150, GetColor(255, 255, 0), "命中");
 
-	DrawFormatString(120, 100, GetColor(0, 0, 255), "%d", myStatus->myParam.HP);
+	DrawFormatString(120, 100, GetColor(0, 0, 255), "%d", myStatus.myParam.HP);
 	DrawFormatString(120, 125, GetColor(0, 0, 255), "%d", mySTR);
 	if (mySPD >= 4) DrawFormatString(130, 130, GetColor(255, 255, 255), "×2");
 	DrawFormatString(120, 150, GetColor(0, 0, 255), "%d", myHitness);
 
-	DrawFormatString(45, 100, GetColor(0, 0, 255), "%d", eStatus->myParam.HP);
+	DrawFormatString(45, 100, GetColor(0, 0, 255), "%d", eStatus.myParam.HP);
 	DrawFormatString(45, 125, GetColor(0, 0, 255), "%d", eSTR);
 	if (mySPD <= -4) DrawFormatString(55, 130, GetColor(255, 255, 255), "×2");
 	DrawFormatString(45, 150, GetColor(0, 0, 255), "%d", eHitness);
