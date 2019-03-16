@@ -2,6 +2,7 @@
 #include "DxLib.h"
 #include "StageCreate.h"
 #include <vector>
+#include <array>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -19,7 +20,6 @@ class Character
 {
 public:
 	Character();
-	~Character();
 
 	// プレイヤーステータスの列挙
 	enum PLAYER_PARAM
@@ -76,6 +76,8 @@ public:
 		bool isDeath;      // 死亡判定
 	}STATUS ;
 
+	unique_ptr<STATUS> myStatus = make_unique<STATUS>();
+
 	// 道筋
 	vector<int> OldPosX;
 	vector<int> OldPosY;
@@ -84,39 +86,39 @@ public:
 	int moveCount;
 
 	// 初期化
-	void Character_Initialize(STATUS* status, string pass, string team, int posX, int posY);
+	void Character_Initialize(string pass, string team, int posX, int posY);
 	// パラメータ取得
 	void GetCharacterParam(string pass);
 
 	// 描画
 	void SpriteDraw(int x, int y, int img);
 	// キャラクターのアニメーション
-	void CharacterAnim(STATUS* status);
+	void CharacterAnim();
 
 	// 移動範囲計算
-    void MoveRange(STATUS* status, int x, int y, int moveRange);
+    void MoveRange(int x, int y, int moveRange);
 	// 攻撃範囲描画
 	void AttackRange();
 	// 移動方向描画
-	void DrawMoveArrow(STATUS status, int x, int y, int moveValue);
+	void DrawMoveArrow(int x, int y, int moveValue);
 	// キャラクターの移動
-	bool CharacterMove(STATUS* status, int moveX, int moveY);
+	bool CharacterMove(int moveX, int moveY);
 
 	// 攻撃チェック
-	void AttackCheck(STATUS* status);
+	void AttackCheck();
 	// 攻撃範囲描画
-	void AttackableDraw(STATUS status);
+	void AttackableDraw();
 	// 攻撃の詳細情報表示
-	void GetAttackDetail(STATUS myStatus, STATUS eStatus);
+	void GetAttackDetail(Character* eCharacter);
 	// 攻撃アニメーション
-	bool AttackAnimation(STATUS* myStatus, STATUS* eStatus, int count);
+	bool AttackAnimation(Character* eCharacter, int count);
 	// 攻撃の計算
-	void CharacterAttack(STATUS* myStatus, STATUS* eStatus, int count);
+	void CharacterAttack(Character* eCharacter, int count);
 	// 攻撃の処理
-	void CharacterDamage(STATUS* myStatus, STATUS* eStatus, int damage);
+	void CharacterDamage(Character* eCharacter, int damage);
 
 	// カメラとのオフセット計算
-	void SetCameraOffset(STATUS* status, int dir, bool horizontal);
+	void SetCameraOffset(int dir, bool horizontal);
 
 	// 移動エリアのリセット
 	void MoveAreaClear();

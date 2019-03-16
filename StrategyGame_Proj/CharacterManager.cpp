@@ -1,50 +1,30 @@
 #include "CharacterManager.h"
 #include "AIManager.h"
-#include "Character.h"
 
 // 生成するキャラクター数
 const int PlayerNum = 3;
-
-// AIManagerインスタンス
-AIManager* AIMgr;
 
 // キャラクターの情報
 vector<Character::STATUS> statusList;
 Character::STATUS status[PlayerNum];
 
-// キャラクターのインスタンス
-Character* character;
-// 攻撃するユニット
-Character::STATUS* myStatus = nullptr;
-// 攻撃されるユニット
-Character::STATUS* eStatus = nullptr;
-
-// デストラクタ
-CharacterManager::~CharacterManager()
-{
-	delete AIMgr;
-	delete character;
-}
-
 // 初期化
 void CharacterManager::Initialize()
 {
-	AIMgr = new AIManager();
-	character = new Character();
-
 	// キャラクターの追加
-	for (unsigned int num = 0; num < PlayerNum; num ++) {
-		statusList.push_back(status[num]);
+	for (unsigned int num = 0; num < PlayerNum; num++) {
+		//statusList.push_back(status[num]);
+		character.push_back(new Character());
 	}
 
 	// キャラクターの初期化
-	character->Character_Initialize(&statusList[0], CHARACTER_DATA_1, "Player", 240, 240);
-	character->Character_Initialize(&statusList[1], CHARACTER_DATA_2, "Enemy", 144, 336);
-	character->Character_Initialize(&statusList[2], CHARACTER_DATA_3, "Player", 96, 384);
+	character[0]->Character_Initialize(CHARACTER_DATA_1, "Player", 240, 240);
+	character[1]->Character_Initialize(CHARACTER_DATA_2, "Enemy", 144, 240);
+	character[2]->Character_Initialize(CHARACTER_DATA_3, "Player", 96, 384);
 
 	// 敵AIの初期化
-	for (Character::STATUS &status : statusList) {
-		AIMgr->CharacterCount(status);
+	for (Character* _character : character) {
+		AIManager::Instance()->CharacterCount(_character);
 	}
 
 	StartTurn();
@@ -56,14 +36,15 @@ void CharacterManager::Update(int x, int y)
 	// 攻撃範囲検索
 	GetAttackArea(x, y);
 
-	for (unsigned int i = 0; i < statusList.size(); i++) {
+	for (unsigned int i = 0; i < character.size(); i++) {
 		// 死亡したユニットを除外する
-		if (statusList[i].isDeath) {
-			statusList.erase(statusList.begin() + i);
+		if (character[i]->myStatus->isDeath) {
+			//delete character[i];
+			character.erase(character.begin() + i);
 			return;
 		}
 
-		character->CharacterAnim(&statusList[i]);
+		character[i]->CharacterAnim();
 	}
 
 	if (isSelect == false) CharacterMove(x, y);
@@ -78,15 +59,15 @@ void CharacterManager::StartTurn()
 	moveableUnit = 0;
 
 	// 移動可能なユニットのカウント
-	for (Character::STATUS &status : statusList) {
-		// プレイヤーターン
-		if (playerTurn && status.myTeam == "Player") moveableUnit++;
-		// 敵ターン
-		else if (playerTurn == false && status.myTeam == "Enemy") moveableUnit++;
+	for (unsigned int num = 0; num < character.size(); num++) {
+		// プレイヤー側ユニットの計算
+		if (playerTurn && character[num]->myStatus->myTeam == "Player") moveableUnit++;
+		// 敵側ユニットの計算
+		else if (playerTurn == false && character[num]->myStatus->myTeam == "Enemy") moveableUnit++;
 	}
 
 	// 敵ターンの開始
-	if (playerTurn == false) AIMgr->Play();
+	if (playerTurn == false) AIManager::Instance()->Play();
 }
 
 // 描画するかチェック
@@ -98,12 +79,12 @@ void CharacterManager::DrawCheck(int x, int y)
 		return;
 	}
 
-	for (Character::STATUS &status : statusList) {
+	for (unsigned int num = 0; num < character.size(); num++) {
 		// カーソルが合っているユニットのみ表示
-		if (status.PosX == x && status.PosY == y) {
-			if (status.canMove) {
-				status.isSelect = true;
-				status.AnimHandle = 4.0f;
+		if (character[num]->myStatus->PosX == x && character[num]->myStatus->PosY == y) {
+			if (character[num]->myStatus->canMove) {
+				character[num]->myStatus->isSelect = true;
+				character[num]->myStatus->AnimHandle = 4.0f;
 				isSelect = true;
 				attack = false;
 			}
@@ -114,15 +95,15 @@ void CharacterManager::DrawCheck(int x, int y)
 // 描画処理
 void CharacterManager::Draw()
 {
-	for (Character::STATUS &status : statusList) {
-		character->MoveAreaClear();
+	for (unsigned int num = 0; num < character.size(); num++) {
+		character[num]->MoveAreaClear();
 
 		// 移動順路を記録しつつ移動範囲と攻撃範囲の描画
-		if (status.isSelect) {
-			character->OldPosX.push_back(status.PosX);
-			character->OldPosY.push_back(status.PosY);
-			character->MoveRange(&status, status.PosX, status.PosY, status.myParam.MOVERANGE);
-			character->AttackRange();
+		if (character[num]->myStatus->isSelect) {
+			character[num]->OldPosX.push_back(character[num]->myStatus->PosX);
+			character[num]->OldPosY.push_back(character[num]->myStatus->PosY);
+			character[num]->MoveRange(character[num]->myStatus->PosX, character[num]->myStatus->PosY, character[num]->myStatus->myParam.MOVERANGE);
+			character[num]->AttackRange();
 			return;
 		}
 	}
@@ -131,12 +112,13 @@ void CharacterManager::Draw()
 void CharacterManager::CharacterMove(int x, int y) 
 {
 	// キャラクターの移動
-	for (Character::STATUS &status : statusList) {
-		if (status.isSelect) {
-			isMove = character->CharacterMove(&status, x, y);
+	for (unsigned int num = 0; num < character.size(); num++) {
+		if (character[num]->myStatus->isSelect) {
+			isMove = character[num]->CharacterMove(x, y);
 
 			// 移動が完了し、攻撃しないなら行動終了
-			if (isMove == false && status.canMove == false && status.canAttack == false) moveableUnit--;
+			if (isMove == false && character[num]->myStatus->canMove == false 
+				&& character[num]->myStatus->canAttack == false) moveableUnit--;
 		}
 	}
 
@@ -146,23 +128,25 @@ void CharacterManager::CharacterMove(int x, int y)
 
 // 移動値の取得
 void CharacterManager::GetMoveCount(int x, int y) {
-	character->OldPosX.push_back(x);
-	character->OldPosY.push_back(y);
-	character->moveCount++;
+	for (unsigned int num = 0; num < character.size(); num++) {
+		character[num]->OldPosX.push_back(x);
+		character[num]->OldPosY.push_back(y);
+		character[num]->moveCount++;
+	}
 }
 
 void CharacterManager::GetMoveArrow(int x, int y)
 {
 	// 移動順路を描画
-	for (Character::STATUS &status : statusList) {
-		if (status.isSelect) {
-			character->DrawMoveArrow(status, x, y, 5);
+	for (unsigned int num = 0; num < character.size(); num++) {
+		if (character[num]->myStatus->isSelect) {
+			character[num]->DrawMoveArrow(x, y, 5);
 
 			// ユニットの位置に戻ったら順路をクリア
-			if (status.PosX == x && status.PosY == y) {
-				character->OldPosX.clear();
-				character->OldPosY.clear();
-				character->moveCount = 0;
+			if (character[num]->myStatus->PosX == x && character[num]->myStatus->PosY == y) {
+				character[num]->OldPosX.clear();
+				character[num]->OldPosY.clear();
+				character[num]->moveCount = 0;
 			}
 		}
 	}
@@ -175,20 +159,22 @@ void CharacterManager::GetAttackArea(int x, int y)
 	Character::STATUS _status;
 
 	// 攻撃可能なユニットの取得
-	for (Character::STATUS &status : statusList) {
-		if (status.canAttack) {
-			myStatus = &status;
-			_status = status;
-			character->AttackableDraw(status);
+	for (unsigned int num = 0; num < character.size(); num++) {
+		if (character[num]->myStatus->canAttack) {
+			myCharacter = character[num];
+			myCharacter->AttackableDraw();
 			attack = true;
 		}
 	}
 
-	// 攻撃可能なユニットがいるなら攻撃した際の詳細情報を描画
-	for (Character::STATUS &status : statusList) {
-		if (myStatus != nullptr && myStatus != &status) {
-			if (status.PosX == x && status.PosY == y && status.myTeam != myStatus->myTeam) 
-				character->GetAttackDetail(_status, status);
+	// 攻撃可能な位置のユニットとの攻撃した際の詳細情報の表示
+	for (unsigned int num = 0; num < character.size(); num++) {
+		if (attack) {
+			if (character[num]->myStatus->PosX != x && character[num]->myStatus->PosY != y) return;
+
+			if (myCharacter->myStatus->myTeam != character[num]->myStatus->myTeam
+				&& myCharacter->myStatus->canAttack == true)
+				myCharacter->GetAttackDetail(character[num]);
 		}
 	}
 }
@@ -197,19 +183,18 @@ void CharacterManager::GetAttackArea(int x, int y)
 void CharacterManager::ChoiseAttack(int x, int y)
 {
 	// 選択した位置に敵がいたら攻撃対象のリファレンスを作成
-	for (Character::STATUS &status : statusList) {
-		if (myStatus != &status) {
-			if (status.PosX == x && status.PosY == y) {
-				eStatus = &status;
-				myStatus->isAttack = true;
-			}
+	for (unsigned int num = 0; num < character.size(); num++) {
+		if (myCharacter != character[num] &&
+			character[num]->myStatus->PosX == x && character[num]->myStatus->PosY == y) {
+			eCharacter = character[num];
+			myCharacter->myStatus->isAttack = true;
 		}
 	}
 
 	// 攻撃可能なユニットがいなかったら終了
-	if(myStatus != nullptr) myStatus->canAttack = false;
+	if(myCharacter != nullptr) myCharacter->myStatus->canAttack = false;
 	// 選択した位置に敵がいないなら終了
-	if (eStatus == nullptr) {
+	if (eCharacter == nullptr) {
 		attack = false;
 		moveableUnit--;
 		if (moveableUnit == 0) StartTurn();
@@ -220,9 +205,9 @@ void CharacterManager::ChoiseAttack(int x, int y)
 void CharacterManager::Attack()
 {
 	// 1回目の攻撃
-	if (myStatus != nullptr && eStatus != nullptr && attackCount < 2) {
-		if (myStatus->isAttack) attack = character->AttackAnimation(myStatus, eStatus, 1);
-		if (eStatus->isAttack) attack = character->AttackAnimation(eStatus, myStatus, 2);
+	if (myCharacter != nullptr && eCharacter != nullptr && attackCount < 2) {
+		if (myCharacter->myStatus->isAttack) attack = myCharacter->AttackAnimation(eCharacter, 1);
+		if (eCharacter->myStatus->isAttack) attack = eCharacter->AttackAnimation(myCharacter, 2);
 
 		// アニメーションが終わっていないならリターン
 		if (attack) return;
@@ -232,9 +217,9 @@ void CharacterManager::Attack()
 	if(attack == false) attackCount = 3;
 
 	// 2回目の攻撃
-	if (myStatus != nullptr && eStatus != nullptr && attackCount > 2) {
-		if (myStatus->isAttack) attack = character->AttackAnimation(myStatus, eStatus, 3);
-		if (eStatus->isAttack) attack = character->AttackAnimation(eStatus, myStatus, 4);
+	if (myCharacter != nullptr && eCharacter != nullptr && attackCount > 2) {
+		if (myCharacter->myStatus->isAttack) attack = myCharacter->AttackAnimation(eCharacter, 3);
+		if (eCharacter->myStatus->isAttack) attack = eCharacter->AttackAnimation(myCharacter, 4);
 		
 		// アニメーションが終わっていないならリターン
 		if (attack) return;
@@ -243,8 +228,8 @@ void CharacterManager::Attack()
 	// アニメーションが終わったなら攻撃終了
 	if (attack == false) {
 		attackCount = 0;
-		myStatus = nullptr;
-		eStatus = nullptr;
+		myCharacter = nullptr;
+		eCharacter = nullptr;
 		moveableUnit--;
 		if (moveableUnit <= 0) StartTurn();
 	}
@@ -253,19 +238,19 @@ void CharacterManager::Attack()
 // カメラとのオフセットの計算
 void CharacterManager::SetCameraOffset(int dir, bool horizontal)
 {
-	for (Character::STATUS &status : statusList) {
-		character->SetCameraOffset(&status, dir, horizontal);
+	for (unsigned int num = 0; num < character.size(); num++) {
+		character[num]->SetCameraOffset(dir, horizontal);
 	}
 }
 
 void CharacterManager::KeyCheck(int x, int y)
 {
-	for (unsigned int i = 0; i < statusList.size(); i++) {
+	for (unsigned int i = 0; i < character.size(); i++) {
 		// カーソルが合っているユニットのみ表示
-		if (statusList[i].PosX != x || statusList[i].PosY != y) {
-			character->OldPosX.clear();
-			character->OldPosY.clear();
-			character->moveCount = 0;
+		if (character[i]->myStatus->PosX != x || character[i]->myStatus->PosY != y) {
+			character[i]->OldPosX.clear();
+			character[i]->OldPosY.clear();
+			character[i]->moveCount = 0;
 			isSelect = false;
 		}
 	}

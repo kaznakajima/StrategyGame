@@ -1,26 +1,24 @@
 #include "DxLib.h"
 #include "BaseScene.h"
 #include "GameScene.h"
+#include <memory>
+using namespace std;
 
-BaseScene* Scene::c_Scene;
+// 現在のシーン
+unique_ptr<BaseScene> c_Scene;
 
 Scene::Scene()
 {
 	ChangeScene(Scene::GAME);
 }
 
-Scene::~Scene()
-{
-	
-}
-
 // シーン変更 (引数　変更先のシーン)
 void Scene::ChangeScene(SCENE scene)
 {
 	// 古いシーンの削除
-	if (c_Scene != NULL) {
+	/*if (c_Scene != NULL) {
 		delete c_Scene;
-	}
+	}*/
 
 	switch (scene) {
 	case SCENE::TITLE:
@@ -28,7 +26,7 @@ void Scene::ChangeScene(SCENE scene)
 	case SCENE::SELECT:
 		break;
 	case SCENE::GAME:
-		c_Scene = new GameScene();
+		c_Scene = make_unique<GameScene>();
 		break;
 	}
 }

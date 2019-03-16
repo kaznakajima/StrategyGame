@@ -17,19 +17,19 @@ void AIManager::Initialize()
 // 更新
 void AIManager::Update()
 {
-	if (myStatus != nullptr && myStatus->isSelect) characterMgr->Draw();
+	if (myCharacter != nullptr && myCharacter->myStatus->isSelect) characterMgr->Draw();
 
 	characterMgr->Update(x, y);
 }
 
 // 現在の敵(AI)、プレイヤーのカウント
-void AIManager::CharacterCount(Character::STATUS status)
+void AIManager::CharacterCount(Character* character)
 {
-	if (status.myTeam == "Player") {
-		playerList.push_back(status);
+	if (character->myStatus->myTeam == "Player") {
+		playerList.push_back(character);
 	}
-	else if (status.myTeam == "Enemy") {
-		enemyList.push_back(status);
+	else if (character->myStatus->myTeam == "Enemy") {
+		enemyList.push_back(character);
 	} 
 }
 
@@ -39,21 +39,21 @@ void AIManager::Play()
 	int minDistance = 100;
 
 	// プレイヤーに一番近いユニットを行動させる
-	for (Character::STATUS &status : enemyList) {
+	for (Character* character : enemyList) {
 		// 一番近いキャラクターを選択
-		if (minDistance > GetDistance(&status, playerList) && status.canMove) {
-			minDistance = GetDistance(&status, playerList);
-			myStatus = &status;
+		if (minDistance > GetDistance(character, playerList) && character->myStatus->canMove) {
+			minDistance = GetDistance(character, playerList);
+			myCharacter = character;
 		}
 	}
 
-	MoveSelect(myStatus);
+	MoveSelect(myCharacter);
 }
 
 // 動かすキャラクターの選択
-void AIManager::MoveSelect(Character::STATUS* status)
+void AIManager::MoveSelect(Character* character)
 {
-	x = status->PosX, y = status->PosY;
+	x = character->myStatus->PosX, y = character->myStatus->PosY;
 
 	ChoiseMovePoint();
 }
@@ -65,7 +65,7 @@ void AIManager::ChoiseMovePoint()
 }
 
 // プレイヤー側のキャラクターの取得
-int AIManager::GetDistance(Character::STATUS* status, vector<Character::STATUS> playerList)
+int AIManager::GetDistance(Character* character, vector<Character*> playerList)
 {
 	// プレイヤー側のキャラクターとの距離
 	int offsetX = 0, offsetY = 0, offsetTotal = 0;
@@ -73,9 +73,9 @@ int AIManager::GetDistance(Character::STATUS* status, vector<Character::STATUS> 
 	int minDistance = 100;
 
 	// プレイヤーからの距離の計算
-	for (Character::STATUS &playerSt : playerList) {
-		offsetX = abs(playerSt.PosX - status->PosX);
-		offsetY = abs(playerSt.PosY - status->PosY);
+	for (Character* playerSt : playerList) {
+		offsetX = abs(playerSt->myStatus->PosX - character->myStatus->PosX);
+		offsetY = abs(playerSt->myStatus->PosY - character->myStatus->PosY);
 		offsetTotal = offsetX + offsetY;
 
 		// 最短距離の更新
@@ -88,7 +88,7 @@ int AIManager::GetDistance(Character::STATUS* status, vector<Character::STATUS> 
 }
 
 // 敵キャラクターのロスト(死亡処理)
-void AIManager::CharacterLost(Character::STATUS* status)
+void AIManager::CharacterLost(Character* character)
 {
 
 }

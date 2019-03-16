@@ -3,18 +3,12 @@
 #include "CharacterManager.h"
 #include "AIManager.h"
 
-KeyInput* _key;
 CharacterManager* _characterMgr;
-AIManager* _AIMgr;
 
 // コンストラクタ
 GameScene::GameScene()
 {
-	// インスタンスの生成
-	_key = KeyInput::Instance();
 	_characterMgr = new CharacterManager();
-	_AIMgr = new AIManager();
-
 
 	Initialize();
 
@@ -43,7 +37,7 @@ void GameScene::UnLoadFile()
 void GameScene::Update()
 {
 	if (_characterMgr->playerTurn) {
-		_key->InputCalc(_characterMgr);
+		KeyInput::Instance()->InputCalc(_characterMgr);
 
 		Draw();
 
@@ -52,7 +46,7 @@ void GameScene::Update()
 	else {
 		Draw();
 
-		_AIMgr->Update();
+		AIManager::Instance()->Update();
 	}
 	
 }
@@ -61,19 +55,19 @@ void GameScene::Update()
 void GameScene::Draw()
 {
 	// 座標更新
-	xPos = _key->xPos;
-	yPos = _key->yPos;
+	xPos = KeyInput::Instance()->xPos;
+	yPos = KeyInput::Instance()->yPos;
 
 	// 描画
-	DrawGraph(0 - _key->cameraPos.x, 0 - _key->cameraPos.y, stageImg, true);
+	DrawGraph(0 - KeyInput::Instance()->cameraPos.x, 0 - KeyInput::Instance()->cameraPos.y, stageImg, true);
 
-	if (_key->Key[KEY_INPUT_SPACE] == 1) {
+	if (KeyInput::Instance()->Key[KEY_INPUT_SPACE] == 1) {
 		_characterMgr->KeyCheck(xPos, yPos);
 
 		if (isSelect == false) _characterMgr->DrawCheck(xPos, yPos);
 
 		isSelect = _characterMgr->isSelect;
-		_key->isSelect = isSelect;
+		KeyInput::Instance()->isSelect = isSelect;
 	}
 
 	if (isSelect == true && _characterMgr->attack == false) {

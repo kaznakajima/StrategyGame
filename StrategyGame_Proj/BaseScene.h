@@ -23,7 +23,6 @@ class Scene
 {
 public:
 	Scene();
-	~Scene();
 
 	// シーンタイプ
 	enum SCENE {
@@ -41,6 +40,4 @@ public:
 	// 描画
 	static void Draw();
 private:
-	// 現在のシーン
-	static BaseScene* c_Scene;
 };

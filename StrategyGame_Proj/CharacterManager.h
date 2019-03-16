@@ -1,4 +1,5 @@
 #pragma once
+#include "Character.h"
 
 // キャラクターのデータ
 #define CHARACTER_DATA_1 "Resources\\CharacterData\\PlayerData.dat"
@@ -8,7 +9,15 @@
 class CharacterManager
 {
 public:
-	~CharacterManager();
+	// 生成するキャラクター
+	vector<Character*> character;
+
+	// 攻撃するユニット
+	int attackUnitNum = 0;
+	Character* myCharacter = nullptr;
+	// 攻撃されるユニット
+	int blockUnitNum = 0;
+	Character* eCharacter = nullptr;
 
 	// プレイヤーのターンかどうか
 	bool playerTurn = false;

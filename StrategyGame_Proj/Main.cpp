@@ -2,17 +2,10 @@
 #include "StageCreate.h"
 #include "BaseScene.h"
 
-// シーン管理クラスのインスタンス
-Scene* c_Scene;
-
-KeyInput* _keyInput;
-
 // 情報の初期化
 void Init()
 {
-	_keyInput = KeyInput::Instance();
 
-	c_Scene = new Scene();
 }
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
@@ -28,9 +21,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	Init();
 
+	// シーン管理クラスのインスタンス
+	unique_ptr<Scene> c_Scene = make_unique<Scene>();
+
 	StageCreate::Instance()->Open(STAGE_FILE_1);
 
-	while (ScreenFlip() == 0 && ProcessMessage() == 0 && ClearDrawScreen() == 0 && _keyInput->UpdateInput() == 0)
+	while (ScreenFlip() == 0 && ProcessMessage() == 0 && ClearDrawScreen() == 0 && KeyInput::Instance()->UpdateInput() == 0)
 	{
 		c_Scene->Update();
 	}
