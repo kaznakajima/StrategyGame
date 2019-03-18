@@ -4,6 +4,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <vector>
 using namespace std;
 
 #define STAGE_FILE_1 "Resources\\StageData\\StageData.csv"
@@ -17,8 +18,8 @@ using namespace std;
 
 #define STAGE_LONG_SIZE 100
 
-#define MAP_SIZEX 15
-#define MAP_SIZEY 10
+//#define MAP_SIZEX 15
+//#define MAP_SIZEY 10
 
 #define CHIP_SIZE 48
 
@@ -35,22 +36,28 @@ MapChipの読み込みをする(テスト)
 class StageCreate : public Singleton <StageCreate>
 {
 public:
+	StageCreate();
+
+	// ステージサイズ
+	int MAP_SIZEX = 15;
+	int MAP_SIZEY = 10;
+
 	// ステージのデータ
-	int stageList[MAP_SIZEY][MAP_SIZEX];
+	vector<vector<int>> stageList;
 
 	// ユニットがいるかどうか
-	bool onUnit[MAP_SIZEY][MAP_SIZEX];
+	vector<vector<string>> onUnit;
 
 	// 移動可能かどうか
-	bool checkMove[MAP_SIZEY][MAP_SIZEX];
+	vector<vector<bool>> checkMove;
 
 	// ファイルを開く (string ファイル名 int マップのサイズ)
-	static void Open(string);
+	void Open(string pass);
 
 	static void Draw(int);
 
 	// ステージ上のデータを取得
-	static int GetData(int x, int y);
+	int GetData(int x, int y);
 
 	// ステージの状態を更新
 	void StageUpdate(int x, int y);

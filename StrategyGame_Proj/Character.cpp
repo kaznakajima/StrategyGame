@@ -14,10 +14,10 @@ int AttackDetail;
 int ArrowImage[6];
 
 // 移動できるエリア
-int moveToPos[MAP_SIZEY][MAP_SIZEX];
+vector<vector<int>> moveToPos = vector<vector<int>>(10, vector<int>(15, 0));
 
 // 移動先の道筋かどうか
-bool moveArrow[MAP_SIZEY][MAP_SIZEX];
+vector<vector<int>> moveArrow = vector<vector<int>>(10, vector<int>(15, 0));
 
 // ステージデータを読み込むクラスのインスタンス
 StageCreate* stage;
@@ -36,8 +36,8 @@ Character::Character()
 	// インスタンス作成
 	stage = StageCreate::Instance();
 
-	for (int y = 0; y < MAP_SIZEY; y++) {
-		for (int x = 0; x < MAP_SIZEX; x++) {
+	for (int y = 0; y < StageCreate::Instance()->MAP_SIZEY; y++) {
+		for (int x = 0; x < StageCreate::Instance()->MAP_SIZEX; x++) {
 			moveToPos[y][x] = -1;
 			moveArrow[y][x] = false;
 			stage->StageUpdate(x, y);
@@ -45,7 +45,7 @@ Character::Character()
 	}
 }
 
- void Character::Character_Initialize(string pass, string team, int posX, int posY)
+ void Character::Character_Initialize(string pass, string name, string team, int posX, int posY)
 {
 	 //if (status == nullptr) return;
 
@@ -62,6 +62,7 @@ Character::Character()
 	 LoadDivGraph(CHARACTER_IMG, 20, 4, 5, CHIP_SIZE, CHIP_SIZE, myStatus->Image);
 
 	 // パラメータ設定
+	 myStatus->myParam.NAME = name;
 	 myStatus->myParam.HP = _param[(int)PLAYER_PARAM::HP];
 	 myStatus->myParam.POWER = _param[(int)PLAYER_PARAM::POWER];
 	 myStatus->myParam.TECHNIQUE = _param[(int)PLAYER_PARAM::TECHNIQUE];
@@ -98,6 +99,12 @@ Character::Character()
 	}
  }
 
+ // 移動再開(ターン開始時に呼び出す)
+ void Character::TurnStart()
+ {
+	 myStatus->canMove = true;
+ }
+
  // キャラクター周りの描画
  void Character::SpriteDraw(int x, int y, int img)
  {
@@ -120,7 +127,7 @@ void Character::CharacterAnim()
 	DrawGraph(myStatus->PosX, myStatus->PosY, myStatus->Image[(int)myStatus->AnimHandle], true);
 
 	// 選択中でないユニットの位置にチェック
-	if (myStatus->isSelect == false) stage->onUnit[myStatus->PosY / CHIP_SIZE][myStatus->PosX / CHIP_SIZE] = true;
+	if (myStatus->isSelect == false) stage->onUnit[myStatus->PosY / CHIP_SIZE][myStatus->PosX / CHIP_SIZE] = myStatus->myTeam;
 }
 
 // キャラクターの移動
@@ -139,7 +146,7 @@ bool Character::CharacterMove(int moveX, int moveY)
 
 	// 移動不能エリアを選択したらリターン
 	if (stage->checkMove[moveY / CHIP_SIZE][moveX / CHIP_SIZE] == false
-		|| stage->onUnit[moveY / CHIP_SIZE][moveX / CHIP_SIZE] == true) {
+		|| stage->onUnit[moveY / CHIP_SIZE][moveX / CHIP_SIZE] != "NONE") {
 		myStatus->isSelect = false;
 		myStatus->AnimHandle = 0;
 		return false;
@@ -158,7 +165,7 @@ bool Character::CharacterMove(int moveX, int moveY)
 	moveArrow[nextY][nextX] = false;
 
 	// 右移動
-	if (moveArrow[nextY][nextX + 1] == true) {
+	if (nextX + 1 <= 15 && moveArrow[nextY][nextX + 1] == true) {
 		// 画像の切り替え
 		if (myStatus->AnimHandle < 8.0f || myStatus->AnimHandle > 11.0f)
 			myStatus->AnimHandle = 8.0f;
@@ -183,7 +190,7 @@ bool Character::CharacterMove(int moveX, int moveY)
 	}
 
 	// 左移動
-	if (moveArrow[nextY][nextX - 1] == true) {
+	if (nextX - 1 >= 0 && moveArrow[nextY][nextX - 1] == true) {
 		// 画像の切り替え
 		if (myStatus->AnimHandle < 12.0f || myStatus->AnimHandle > 15.0f)
 			myStatus->AnimHandle = 12.0f;
@@ -208,7 +215,7 @@ bool Character::CharacterMove(int moveX, int moveY)
 	}
 
 	// 下移動
-	if (moveArrow[nextY + 1][nextX] == true) {
+	if (nextY + 1 <= 10 && moveArrow[nextY + 1][nextX] == true) {
 		// 画像の切り替え
 		if (myStatus->AnimHandle < 4.0f || myStatus->AnimHandle > 7.0f)
 			myStatus->AnimHandle = 4.0f;
@@ -233,7 +240,7 @@ bool Character::CharacterMove(int moveX, int moveY)
 	}
 
 	// 上移動
-	if (moveArrow[nextY - 1][nextX] == true) {
+	if (nextY - 1 >= 0 && moveArrow[nextY - 1][nextX] == true) {
 		// 画像の切り替え
 		if (myStatus->AnimHandle < 16.0f || myStatus->AnimHandle > 19.0f)
 			myStatus->AnimHandle = 16.0f;
@@ -279,6 +286,9 @@ void Character::MoveRange(int x, int y, int moveCost)
 	// 画面外ならリターン
 	if (valueX < 0 || valueX > 14 || valueY < 0 || valueY > 9)
 		return;
+	// 画面外ならリターン
+	if (_valueX < 0 || _valueX > 14 || _valueY < 0 || _valueY > 9)
+		return;
 
 	// 移動先情報を格納
 	moveToPos[valueY][valueX] = moveCost;
@@ -297,20 +307,20 @@ void Character::MoveRange(int x, int y, int moveCost)
 	}
 
 	// 上へ行けるならチェック
-	if (moveToPos[valueY - 1][valueX] < moveCost) MoveRange(x, y - CHIP_SIZE, moveCost - 1);
+	if (valueY - 1 >= 0 && moveToPos[valueY - 1][valueX] < moveCost) MoveRange(x, y - CHIP_SIZE, moveCost - 1);
 	// 右へ行けるならチェック
-	if (moveToPos[valueY][valueX + 1] < moveCost) MoveRange(x + CHIP_SIZE, y, moveCost - 1);
+	if (valueX + 1 <= 15 && moveToPos[valueY][valueX + 1] < moveCost) MoveRange(x + CHIP_SIZE, y, moveCost - 1);
 	// 左へ行けるならチェック
-	if (moveToPos[valueY][valueX - 1] < moveCost)MoveRange(x - CHIP_SIZE, y, moveCost - 1);
+	if (valueX - 1 >= 0 && moveToPos[valueY][valueX - 1] < moveCost)MoveRange(x - CHIP_SIZE, y, moveCost - 1);
 	// 下へ行けるならチェック
-	if (moveToPos[valueY + 1][valueX] < moveCost) MoveRange(x, y + CHIP_SIZE, moveCost - 1);
+	if (valueY + 1 <= 9 && moveToPos[valueY + 1][valueX] < moveCost) MoveRange(x, y + CHIP_SIZE, moveCost - 1);
 }
 
 // 攻撃範囲表示
 void Character::AttackRange()
 {
-	for (int y = 0; y < MAP_SIZEY; y++) {
-		for (int x = 0; x < MAP_SIZEX; x++) {
+	for (int y = 0; y < StageCreate::Instance()->MAP_SIZEY; y++) {
+		for (int x = 0; x < StageCreate::Instance()->MAP_SIZEX; x++) {
 			if (moveToPos[y][x] == 0) SpriteDraw(x * CHIP_SIZE, y * CHIP_SIZE, AttackArea);
 		}
 	}
@@ -328,6 +338,40 @@ void Character::DrawMoveArrow(int x, int y, int moveValue)
 		OldPosY.clear();
 		moveCount++;
 		moveArrow[valueY][valueX] = false;
+	}
+
+	// 敵の行動
+	if (myStatus->myTeam == "Enemy") {
+		// これまでの入力情報をクリア
+		OldPosX.clear();
+		OldPosY.clear();
+
+		if (stage->checkMove[valueY][valueX] == true) {
+
+			// ユニットの位置でないならここから逆探知
+			if (myStatus->PosX != x || myStatus->PosY != y) {
+				DrawGraph(x, y, ArrowImage[moveValue], true);
+				moveArrow[valueY][valueX] = true;
+			}
+
+			// ユニットに向かってルートを逆探知していく
+			if (valueY + 1 <= 9 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY + 1][valueX] && stage->checkMove[valueY + 1][valueX] == true) {
+				DrawMoveArrow(x, y + CHIP_SIZE, 5);
+				return;
+			}
+			if (valueY - 1 >= 0 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY - 1][valueX] && stage->checkMove[valueY - 1][valueX] == true) {
+				DrawMoveArrow(x, y - CHIP_SIZE, 5);
+				return;
+			}
+			if (valueX + 1 <= 14 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY][valueX + 1] && stage->checkMove[valueY][valueX + 1] == true) {
+				DrawMoveArrow(x + CHIP_SIZE, y, 5);
+				return;
+			}
+			if (valueX - 1 >= 0 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY][valueX - 1] && stage->checkMove[valueY][valueX - 1] == true) {
+				DrawMoveArrow(x - CHIP_SIZE, y, 5);
+				return;
+			}
+		}
 	}
 
 	// 入力順にガイドライン表示
@@ -383,20 +427,20 @@ void Character::AttackCheck()
 	myStatus->canAttack = false;
 
 	int valueX = myStatus->PosX / CHIP_SIZE, valueY = myStatus->PosY / CHIP_SIZE;
-	if (stage->onUnit[valueY][valueX + 1] == true) myStatus->canAttack = true;
-	if (stage->onUnit[valueY][valueX - 1] == true) myStatus->canAttack = true;
-	if (stage->onUnit[valueY + 1][valueX] == true) myStatus->canAttack = true;
-	if (stage->onUnit[valueY - 1][valueX] == true) myStatus->canAttack = true;
+	if (valueX + 1 <= 14 && stage->onUnit[valueY][valueX + 1] != "NONE" && stage->onUnit[valueY][valueX + 1] != myStatus->myTeam) myStatus->canAttack = true;
+	if (valueX - 1 >= 0 && stage->onUnit[valueY][valueX - 1] != "NONE" && stage->onUnit[valueY][valueX - 1] != myStatus->myTeam) myStatus->canAttack = true;
+	if (valueY + 1 <= 9 && stage->onUnit[valueY + 1][valueX] != "NONE" && stage->onUnit[valueY + 1][valueX] != myStatus->myTeam) myStatus->canAttack = true;
+	if (valueY - 1 >= 0 && stage->onUnit[valueY - 1][valueX] != "NONE" && stage->onUnit[valueY - 1][valueX] != myStatus->myTeam) myStatus->canAttack = true;
 }
 
 // 攻撃範囲描画
 void Character::AttackableDraw()
 {
 	int valueX = myStatus->PosX / CHIP_SIZE, valueY = myStatus->PosY / CHIP_SIZE;
-	if (stage->onUnit[valueY][valueX + 1] == true) SpriteDraw(myStatus->PosX + CHIP_SIZE, myStatus->PosY, AttackArea);
-	if (stage->onUnit[valueY][valueX - 1] == true) SpriteDraw(myStatus->PosX - CHIP_SIZE, myStatus->PosY, AttackArea);
-	if (stage->onUnit[valueY + 1][valueX] == true) SpriteDraw(myStatus->PosX, myStatus->PosY + CHIP_SIZE, AttackArea);
-	if (stage->onUnit[valueY - 1][valueX] == true) SpriteDraw(myStatus->PosX, myStatus->PosY - CHIP_SIZE, AttackArea);
+	if (valueX + 1 <= 14 && stage->onUnit[valueY][valueX + 1] != "NONE" && stage->onUnit[valueY][valueX + 1] != myStatus->myTeam) SpriteDraw(myStatus->PosX + CHIP_SIZE, myStatus->PosY, AttackArea);
+	if (valueX - 1 >= 0 && stage->onUnit[valueY][valueX - 1] != "NONE" && stage->onUnit[valueY][valueX - 1] != myStatus->myTeam) SpriteDraw(myStatus->PosX - CHIP_SIZE, myStatus->PosY, AttackArea);
+	if (valueY + 1 <= 9 && stage->onUnit[valueY + 1][valueX] != "NONE" && stage->onUnit[valueY + 1][valueX] != myStatus->myTeam) SpriteDraw(myStatus->PosX, myStatus->PosY + CHIP_SIZE, AttackArea);
+	if (valueY - 1 >= 0 && stage->onUnit[valueY - 1][valueX] != "NONE" && stage->onUnit[valueY - 1][valueX] != myStatus->myTeam) SpriteDraw(myStatus->PosX, myStatus->PosY - CHIP_SIZE, AttackArea);
 }
 
 // 攻撃の詳細表示
@@ -571,8 +615,8 @@ void Character::SetCameraOffset(int dir, bool horizontal)
 
 void Character::MoveAreaClear()
 {
-	for (int y = 0; y < MAP_SIZEY; y++) {
-		for (int x = 0; x < MAP_SIZEX; x++) {
+	for (int y = 0; y < StageCreate::Instance()->MAP_SIZEY; y++) {
+		for (int x = 0; x < StageCreate::Instance()->MAP_SIZEX; x++) {
 			moveToPos[y][x] = -1;
 			moveArrow[y][x] = false;
 			stage->StageUpdate(x, y);

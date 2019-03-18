@@ -8,7 +8,7 @@ CharacterManager* _characterMgr;
 // コンストラクタ
 GameScene::GameScene()
 {
-	_characterMgr = new CharacterManager();
+	_characterMgr = CharacterManager::Instance();
 
 	Initialize();
 
@@ -47,6 +47,8 @@ void GameScene::Update()
 		Draw();
 
 		AIManager::Instance()->Update();
+
+		_characterMgr->Update(AIManager::Instance()->x, AIManager::Instance()->y);
 	}
 	
 }
@@ -55,11 +57,17 @@ void GameScene::Update()
 void GameScene::Draw()
 {
 	// 座標更新
-	xPos = KeyInput::Instance()->xPos;
-	yPos = KeyInput::Instance()->yPos;
+	if (_characterMgr->playerTurn) {
+		xPos = KeyInput::Instance()->xPos;
+		yPos = KeyInput::Instance()->yPos;
+	}
+	else {
+		xPos = AIManager::Instance()->x;
+		yPos = AIManager::Instance()->y;
+	}
 
 	// 描画
-	DrawGraph(0 - KeyInput::Instance()->cameraPos.x, 0 - KeyInput::Instance()->cameraPos.y, stageImg, true);
+	DrawGraph(0.0f - KeyInput::Instance()->cameraPos.x, 0.0f - KeyInput::Instance()->cameraPos.y, stageImg, true);
 
 	if (KeyInput::Instance()->Key[KEY_INPUT_SPACE] == 1) {
 		_characterMgr->KeyCheck(xPos, yPos);

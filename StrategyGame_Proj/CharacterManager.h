@@ -6,7 +6,7 @@
 #define CHARACTER_DATA_2 "Resources\\CharacterData\\PlayerData_1.dat"
 #define CHARACTER_DATA_3 "Resources\\CharacterData\\PlayerData_2.dat"
 
-class CharacterManager
+class CharacterManager : public Singleton<CharacterManager>
 {
 public:
 	// 生成するキャラクター

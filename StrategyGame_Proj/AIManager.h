@@ -8,6 +8,10 @@ class AIManager : public Singleton<AIManager>
 public:
 	AIManager();
 
+	// 移動先の座標
+	int x = 0, y = 0; 
+	int xPos = 0, yPos = 0;
+
 	// AIを動かすかどうか
 	bool AIMove;
 
@@ -27,13 +31,11 @@ public:
 	void MoveSelect(Character* character);
 
 	// 移動先を選択する
-	void ChoiseMovePoint();
+	void ChoiseMovePoint(int xPos, int yPos);
 
 	// プレイヤー側キャラクターとの距離を取得
 	int GetDistance(Character* character, vector<Character*> playerList);
 private:
-	// 移動先の座標
-	int x = 0, y = 0;
 
 	// CharacterManagerのインスタンス
 	CharacterManager* characterMgr;

@@ -4,6 +4,8 @@
 // 生成するキャラクター数
 const int PlayerNum = 3;
 
+AIManager* AIMgr;
+
 // キャラクターの情報
 vector<Character::STATUS> statusList;
 Character::STATUS status[PlayerNum];
@@ -11,6 +13,8 @@ Character::STATUS status[PlayerNum];
 // 初期化
 void CharacterManager::Initialize()
 {
+	AIMgr = AIManager::Instance();
+
 	// キャラクターの追加
 	for (unsigned int num = 0; num < PlayerNum; num++) {
 		//statusList.push_back(status[num]);
@@ -18,13 +22,13 @@ void CharacterManager::Initialize()
 	}
 
 	// キャラクターの初期化
-	character[0]->Character_Initialize(CHARACTER_DATA_1, "Player", 240, 240);
-	character[1]->Character_Initialize(CHARACTER_DATA_2, "Enemy", 144, 240);
-	character[2]->Character_Initialize(CHARACTER_DATA_3, "Player", 96, 384);
+	character[0]->Character_Initialize(CHARACTER_DATA_1, "エイリーク", "Player", 240, 240);
+	character[1]->Character_Initialize(CHARACTER_DATA_2, "ヴァルター", "Enemy", 144, 240);
+	character[2]->Character_Initialize(CHARACTER_DATA_3, "ゼト", "Player", 96, 384);
 
 	// 敵AIの初期化
 	for (Character* _character : character) {
-		AIManager::Instance()->CharacterCount(_character);
+		AIMgr->CharacterCount(_character);
 	}
 
 	StartTurn();
@@ -37,13 +41,7 @@ void CharacterManager::Update(int x, int y)
 	GetAttackArea(x, y);
 
 	for (unsigned int i = 0; i < character.size(); i++) {
-		// 死亡したユニットを除外する
-		if (character[i]->myStatus->isDeath) {
-			//delete character[i];
-			character.erase(character.begin() + i);
-			return;
-		}
-
+		// アニメーション
 		character[i]->CharacterAnim();
 	}
 
@@ -58,16 +56,35 @@ void CharacterManager::StartTurn()
 	playerTurn = !playerTurn;
 	moveableUnit = 0;
 
-	// 移動可能なユニットのカウント
 	for (unsigned int num = 0; num < character.size(); num++) {
-		// プレイヤー側ユニットの計算
-		if (playerTurn && character[num]->myStatus->myTeam == "Player") moveableUnit++;
-		// 敵側ユニットの計算
-		else if (playerTurn == false && character[num]->myStatus->myTeam == "Enemy") moveableUnit++;
+		// 死亡したユニットを除外する
+		if (character[num]->myStatus->isDeath) {
+			//delete character[i];
+			character.erase(character.begin() + num);
+			AIMgr->Initialize();
+			// 敵AIの初期化
+			for (Character* _character : character) {
+				AIMgr->CharacterCount(_character);
+			}
+		}
+		else {
+			// 移動可能なユニットのカウント
+		    // プレイヤー側ユニットの計算
+			if (playerTurn && character[num]->myStatus->myTeam == "Player") moveableUnit++;
+			// 敵側ユニットの計算
+			else if (playerTurn == false && character[num]->myStatus->myTeam == "Enemy") moveableUnit++;
+		}
+	}
+
+	// プレイヤーターンの開始
+	if (playerTurn == true) {
+		for (unsigned int num = 0; num < character.size(); num++) {
+			character[num]->TurnStart();
+		}
 	}
 
 	// 敵ターンの開始
-	if (playerTurn == false) AIManager::Instance()->Play();
+	if (playerTurn == false) AIMgr->Play();
 }
 
 // 描画するかチェック
@@ -96,10 +113,9 @@ void CharacterManager::DrawCheck(int x, int y)
 void CharacterManager::Draw()
 {
 	for (unsigned int num = 0; num < character.size(); num++) {
-		character[num]->MoveAreaClear();
-
 		// 移動順路を記録しつつ移動範囲と攻撃範囲の描画
 		if (character[num]->myStatus->isSelect) {
+			character[num]->MoveAreaClear();
 			character[num]->OldPosX.push_back(character[num]->myStatus->PosX);
 			character[num]->OldPosY.push_back(character[num]->myStatus->PosY);
 			character[num]->MoveRange(character[num]->myStatus->PosX, character[num]->myStatus->PosY, character[num]->myStatus->myParam.MOVERANGE);
@@ -114,6 +130,7 @@ void CharacterManager::CharacterMove(int x, int y)
 	// キャラクターの移動
 	for (unsigned int num = 0; num < character.size(); num++) {
 		if (character[num]->myStatus->isSelect) {
+			DrawFormatString(x, y, GetColor(255, 0, 0), "移動");
 			isMove = character[num]->CharacterMove(x, y);
 
 			// 移動が完了し、攻撃しないなら行動終了
@@ -155,9 +172,6 @@ void CharacterManager::GetMoveArrow(int x, int y)
 // 攻撃範囲表示
 void CharacterManager::GetAttackArea(int x, int y)
 {
-	// キャラクター情報観賞用
-	Character::STATUS _status;
-
 	// 攻撃可能なユニットの取得
 	for (unsigned int num = 0; num < character.size(); num++) {
 		if (character[num]->myStatus->canAttack) {
@@ -169,11 +183,11 @@ void CharacterManager::GetAttackArea(int x, int y)
 
 	// 攻撃可能な位置のユニットとの攻撃した際の詳細情報の表示
 	for (unsigned int num = 0; num < character.size(); num++) {
-		if (attack) {
-			if (character[num]->myStatus->PosX != x && character[num]->myStatus->PosY != y) return;
+		if (myCharacter != nullptr && myCharacter->myStatus->canAttack) {
+			if (myCharacter->myStatus->PosX == x && myCharacter->myStatus->PosY == y
+				|| StageCreate::Instance()->onUnit[y / CHIP_SIZE][x / CHIP_SIZE] != "Enemy") return;
 
-			if (myCharacter->myStatus->myTeam != character[num]->myStatus->myTeam
-				&& myCharacter->myStatus->canAttack == true)
+			if (myCharacter->myStatus->myTeam != character[num]->myStatus->myTeam)
 				myCharacter->GetAttackDetail(character[num]);
 		}
 	}

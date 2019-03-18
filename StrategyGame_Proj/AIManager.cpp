@@ -3,7 +3,7 @@
 
 AIManager::AIManager()
 {
-	characterMgr = new CharacterManager();
+	characterMgr = CharacterManager::Instance();
 }
 
 // 初期化
@@ -17,9 +17,15 @@ void AIManager::Initialize()
 // 更新
 void AIManager::Update()
 {
-	if (myCharacter != nullptr && myCharacter->myStatus->isSelect) characterMgr->Draw();
-
-	characterMgr->Update(x, y);
+	if (myCharacter != nullptr) {
+		if (characterMgr->isSelect) {
+			characterMgr->Draw();
+			characterMgr->GetMoveArrow(x, y);
+			characterMgr->KeyCheck(x, y);
+		}
+		if (myCharacter->myStatus->canAttack) characterMgr->DrawCheck(xPos, yPos);
+	}
+	
 }
 
 // 現在の敵(AI)、プレイヤーのカウント
@@ -47,7 +53,7 @@ void AIManager::Play()
 		}
 	}
 
-	MoveSelect(myCharacter);
+	if(myCharacter != nullptr) MoveSelect(myCharacter);
 }
 
 // 動かすキャラクターの選択
@@ -55,13 +61,32 @@ void AIManager::MoveSelect(Character* character)
 {
 	x = character->myStatus->PosX, y = character->myStatus->PosY;
 
-	ChoiseMovePoint();
+	characterMgr->DrawCheck(x, y);
+
+	for (int stageY = 0; stageY < StageCreate::Instance()->MAP_SIZEY; stageY++) {
+		for (int stageX = 0; stageX < StageCreate::Instance()->MAP_SIZEX; stageX++) {
+			if (StageCreate::Instance()->checkMove[stageY][stageX] == true) {
+				x = stageX * CHIP_SIZE;
+				y = stageY * CHIP_SIZE;
+			}
+		}
+	}
+
+	for (Character* _character : playerList) {
+		xPos = _character->myStatus->PosX, yPos = _character->myStatus->PosY;
+		if (yPos / CHIP_SIZE > 9 && StageCreate::Instance()->checkMove[yPos / CHIP_SIZE + 1][xPos / CHIP_SIZE] == true) ChoiseMovePoint(xPos, yPos + CHIP_SIZE);
+		if (yPos / CHIP_SIZE < 0 && StageCreate::Instance()->checkMove[yPos / CHIP_SIZE - 1][xPos / CHIP_SIZE] == true) ChoiseMovePoint(xPos, yPos - CHIP_SIZE);
+		if (xPos / CHIP_SIZE < 14 && StageCreate::Instance()->checkMove[yPos / CHIP_SIZE][xPos / CHIP_SIZE + 1] == true) ChoiseMovePoint(xPos + CHIP_SIZE, yPos);
+		if (xPos / CHIP_SIZE > 0 && StageCreate::Instance()->checkMove[yPos / CHIP_SIZE][xPos / CHIP_SIZE - 1] == true) ChoiseMovePoint(xPos - CHIP_SIZE, yPos);
+	}
 }
 
 // 移動先の選択
-void AIManager::ChoiseMovePoint()
+void AIManager::ChoiseMovePoint(int xPos, int yPos)
 {
-	characterMgr->DrawCheck(x, y);
+	if (StageCreate::Instance()->onUnit[yPos / CHIP_SIZE][xPos / CHIP_SIZE] != "NONE") return;
+
+	x = xPos, y = yPos;
 }
 
 // プレイヤー側のキャラクターの取得
@@ -74,8 +99,9 @@ int AIManager::GetDistance(Character* character, vector<Character*> playerList)
 
 	// プレイヤーからの距離の計算
 	for (Character* playerSt : playerList) {
-		offsetX = abs(playerSt->myStatus->PosX - character->myStatus->PosX);
-		offsetY = abs(playerSt->myStatus->PosY - character->myStatus->PosY);
+		offsetTotal = 0;
+		offsetX = abs(character->myStatus->PosX - playerSt->myStatus->PosX) / CHIP_SIZE;
+		offsetY = abs(character->myStatus->PosY - playerSt->myStatus->PosY) / CHIP_SIZE;
 		offsetTotal = offsetX + offsetY;
 
 		// 最短距離の更新

@@ -24,6 +24,7 @@ public:
 	// プレイヤーステータスの列挙
 	enum PLAYER_PARAM
 	{
+		NAME,
 		HP = 0,
 		POWER,
 		TECHNIQUE,
@@ -38,6 +39,7 @@ public:
 
 	// キャラクターのパラメータ
 	typedef struct {
+		string NAME;
 		int HP;
 		int POWER;
 		int TECHNIQUE;
@@ -73,7 +75,7 @@ public:
 		bool canMove = true;       // 移動可能か
 		bool isAttack;     // 攻撃中か
 		bool canAttack;   // 攻撃可能か
-		bool isDeath;      // 死亡判定
+		bool isDeath = false;      // 死亡判定
 	}STATUS ;
 
 	unique_ptr<STATUS> myStatus = make_unique<STATUS>();
@@ -86,7 +88,7 @@ public:
 	int moveCount;
 
 	// 初期化
-	void Character_Initialize(string pass, string team, int posX, int posY);
+	void Character_Initialize(string pass, string name, string team, int posX, int posY);
 	// パラメータ取得
 	void GetCharacterParam(string pass);
 
@@ -95,6 +97,8 @@ public:
 	// キャラクターのアニメーション
 	void CharacterAnim();
 
+	// 移動再開(ターン開始時に呼び出す)
+	void TurnStart();
 	// 移動範囲計算
     void MoveRange(int x, int y, int moveRange);
 	// 攻撃範囲描画
