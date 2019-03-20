@@ -35,7 +35,7 @@ void GameScene::UnLoadFile()
 
 void GameScene::TurnChange(bool playerTurn)
 {
-	turnChangeImg = LoadGraph(PLAYERTURN_IMG);
+	turnChangeImg = LoadGraph(PLAYERTURN_IMG); 
 
 	// プレイヤーターン
 	if (playerTurn) {
@@ -45,7 +45,6 @@ void GameScene::TurnChange(bool playerTurn)
 	else {
 		DrawGraph(moveX, 0, turnChangeImg, true);
 	}
-	moveX -= 24;
 
 	if (moveX == 0) {
 		WaitTimer(3000);
@@ -53,8 +52,10 @@ void GameScene::TurnChange(bool playerTurn)
 		turnChangeImg = 0;
 		characterMgr->turnAnim = false;
 		if (playerTurn == false) AIManager::Instance()->Play();
+		return;
 	}
-	
+
+	moveX -= 24;
 }
 
 // シーン全体の更新
@@ -68,7 +69,7 @@ void GameScene::Update()
 
 		characterMgr->Update(xPos, yPos);
 
-		if (characterMgr->turnAnim && moveX > 0) {
+		if (characterMgr->turnAnim) {
 			TurnChange(characterMgr->playerTurn);
 		}
 	}
@@ -79,7 +80,7 @@ void GameScene::Update()
 
 		characterMgr->Update(AIManager::Instance()->x, AIManager::Instance()->y);
 
-		if (characterMgr->turnAnim && moveX > 0) {
+		if (characterMgr->turnAnim) {
 			TurnChange(characterMgr->playerTurn);
 		}
 	}
