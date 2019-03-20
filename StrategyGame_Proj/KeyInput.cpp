@@ -37,7 +37,7 @@ int KeyInput::UpdateInput()
 // 移動量計算
 void KeyInput::InputCalc(CharacterManager* characterMgr)
 {
-	if (characterMgr->isMove || characterMgr->playerTurn == false) return;
+	if (characterMgr->isMove || characterMgr->playerTurn == false || characterMgr->turnAnim) return;
 
 	// 押されたキー入力によって処理を実行
 	// 右キーが押されたら
@@ -90,5 +90,13 @@ void KeyInput::InputCalc(CharacterManager* characterMgr)
 		if (yPos <= 0) yPos = 0;
 
 		if (isSelect) characterMgr->GetMoveCount(xPos, yPos);
+	}
+
+	if (KeyInput::Instance()->Key[KEY_INPUT_SPACE] == 1) {
+		characterMgr->KeyCheck(xPos, yPos);
+
+		if (isSelect == false) characterMgr->DrawCheck(xPos, yPos);
+
+		isSelect = characterMgr->isSelect;
 	}
 }

@@ -309,7 +309,7 @@ void Character::MoveRange(int x, int y, int moveCost)
 	// 上へ行けるならチェック
 	if (valueY - 1 >= 0 && moveToPos[valueY - 1][valueX] < moveCost) MoveRange(x, y - CHIP_SIZE, moveCost - 1);
 	// 右へ行けるならチェック
-	if (valueX + 1 <= 15 && moveToPos[valueY][valueX + 1] < moveCost) MoveRange(x + CHIP_SIZE, y, moveCost - 1);
+	if (valueX + 1 <= 14 && moveToPos[valueY][valueX + 1] < moveCost) MoveRange(x + CHIP_SIZE, y, moveCost - 1);
 	// 左へ行けるならチェック
 	if (valueX - 1 >= 0 && moveToPos[valueY][valueX - 1] < moveCost)MoveRange(x - CHIP_SIZE, y, moveCost - 1);
 	// 下へ行けるならチェック

@@ -25,7 +25,6 @@ void AIManager::Update()
 		}
 		if (myCharacter->myStatus->canAttack) characterMgr->DrawCheck(xPos, yPos);
 	}
-	
 }
 
 // 現在の敵(AI)、プレイヤーのカウント

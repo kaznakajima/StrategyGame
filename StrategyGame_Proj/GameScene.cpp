@@ -3,16 +3,16 @@
 #include "CharacterManager.h"
 #include "AIManager.h"
 
-CharacterManager* _characterMgr;
+CharacterManager* characterMgr;
 
 // コンストラクタ
 GameScene::GameScene()
 {
-	_characterMgr = CharacterManager::Instance();
+	characterMgr = CharacterManager::Instance();
 
 	Initialize();
 
-	_characterMgr->Initialize();
+	characterMgr->Initialize();
 }
 
 // 初期化
@@ -33,31 +33,63 @@ void GameScene::UnLoadFile()
 
 }
 
-// 更新
+void GameScene::TurnChange(bool playerTurn)
+{
+	turnChangeImg = LoadGraph(PLAYERTURN_IMG);
+
+	// プレイヤーターン
+	if (playerTurn) {
+		DrawGraph(moveX, 0, turnChangeImg, true);
+	}
+	// エネミーターン
+	else {
+		DrawGraph(moveX, 0, turnChangeImg, true);
+	}
+	moveX -= 24;
+
+	if (moveX == 0) {
+		WaitTimer(3000);
+		moveX = 720;
+		turnChangeImg = 0;
+		characterMgr->turnAnim = false;
+		if (playerTurn == false) AIManager::Instance()->Play();
+	}
+	
+}
+
+// シーン全体の更新
 void GameScene::Update()
 {
-	if (_characterMgr->playerTurn) {
-		KeyInput::Instance()->InputCalc(_characterMgr);
+	if (characterMgr->playerTurn) {
+
+		KeyInput::Instance()->InputCalc(characterMgr);
 
 		Draw();
 
-		_characterMgr->Update(xPos, yPos);
+		characterMgr->Update(xPos, yPos);
+
+		if (characterMgr->turnAnim && moveX > 0) {
+			TurnChange(characterMgr->playerTurn);
+		}
 	}
 	else {
 		Draw();
 
 		AIManager::Instance()->Update();
 
-		_characterMgr->Update(AIManager::Instance()->x, AIManager::Instance()->y);
+		characterMgr->Update(AIManager::Instance()->x, AIManager::Instance()->y);
+
+		if (characterMgr->turnAnim && moveX > 0) {
+			TurnChange(characterMgr->playerTurn);
+		}
 	}
-	
 }
 
 // メインシーンの描画
 void GameScene::Draw()
 {
 	// 座標更新
-	if (_characterMgr->playerTurn) {
+	if (characterMgr->playerTurn) {
 		xPos = KeyInput::Instance()->xPos;
 		yPos = KeyInput::Instance()->yPos;
 	}
@@ -69,18 +101,9 @@ void GameScene::Draw()
 	// 描画
 	DrawGraph(0.0f - KeyInput::Instance()->cameraPos.x, 0.0f - KeyInput::Instance()->cameraPos.y, stageImg, true);
 
-	if (KeyInput::Instance()->Key[KEY_INPUT_SPACE] == 1) {
-		_characterMgr->KeyCheck(xPos, yPos);
-
-		if (isSelect == false) _characterMgr->DrawCheck(xPos, yPos);
-
-		isSelect = _characterMgr->isSelect;
-		KeyInput::Instance()->isSelect = isSelect;
-	}
-
-	if (isSelect == true && _characterMgr->attack == false) {
-		_characterMgr->Draw();
-		_characterMgr->GetMoveArrow(xPos, yPos);
+	if (KeyInput::Instance()->isSelect == true && characterMgr->attack == false) {
+		characterMgr->Draw();
+		characterMgr->GetMoveArrow(xPos, yPos);
 	}
 
 	// カーソル表示

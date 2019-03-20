@@ -19,6 +19,8 @@ public:
 	int blockUnitNum = 0;
 	Character* eCharacter = nullptr;
 
+	// ターン変更アニメーション
+	bool turnAnim;
 	// プレイヤーのターンかどうか
 	bool playerTurn = false;
 	// 選択判定

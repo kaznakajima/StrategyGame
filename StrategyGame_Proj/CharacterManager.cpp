@@ -59,7 +59,6 @@ void CharacterManager::StartTurn()
 	for (unsigned int num = 0; num < character.size(); num++) {
 		// 死亡したユニットを除外する
 		if (character[num]->myStatus->isDeath) {
-			//delete character[i];
 			character.erase(character.begin() + num);
 			AIMgr->Initialize();
 			// 敵AIの初期化
@@ -76,6 +75,8 @@ void CharacterManager::StartTurn()
 		}
 	}
 
+	turnAnim = true;
+
 	// プレイヤーターンの開始
 	if (playerTurn == true) {
 		for (unsigned int num = 0; num < character.size(); num++) {
@@ -84,7 +85,7 @@ void CharacterManager::StartTurn()
 	}
 
 	// 敵ターンの開始
-	if (playerTurn == false) AIMgr->Play();
+	//if (playerTurn == false) AIMgr->Play();
 }
 
 // 描画するかチェック
@@ -245,6 +246,17 @@ void CharacterManager::Attack()
 		myCharacter = nullptr;
 		eCharacter = nullptr;
 		moveableUnit--;
+		for (unsigned int num = 0; num < character.size(); num++) {
+			// 死亡したユニットを除外する
+			if (character[num]->myStatus->isDeath) {
+				character.erase(character.begin() + num);
+				AIMgr->Initialize();
+				// 敵AIの初期化
+				for (Character* _character : character) {
+					AIMgr->CharacterCount(_character);
+				}
+			}
+		}
 		if (moveableUnit <= 0) StartTurn();
 	}
 }

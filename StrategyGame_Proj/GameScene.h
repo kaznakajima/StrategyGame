@@ -4,6 +4,8 @@
 // ステージ画像とカーソル画像
 #define FIELD_IMG "Resources\\image\\Field.png"
 #define CURSOR_IMG "Resources\\image\\Cursor.png"
+#define PLAYERTURN_IMG "Resources\\image\\TurnStart_P_720×480.png"
+#define ENEMYTURN_IMG "Resources\\image\\TurnStart_E_720×480.png"
 
 class GameScene : public BaseScene
 {
@@ -17,18 +19,22 @@ public:
 	void LoadFile();
 	// 読み込んだファイルの破棄
 	void UnLoadFile();
+	// ターン変更
+	void TurnChange(bool playerTurn);
 	//更新
 	void Update();
 	//描画
 	void Draw();
 
 private:
-	// 選択状態
-	bool isSelect = false;
 	// ステージ画像
 	int stageImg;
 	// カーソル画像
 	int cursorImg;
+	// ターン変更用画像
+	int turnChangeImg = 0;
+	// アニメーション用変数
+	float moveX = 720;
 
 	// 現在の座標
 	int xPos = 480, yPos = 240;
