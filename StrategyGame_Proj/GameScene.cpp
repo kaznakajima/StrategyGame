@@ -21,6 +21,7 @@ void GameScene::Initialize()
 	// 画像の読み込み
 	stageImg = LoadGraph(FIELD_IMG);
 	cursorImg = LoadGraph(CURSOR_IMG);
+	turnChangeImg = LoadGraph(PLAYERTURN_IMG);
 }
 
 void GameScene::LoadFile()
@@ -35,7 +36,8 @@ void GameScene::UnLoadFile()
 
 void GameScene::TurnChange(bool playerTurn)
 {
-	turnChangeImg = LoadGraph(PLAYERTURN_IMG); 
+	// 位置変更
+	moveX -= 24;
 
 	// プレイヤーターン
 	if (playerTurn) {
@@ -44,18 +46,21 @@ void GameScene::TurnChange(bool playerTurn)
 	// エネミーターン
 	else {
 		DrawGraph(moveX, 0, turnChangeImg, true);
+		
 	}
 
-	if (moveX == 0) {
-		WaitTimer(3000);
-		moveX = 720;
-		turnChangeImg = 0;
+	// 移動完了したら
+	if (moveX < 0) {
+		WaitTimer(1000);
+		moveX = 672;
 		characterMgr->turnAnim = false;
-		if (playerTurn == false) AIManager::Instance()->Play();
-		return;
+		if (playerTurn) turnChangeImg = LoadGraph(ENEMYTURN_IMG);
+		// エネミーターン
+		else {
+			AIManager::Instance()->Play();
+			turnChangeImg = LoadGraph(PLAYERTURN_IMG);
+		}
 	}
-
-	moveX -= 24;
 }
 
 // シーン全体の更新

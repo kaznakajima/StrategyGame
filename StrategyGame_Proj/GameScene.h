@@ -34,7 +34,7 @@ private:
 	// ターン変更用画像
 	int turnChangeImg = 0;
 	// アニメーション用変数
-	float moveX = 720;
+	float moveX = 672;
 
 	// 現在の座標
 	int xPos = 480, yPos = 240;
