@@ -66,6 +66,7 @@ int StageCreate::GetData(int x, int y)
 void StageCreate::StageUpdate(int x, int y)
 {
 	stageList[y][x] = GetData(x, y);
+	DrawFormatString(x * CHIP_SIZE, y * CHIP_SIZE, GetColor(0, 0, 0), "[%d]", stageList[y][x]);
 	onUnit[y][x] = "NONE";
 	checkMove[y][x] = false;
 }

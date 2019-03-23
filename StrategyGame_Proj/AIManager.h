@@ -26,17 +26,7 @@ public:
 
 	// 初回起動
 	void Play();
-
-	// 動かすキャラクターの選択
-	void MoveSelect(Character* character);
-
-	// 移動先を選択する
-	void ChoiseMovePoint(int xPos, int yPos);
-
-	// プレイヤー側キャラクターとの距離を取得
-	int GetDistance(Character* character, vector<Character*> playerList);
 private:
-
 	// CharacterManagerのインスタンス
 	CharacterManager* characterMgr;
 
@@ -47,6 +37,29 @@ private:
 
 	// 操作するキャラクターのインスタンス
 	Character* myCharacter;
+
+	// 移動判定
+	bool isMove;
+	int moveToX = 0, moveToY = 0;
+	// 移動最大値格納
+	int moveCost;
+	// プレイヤーとの最短距離
+	int minDistance = 100;
+	
+	// 動かすキャラクターの選択
+	void MoveSelect(Character* character);
+
+	// 移動先を選択する
+	void ChoiseMovePoint(int _x, int _y);
+
+	// プレイヤー側キャラクターとの距離を取得
+	int GetDistancePlayer(Character* character, vector<Character*> playerList);
+
+	// 移動地点の取得
+	void GetMovePoint(Character* character, int _x, int _y, vector<Character*> playerList);
+
+	// 移動地点がプレイヤーに向かえる最短距離か検索
+	void CheckCanMove(Character* character, int _x, int _y, Character* playerSt);
 
 	// 敵キャラクターのロスト(死亡処理)
 	void CharacterLost(Character* character);

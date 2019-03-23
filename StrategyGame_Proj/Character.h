@@ -15,6 +15,9 @@ using namespace std;
 #define ATTACK_DETAIL "Resources\\image\\AttackGraph.png"
 #define ARROW "Resources\\image\\Arrow.png"
 #define CHARACTER_IMG "Resources\\image\\Character_40×40.png"
+#define DAMAGE_DETAIL "Resources\\image\\DamageDetail.png"
+#define HP_BAR "Resources\\image\\HP_Bar.png"
+#define HP_BARBOX "Resources\\image\\HP_BarBox.png"
 
 class Character
 {
@@ -69,7 +72,6 @@ public:
 		int Image[20];    // キャラクター用画像
 		float AnimHandle;  // アニメーション用変数
 		int AttackRange;    // 攻撃範囲
-		double Count;            // アニメーションカウント
 		bool animReset;  // アニメーションのリセット 
 		bool isSelect;      // 選択されているか
 		bool canMove = true;       // 移動可能か
@@ -78,11 +80,17 @@ public:
 		bool isDeath = false;      // 死亡判定
 	}STATUS ;
 
-	unique_ptr<STATUS> myStatus = make_unique<STATUS>();
-
 	// 道筋
 	vector<int> OldPosX;
 	vector<int> OldPosY;
+
+	unique_ptr<STATUS> myStatus = make_unique<STATUS>();
+
+	// 移動できるエリア
+	vector<vector<int>> moveToPos = vector<vector<int>>(10, vector<int>(15, -1));
+
+	// 移動先の道筋かどうか
+	vector<vector<bool>> moveArrow = vector<vector<bool>>(10, vector<bool>(15, 0));
 
 	// 移動値
 	int moveCount;
@@ -125,5 +133,26 @@ public:
 	void SetCameraOffset(int dir, bool horizontal);
 
 	// 移動エリアのリセット
-	void MoveAreaClear();
+	void MoveAreaClear(vector<Character*> _character);
+
+private:
+
+	// HP用画像
+	int HpBar;
+	int HpBarBox;
+	// 移動範囲
+	int MoveArea;
+	// 攻撃範囲
+	int AttackArea;
+	// 攻撃情報
+	int AttackDetail;
+	int DamageDetail;
+	// 移動経路
+	int ArrowImage[6];
+
+	// ステージデータを読み込むクラスのインスタンス
+	StageCreate* stage;
+
+	// パラメータ
+	int _param[9];
 };

@@ -2,7 +2,7 @@
 #include "AIManager.h"
 
 // 生成するキャラクター数
-const int PlayerNum = 3;
+const int PlayerNum = 4;
 
 AIManager* AIMgr;
 
@@ -25,6 +25,7 @@ void CharacterManager::Initialize()
 	character[0]->Character_Initialize(CHARACTER_DATA_1, "エイリーク", "Player", 240, 240);
 	character[1]->Character_Initialize(CHARACTER_DATA_2, "ヴァルター", "Enemy", 144, 240);
 	character[2]->Character_Initialize(CHARACTER_DATA_3, "ゼト", "Player", 96, 384);
+	character[3]->Character_Initialize(CHARACTER_DATA_1, "クーガー", "Enemy", 480, 240);
 
 	// 敵AIの初期化
 	for (Character* _character : character) {
@@ -116,7 +117,7 @@ void CharacterManager::Draw()
 	for (unsigned int num = 0; num < character.size(); num++) {
 		// 移動順路を記録しつつ移動範囲と攻撃範囲の描画
 		if (character[num]->myStatus->isSelect) {
-			character[num]->MoveAreaClear();
+			character[num]->MoveAreaClear(character);
 			character[num]->OldPosX.push_back(character[num]->myStatus->PosX);
 			character[num]->OldPosY.push_back(character[num]->myStatus->PosY);
 			character[num]->MoveRange(character[num]->myStatus->PosX, character[num]->myStatus->PosY, character[num]->myStatus->myParam.MOVERANGE);
@@ -135,8 +136,11 @@ void CharacterManager::CharacterMove(int x, int y)
 			isMove = character[num]->CharacterMove(x, y);
 
 			// 移動が完了し、攻撃しないなら行動終了
-			if (isMove == false && character[num]->myStatus->canMove == false 
-				&& character[num]->myStatus->canAttack == false) moveableUnit--;
+			if (isMove == false && character[num]->myStatus->canMove == false
+				&& character[num]->myStatus->canAttack == false) {
+				moveableUnit--;
+				if (playerTurn == false && moveableUnit != 0) AIMgr->Play();
+			}
 		}
 	}
 
@@ -212,6 +216,7 @@ void CharacterManager::ChoiseAttack(int x, int y)
 	if (eCharacter == nullptr) {
 		attack = false;
 		moveableUnit--;
+		if (moveableUnit != 0 && playerTurn == false) AIMgr->Play();
 		if (moveableUnit == 0) StartTurn();
 	}
 }
@@ -257,6 +262,7 @@ void CharacterManager::Attack()
 				}
 			}
 		}
+		if (moveableUnit != 0 && playerTurn == false) AIMgr->Play();
 		if (moveableUnit <= 0) StartTurn();
 	}
 }

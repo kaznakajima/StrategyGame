@@ -4,34 +4,17 @@
 
 #define PI 3.141592654
 
-// 移動範囲
-int MoveArea;
-// 攻撃範囲
-int AttackArea;
-// 攻撃情報
-int AttackDetail;
-// 移動経路
-int ArrowImage[6];
-
-// 移動できるエリア
-vector<vector<int>> moveToPos = vector<vector<int>>(10, vector<int>(15, 0));
-
-// 移動先の道筋かどうか
-vector<vector<int>> moveArrow = vector<vector<int>>(10, vector<int>(15, 0));
-
-// ステージデータを読み込むクラスのインスタンス
-StageCreate* stage;
-
-// パラメータ
-int _param[9];
-
 // コンストラクタ
 Character::Character()
 {
+	HpBar = LoadGraph(HP_BAR);
+	HpBarBox = LoadGraph(HP_BARBOX);
 	MoveArea = LoadGraph(CAN_MOVE_AREA);
 	AttackArea = LoadGraph(CAN_ATTACK_AREA);
 	AttackDetail = LoadGraph(ATTACK_DETAIL);
+	DamageDetail = LoadGraph(DAMAGE_DETAIL);
 	LoadDivGraph(ARROW, 6, 6, 1, CHIP_SIZE, CHIP_SIZE, ArrowImage);
+
 
 	// インスタンス作成
 	stage = StageCreate::Instance();
@@ -165,7 +148,7 @@ bool Character::CharacterMove(int moveX, int moveY)
 	moveArrow[nextY][nextX] = false;
 
 	// 右移動
-	if (nextX + 1 <= 15 && moveArrow[nextY][nextX + 1] == true) {
+	if (nextX + 1 <= 14 && moveArrow[nextY][nextX + 1] == true) {
 		// 画像の切り替え
 		if (myStatus->AnimHandle < 8.0f || myStatus->AnimHandle > 11.0f)
 			myStatus->AnimHandle = 8.0f;
@@ -215,7 +198,7 @@ bool Character::CharacterMove(int moveX, int moveY)
 	}
 
 	// 下移動
-	if (nextY + 1 <= 10 && moveArrow[nextY + 1][nextX] == true) {
+	if (nextY + 1 <= 9 && moveArrow[nextY + 1][nextX] == true) {
 		// 画像の切り替え
 		if (myStatus->AnimHandle < 4.0f || myStatus->AnimHandle > 7.0f)
 			myStatus->AnimHandle = 4.0f;
@@ -291,11 +274,12 @@ void Character::MoveRange(int x, int y, int moveCost)
 		return;
 
 	// 移動先情報を格納
-	moveToPos[valueY][valueX] = moveCost;
+	if (moveToPos[valueY][valueX] < moveCost) moveToPos[valueY][valueX] = moveCost;
 
 	// もう動けないもしくは進めない場所の場合はリターン
 	if (stage->stageList[_valueY][_valueX] > 0 && moveCost >= 0) {
-		SpriteDraw(x, y, AttackArea);
+		SpriteDraw(x, y, AttackArea); 
+		moveToPos[valueY][valueX] = 0;
 		return;
 	}
 	else if (stage->stageList[_valueY][_valueX] > 0 || moveCost == 0) return;
@@ -355,19 +339,19 @@ void Character::DrawMoveArrow(int x, int y, int moveValue)
 			}
 
 			// ユニットに向かってルートを逆探知していく
-			if (valueY + 1 <= 9 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY + 1][valueX] && stage->checkMove[valueY + 1][valueX] == true) {
+			if (valueY + 1 < 9 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY + 1][valueX] && stage->checkMove[valueY + 1][valueX] == true) {
 				DrawMoveArrow(x, y + CHIP_SIZE, 5);
 				return;
 			}
-			if (valueY - 1 >= 0 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY - 1][valueX] && stage->checkMove[valueY - 1][valueX] == true) {
+			if (valueY - 1 > 0 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY - 1][valueX] && stage->checkMove[valueY - 1][valueX] == true) {
 				DrawMoveArrow(x, y - CHIP_SIZE, 5);
 				return;
 			}
-			if (valueX + 1 <= 14 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY][valueX + 1] && stage->checkMove[valueY][valueX + 1] == true) {
+			if (valueX + 1 < 14 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY][valueX + 1] && stage->checkMove[valueY][valueX + 1] == true) {
 				DrawMoveArrow(x + CHIP_SIZE, y, 5);
 				return;
 			}
-			if (valueX - 1 >= 0 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY][valueX - 1] && stage->checkMove[valueY][valueX - 1] == true) {
+			if (valueX - 1 > 0 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY][valueX - 1] && stage->checkMove[valueY][valueX - 1] == true) {
 				DrawMoveArrow(x - CHIP_SIZE, y, 5);
 				return;
 			}
@@ -399,19 +383,19 @@ void Character::DrawMoveArrow(int x, int y, int moveValue)
 			}
 
 			// ユニットに向かってルートを逆探知していく
-			if (moveToPos[valueY][valueX] + 1 == moveToPos[valueY + 1][valueX] && stage->checkMove[valueY + 1][valueX] == true) {
+			if (valueY + 1 < 9 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY + 1][valueX] && stage->checkMove[valueY + 1][valueX] == true) {
 				DrawMoveArrow(x, y + CHIP_SIZE, 5);
 				return;
 			}
-			if (moveToPos[valueY][valueX] + 1 == moveToPos[valueY - 1][valueX] && stage->checkMove[valueY - 1][valueX] == true) {
+			if (valueY - 1 > 0 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY - 1][valueX] && stage->checkMove[valueY - 1][valueX] == true) {
 				DrawMoveArrow(x, y - CHIP_SIZE, 5);
 				return;
 			}
-			if (moveToPos[valueY][valueX] + 1 == moveToPos[valueY][valueX + 1] && stage->checkMove[valueY][valueX + 1] == true) {
+			if (valueX + 1 < 14 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY][valueX + 1] && stage->checkMove[valueY][valueX + 1] == true) {
 				DrawMoveArrow(x + CHIP_SIZE, y, 5);
 				return;
 			}
-			if (moveToPos[valueY][valueX] + 1 == moveToPos[valueY][valueX - 1] && stage->checkMove[valueY][valueX - 1] == true) {
+			if (valueX - 1 > 0 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY][valueX - 1] && stage->checkMove[valueY][valueX - 1] == true) {
 				DrawMoveArrow(x - CHIP_SIZE, y, 5);
 				return;
 			}
@@ -478,6 +462,8 @@ void Character::GetAttackDetail(Character* eStatus)
 // 攻撃アニメーション
 bool Character::AttackAnimation(Character* eCharacter, int count)
 {
+	DrawGraph(0, 0, DamageDetail, true);
+
 	// 攻撃方向を取得
 	int moveX = eCharacter->myStatus->PosX - myStatus->_PosX;
 	int moveY = eCharacter->myStatus->PosY - myStatus->_PosY;
@@ -613,13 +599,15 @@ void Character::SetCameraOffset(int dir, bool horizontal)
 	}
 }
 
-void Character::MoveAreaClear()
+void Character::MoveAreaClear(vector<Character*> _character)
 {
 	for (int y = 0; y < StageCreate::Instance()->MAP_SIZEY; y++) {
 		for (int x = 0; x < StageCreate::Instance()->MAP_SIZEX; x++) {
-			moveToPos[y][x] = -1;
-			moveArrow[y][x] = false;
-			stage->StageUpdate(x, y);
+			for (Character* character : _character) {
+				moveToPos[y][x] = -1;
+				moveArrow[y][x] = false;
+				if(character->myStatus->PosX != x, character->myStatus->PosY != y) stage->StageUpdate(x, y);
+			}
 		}
 	}
 }
