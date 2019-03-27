@@ -478,11 +478,15 @@ bool Character::AttackAnimation(Character* eCharacter, int count)
 	if (myStatus->PosY >= STAGE1_HEIGHT / 2) {
 		drawOffset = -100;
 		SpriteDraw(0, drawOffset, DamageDetail);
-		DrawExtendGraph(200, 100, myStatus->myParam.HP / 2 * 10, 100 + 15, HpBar, true);
+		DrawExtendGraph(myStatus->PosX, myStatus->PosY - 24, myStatus->PosX + (10 * myStatus->myParam.HP), myStatus->PosY - 24 + 15, HpBar, true);
+		DrawExtendGraph(eCharacter->myStatus->PosX, eCharacter->myStatus->PosY - 24, myStatus->PosX + (10 * eCharacter->myStatus->myParam.HP), eCharacter->myStatus->PosY - 24 + 15, HpBar, true);
+		//DrawExtendGraph(400, 100, 400 + (eCharacter->myStatus->myParam.HP * 10), 100 + 15, HpBar, true);
 	}
 	else if (myStatus->PosY < STAGE1_HEIGHT / 2) {
 		SpriteDraw(0, drawOffset, DamageDetail);
-		DrawExtendGraph(200, 300, myStatus->myParam.HP / 2 * 10, 100 + 15, HpBar, true);
+		DrawExtendGraph(myStatus->PosX, myStatus->PosY - 24, myStatus->PosX + (10 * myStatus->myParam.HP), myStatus->PosY - 24 + 15, HpBar, true);
+		DrawExtendGraph(eCharacter->myStatus->PosX, eCharacter->myStatus->PosY - 24, myStatus->PosX + (10 * eCharacter->myStatus->myParam.HP), eCharacter->myStatus->PosY - 24 + 15, HpBar, true);
+		//DrawExtendGraph(400, 300, 400 + (eCharacter->myStatus->myParam.HP * 10), 300 + 15, HpBar, true);
 	}
 
 	// UŒ‚•ûŒü‚ğæ“¾
