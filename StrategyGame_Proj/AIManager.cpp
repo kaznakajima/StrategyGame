@@ -19,6 +19,7 @@ void AIManager::Initialize()
 // 更新
 void AIManager::Update()
 {
+	DrawFormatString(0, 48, GetColor(0, 0, 0), "%d", playerList.size());
 	if (myCharacter != nullptr) {
 		if (characterMgr->isSelect) {
 			//characterMgr->Draw();
@@ -42,6 +43,7 @@ void AIManager::CharacterCount(Character* character)
 void AIManager::Play()
 {
 	isMove = false;
+	myCharacter = nullptr;
 	int _minDistance = 100;
 
 	// プレイヤーに一番近いユニットを行動させる
@@ -53,7 +55,7 @@ void AIManager::Play()
 		}
 	}
 
-	if(myCharacter != nullptr) MoveSelect(myCharacter);
+	if (myCharacter != nullptr) MoveSelect(myCharacter);
 }
 
 // 動かすキャラクターの選択
@@ -63,27 +65,39 @@ void AIManager::MoveSelect(Character* character)
 
 	characterMgr->DrawCheck(x, y);
 
-	character->MoveAreaClear(playerList);
+	character->MoveAreaClear(characterMgr->character);
 
 	character->MoveRange(character->myStatus->PosX, character->myStatus->PosY, character->myStatus->myParam.MOVERANGE);
 
 	for (Character* _character : playerList) {
 		int moveX  = _character->myStatus->PosX, moveY = _character->myStatus->PosY;
-		if (yPos / CHIP_SIZE > 9 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE + 1][moveX / CHIP_SIZE] == true) { 
+		if (moveY / CHIP_SIZE < 9 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE + 1][moveX / CHIP_SIZE] == true) {
 			ChoiseMovePoint(moveX, moveY + CHIP_SIZE);
-			if (isMove) xPos = moveX, yPos = moveY;
+			if (isMove) {
+				xPos = moveX, yPos = moveY;
+				break;
+			}
 		}
-		if (yPos / CHIP_SIZE < 0 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE - 1][moveX / CHIP_SIZE] == true) {
+		if (moveY / CHIP_SIZE > 0 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE - 1][moveX / CHIP_SIZE] == true) {
 			ChoiseMovePoint(moveX, moveY - CHIP_SIZE);
-			if (isMove) xPos = moveX, yPos = moveY;
+			if (isMove) {
+				xPos = moveX, yPos = moveY;
+				break;
+			}
 		}
-		if (xPos / CHIP_SIZE < 14 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE][moveX / CHIP_SIZE + 1] == true) {
+		if (moveX / CHIP_SIZE < 14 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE][moveX / CHIP_SIZE + 1] == true) {
 			ChoiseMovePoint(moveX + CHIP_SIZE, moveY);
-			if (isMove) xPos = moveX, yPos = moveY;
+			if (isMove) {
+				xPos = moveX, yPos = moveY;
+				break;
+			}
 		}
-		if (xPos / CHIP_SIZE > 0 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE][moveX / CHIP_SIZE - 1] == true) {
+		if (moveX / CHIP_SIZE > 0 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE][moveX / CHIP_SIZE - 1] == true) {
 			ChoiseMovePoint(moveX - CHIP_SIZE, moveY);
-			if (isMove) xPos = moveX, yPos = moveY;
+			if (isMove) {
+				xPos = moveX, yPos = moveY;
+				break;
+			}
 		}
 	}
 
@@ -105,7 +119,7 @@ void AIManager::MoveSelect(Character* character)
 // 移動先の選択
 void AIManager::ChoiseMovePoint(int _x, int _y)
 {
-	if (StageCreate::Instance()->onUnit[yPos / CHIP_SIZE][xPos / CHIP_SIZE] != "NONE") {
+	if (StageCreate::Instance()->onUnit[_y / CHIP_SIZE][_x / CHIP_SIZE] != "NONE") {
 		isMove = false; 
 		return;
 	}
@@ -162,8 +176,7 @@ void AIManager::GetMovePoint(Character* character, int _x, int _y, vector<Charac
 			_offsetTotal = _offsetX + _offsetY;
 
 			// 最短距離の更新
-			if (offsetTotal <= _offsetTotal && offsetTotal <= minDistance) {
-				minDistance = offsetTotal;
+			if (offsetTotal <= _offsetTotal) {
 				CheckCanMove(character, playerSt->myStatus->PosX / CHIP_SIZE, playerSt->myStatus->PosY / CHIP_SIZE, playerSt);
 				if (isMove == false) {
 					x = moveToX;
@@ -182,70 +195,57 @@ void AIManager::CheckCanMove(Character* character, int _x, int _y, Character* pl
 {
 	if (StageCreate::Instance()->stageList[_y][_x] > 0) return;
 
-	if (character->moveToPos[_y][_x] == moveCost) {
+	if (character->moveToPos[_y][_x] == moveCost && StageCreate::Instance()->onUnit[_y][_x] == "NONE") {
 		isMove = true;
-		x = _x * CHIP_SIZE;
-		y = _y * CHIP_SIZE;
+		int disX = abs(_x * CHIP_SIZE - playerSt->myStatus->PosX) / CHIP_SIZE, disY = abs(_y * CHIP_SIZE - playerSt->myStatus->PosY) / CHIP_SIZE;
+		int offset = disX + disY;
+		if (minDistance > offset) {
+			minDistance = offset;
+			x = _x * CHIP_SIZE;
+			y = _y * CHIP_SIZE;
+		}
 		return;
 	}
 
 	int moveX = (character->myStatus->PosX - _x * CHIP_SIZE) / CHIP_SIZE, moveY = (character->myStatus->PosY - _y * CHIP_SIZE) / CHIP_SIZE;
-	if (moveX >= 0 && moveY >= 0) {
-		if (_x - 1 > 0 && StageCreate::Instance()->stageList[_y][_x + 1] <= 0) {
+	if (moveX > character->myStatus->PosX / CHIP_SIZE || moveY > character->myStatus->PosY / CHIP_SIZE) {
+		if (_x + 1 < 14 && StageCreate::Instance()->stageList[_y][_x + 1] <= 0) {
 			CheckCanMove(character, _x + 1, _y, playerSt);
 		}
-		if (_y - 1 > 0 && StageCreate::Instance()->stageList[_y + 1][_x] <= 0) {
+		if (_y + 1 < 9 && StageCreate::Instance()->stageList[_y + 1][_x] <= 0) {
 			CheckCanMove(character, _x, _y + 1, playerSt);
 		}
+		return;
 	}
-	else if (moveX >= 0 && moveY <= 0) {
+	else if (moveX > character->myStatus->PosX / CHIP_SIZE || moveY < character->myStatus->PosY / CHIP_SIZE) {
 		// ユニットに向かってルートを逆探知していく
-		for (int yy = 0; yy < moveY; ++yy) {
-			for (int xx = 0; xx > -moveX; --xx) {
-				DrawFormatString((_x + xx) * CHIP_SIZE, (_y + yy) * CHIP_SIZE, GetColor(0, 0, 0), "[%d]", StageCreate::Instance()->stageList[_y + yy][_x + xx]);
-				if (StageCreate::Instance()->stageList[_y + yy][_x + xx] > 0) return;
-			}
-		}
-
-		/*if (_x + 1 < 14 && StageCreate::Instance()->stageList[_y][_x + 1] <= 0) {
+		if (_x + 1 < 14 && StageCreate::Instance()->stageList[_y][_x + 1] <= 0) {
 			CheckCanMove(character, _x + 1, _y, playerSt);
 		}
 		if (_y - 1 > 0 && StageCreate::Instance()->stageList[_y - 1][_x] <= 0) {
 			CheckCanMove(character, _x, _y - 1, playerSt);
-		}*/
-	}
-	else if (moveX <= 0 && moveY >= 0) {
-		// ユニットに向かってルートを逆探知していく
-		for (int yy = 0; yy > -moveY; --yy) {
-			for (int xx = 0; xx < moveX; ++xx) {
-				DrawFormatString((_x + xx) * CHIP_SIZE, (_y + yy) * CHIP_SIZE, GetColor(0, 0, 0), "[%d]", StageCreate::Instance()->stageList[_y + yy][_x + xx]);
-				if (StageCreate::Instance()->stageList[_y + yy][_x + xx] > 0) return;
-			}
 		}
-
-		//if (_x - 1 > 0 && StageCreate::Instance()->stageList[_y][_x - 1] <= 0) {
-		//	CheckCanMove(character, _x - 1, _y, playerSt);
-		//}
-		//// ユニットに向かってルートを逆探知していく
-		//if (_y + 1 < 9 && StageCreate::Instance()->stageList[_y + 1][_x] <= 0) {
-		//	CheckCanMove(character, _x, _y + 1, playerSt);
-		//}
+		return;
 	}
-	else if (moveX <= 0 && moveY <= 0) {
+	else if (moveX <  character->myStatus->PosX / CHIP_SIZE || moveY >  character->myStatus->PosY / CHIP_SIZE) {
 		// ユニットに向かってルートを逆探知していく
-		for (int yy = 0; yy < moveY; ++yy) {
-			for (int xx = 0; xx < moveX; ++xx) {
-				DrawFormatString((_x + xx) * CHIP_SIZE, (_y + yy) * CHIP_SIZE, GetColor(0, 0, 0), "[%d]", StageCreate::Instance()->stageList[_y + yy][_x + xx]);
-				if (StageCreate::Instance()->stageList[_y + yy][_x + xx] > 0) return;
-			}
+		if (_x - 1 > 0 && StageCreate::Instance()->stageList[_y][_x - 1] <= 0) {
+			CheckCanMove(character, _x - 1, _y, playerSt);
 		}
-
-		/*if (_x - 1 > 0 && StageCreate::Instance()->stageList[_y][_x - 1] <= 0) {
+		if (_y + 1 < 9 && StageCreate::Instance()->stageList[_y + 1][_x] <= 0) {
+			CheckCanMove(character, _x, _y + 1, playerSt);
+		}
+		return;
+	}
+	else if (moveX < character->myStatus->PosX / CHIP_SIZE || moveY < character->myStatus->PosY / CHIP_SIZE) {
+		// ユニットに向かってルートを逆探知していく
+		if (_x - 1 > 0 && StageCreate::Instance()->stageList[_y][_x - 1] <= 0) {
 			CheckCanMove(character, _x - 1, _y, playerSt);
 		}
 		if (_y - 1 > 0 && StageCreate::Instance()->stageList[_y - 1][_x] <= 0) {
 			CheckCanMove(character, _x, _y - 1, playerSt);
-		}*/
+		}
+		return;
 	}
 }
 

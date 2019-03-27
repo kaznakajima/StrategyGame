@@ -19,11 +19,11 @@ Character::Character()
 	// インスタンス作成
 	stage = StageCreate::Instance();
 
-	for (int y = 0; y < StageCreate::Instance()->MAP_SIZEY; y++) {
-		for (int x = 0; x < StageCreate::Instance()->MAP_SIZEX; x++) {
+	for (size_t y = 0; y < StageCreate::Instance()->MAP_SIZEY; y++) {
+		for (size_t x = 0; x < StageCreate::Instance()->MAP_SIZEX; x++) {
 			moveToPos[y][x] = -1;
 			moveArrow[y][x] = false;
-			stage->StageUpdate(x, y);
+			stage->StageUpdate((int)x, (int)y);
 		}
 	}
 }
@@ -46,6 +46,7 @@ Character::Character()
 
 	 // パラメータ設定
 	 myStatus->myParam.NAME = name;
+	 myStatus->myParam.MaxHP = _param[(int)PLAYER_PARAM::HP];
 	 myStatus->myParam.HP = _param[(int)PLAYER_PARAM::HP];
 	 myStatus->myParam.POWER = _param[(int)PLAYER_PARAM::POWER];
 	 myStatus->myParam.TECHNIQUE = _param[(int)PLAYER_PARAM::TECHNIQUE];
@@ -86,6 +87,7 @@ Character::Character()
  void Character::TurnStart()
  {
 	 myStatus->canMove = true;
+	 myStatus->canAttack = false;
  }
 
  // キャラクター周りの描画
@@ -255,8 +257,6 @@ void Character::MoveRange(int x, int y, int moveCost)
 {
 	if (myStatus == nullptr) return;
 
-	DrawFormatString(48, 48, GetColor(0, 255, 0), "HP [%d]", myStatus->myParam.HP);
-
 	// カメラとの差分
 	float cameraX = KeyInput::Instance()->cameraPos.x, cameraY = KeyInput::Instance()->cameraPos.y;
 	int offsetX = (int)cameraX / CHIP_SIZE, offsetY = (int)cameraY / CHIP_SIZE;
@@ -420,6 +420,8 @@ void Character::AttackCheck()
 // 攻撃範囲描画
 void Character::AttackableDraw()
 {
+	if (myStatus->canMove) return;
+
 	int valueX = myStatus->PosX / CHIP_SIZE, valueY = myStatus->PosY / CHIP_SIZE;
 	if (valueX + 1 <= 14 && stage->onUnit[valueY][valueX + 1] != "NONE" && stage->onUnit[valueY][valueX + 1] != myStatus->myTeam) SpriteDraw(myStatus->PosX + CHIP_SIZE, myStatus->PosY, AttackArea);
 	if (valueX - 1 >= 0 && stage->onUnit[valueY][valueX - 1] != "NONE" && stage->onUnit[valueY][valueX - 1] != myStatus->myTeam) SpriteDraw(myStatus->PosX - CHIP_SIZE, myStatus->PosY, AttackArea);
@@ -428,41 +430,60 @@ void Character::AttackableDraw()
 }
 
 // 攻撃の詳細表示
-void Character::GetAttackDetail(Character* eStatus)
+void Character::GetAttackDetail(Character* eCharacter)
 {
 	// 威力 (攻撃側の力 - 守備側の守備力)
-	int mySTR = myStatus->myParam.POWER - eStatus->myStatus->myParam.DEFENCE;
+	int mySTR = myStatus->myParam.POWER - eCharacter->myStatus->myParam.DEFENCE;
 	if (mySTR < 0) mySTR = 0;
-	int eSTR = eStatus->myStatus->myParam.POWER - myStatus->myParam.DEFENCE;
+	int eSTR = eCharacter->myStatus->myParam.POWER - myStatus->myParam.DEFENCE;
 	if (eSTR < 0) eSTR = 0;
 
 	// 速さ判定(4以上大きければ2回攻撃)
-	int mySPD = myStatus->myParam.SPEED - eStatus->myStatus->myParam.SPEED;
+	int mySPD = myStatus->myParam.SPEED - eCharacter->myStatus->myParam.SPEED;
 
 	// 命中力 (攻撃側の命中率 - 守備側の回避率)
-	int myHitness = myStatus->myParam.ATTACK_HIT - eStatus->myStatus->myParam.ATTACK_AVO;
-	int eHitness = eStatus->myStatus->myParam.ATTACK_HIT - eStatus->myStatus->myParam.ATTACK_AVO;
+	int myHitness = myStatus->myParam.ATTACK_HIT - eCharacter->myStatus->myParam.ATTACK_AVO;
+	int eHitness = eCharacter->myStatus->myParam.ATTACK_HIT - eCharacter->myStatus->myParam.ATTACK_AVO;
 
-	SpriteDraw(0, 0, AttackDetail);
-	DrawFormatString(80, 100, GetColor(255, 255, 0), "HP");
-	DrawFormatString(80, 125, GetColor(255, 255, 0), "威力");
-	DrawFormatString(80, 150, GetColor(255, 255, 0), "命中");
+	int drawOffset = 0;
 
-	DrawFormatString(120, 100, GetColor(0, 0, 255), "%d", myStatus->myParam.HP);
-	DrawFormatString(120, 125, GetColor(0, 0, 255), "%d", mySTR);
-	if (mySPD >= 4) DrawFormatString(130, 130, GetColor(255, 255, 255), "×2");
-	DrawFormatString(120, 150, GetColor(0, 0, 255), "%d", myHitness);
+	if (myStatus->PosX > STAGE1_WIDTH / 2) { 
+		SpriteDraw(drawOffset, 0, AttackDetail);
+	}
+	else if (myStatus->PosX < STAGE1_WIDTH / 2) { 
+		drawOffset = 480;
+		SpriteDraw(drawOffset, 0, AttackDetail); 
+	}
 
-	DrawFormatString(45, 100, GetColor(0, 0, 255), "%d", eStatus->myStatus->myParam.HP);
-	DrawFormatString(45, 125, GetColor(0, 0, 255), "%d", eSTR);
-	if (mySPD <= -4) DrawFormatString(55, 130, GetColor(255, 255, 255), "×2");
-	DrawFormatString(45, 150, GetColor(0, 0, 255), "%d", eHitness);
+	DrawFormatString(80 + drawOffset, 100, GetColor(255, 255, 0), "HP");
+	DrawFormatString(80 + drawOffset, 125, GetColor(255, 255, 0), "威力");
+	DrawFormatString(80 + drawOffset, 150, GetColor(255, 255, 0), "命中");
+
+	DrawFormatString(120 + drawOffset, 100, GetColor(0, 0, 255), "%d", myStatus->myParam.HP);
+	DrawFormatString(120 + drawOffset, 125, GetColor(0, 0, 255), "%d", mySTR);
+	if (mySPD >= 4) DrawFormatString(130 + drawOffset, 130, GetColor(255, 255, 255), "×2");
+	DrawFormatString(120 + drawOffset, 150, GetColor(0, 0, 255), "%d", myHitness);
+
+	DrawFormatString(45 + drawOffset, 100, GetColor(0, 0, 255), "%d", eCharacter->myStatus->myParam.HP);
+	DrawFormatString(45 + drawOffset, 125, GetColor(0, 0, 255), "%d", eSTR);
+	if (mySPD <= -4) DrawFormatString(55 + drawOffset, 130, GetColor(255, 255, 255), "×2");
+	DrawFormatString(45 + drawOffset, 150, GetColor(0, 0, 255), "%d", eHitness);
 }
 
 // 攻撃アニメーション
 bool Character::AttackAnimation(Character* eCharacter, int count)
 {
-	DrawGraph(0, 0, DamageDetail, true);
+	int drawOffset = 150;
+
+	if (myStatus->PosY >= STAGE1_HEIGHT / 2) {
+		drawOffset = -100;
+		SpriteDraw(0, drawOffset, DamageDetail);
+		DrawExtendGraph(200, 100, myStatus->myParam.HP / 2 * 10, 100 + 15, HpBar, true);
+	}
+	else if (myStatus->PosY < STAGE1_HEIGHT / 2) {
+		SpriteDraw(0, drawOffset, DamageDetail);
+		DrawExtendGraph(200, 300, myStatus->myParam.HP / 2 * 10, 100 + 15, HpBar, true);
+	}
 
 	// 攻撃方向を取得
 	int moveX = eCharacter->myStatus->PosX - myStatus->_PosX;
@@ -540,7 +561,8 @@ void Character::CharacterAttack(Character* eCharacter, int count)
 	// 乱数の初期化
 	srand((unsigned)time(NULL));
 	if (GetRand(100) <= probability) {
-		CharacterDamage(eCharacter, damage);
+		int _damage = eCharacter->myStatus->myParam.HP - damage;
+		CharacterDamage(eCharacter, _damage);
 		// 敵が倒せたらその時点で戦闘終了
 		if (eCharacter->myStatus->isDeath) {
 			myStatus->isAttack = false;
@@ -549,7 +571,7 @@ void Character::CharacterAttack(Character* eCharacter, int count)
 	}
 
 	// 攻撃終了
-	myStatus->isAttack = false;
+	myStatus->isAttack = false; 
 
 	// 敵の反撃
 	if (count < 2 && myStatus->AttackRange == eCharacter->myStatus->AttackRange) {
@@ -568,20 +590,21 @@ void Character::CharacterAttack(Character* eCharacter, int count)
 			return;
 		}
 	}
-
-	// 追撃が出ないなら戦闘終了
-	if (myStatus->myParam.ATTACK_SPEED < 4 || eCharacter->myStatus->myParam.ATTACK_SPEED < 4 || count < 2) myStatus->canAttack = false;
 }
 
 // 攻撃の処理
 void Character::CharacterDamage(Character* eCharacter, int damage)
 {
-	eCharacter->myStatus->myParam.HP -= damage;
+	if (eCharacter->myStatus->myParam.HP == damage)  return;
+
+	eCharacter->myStatus->myParam.HP--;
 
 	if (eCharacter->myStatus->myParam.HP < 0) {
 		eCharacter->myStatus->isDeath = true;
+		return;
 	}
-	myStatus->canAttack = false;
+
+	CharacterDamage(eCharacter, damage);
 }
 
 // 疑似的カメラとのオフセットの計算
@@ -603,10 +626,11 @@ void Character::MoveAreaClear(vector<Character*> _character)
 {
 	for (int y = 0; y < StageCreate::Instance()->MAP_SIZEY; y++) {
 		for (int x = 0; x < StageCreate::Instance()->MAP_SIZEX; x++) {
+			moveToPos[y][x] = -1;
+			moveArrow[y][x] = false; 
+			stage->StageUpdate(x, y);
 			for (Character* character : _character) {
-				moveToPos[y][x] = -1;
-				moveArrow[y][x] = false;
-				if(character->myStatus->PosX != x, character->myStatus->PosY != y) stage->StageUpdate(x, y);
+				if (character->myStatus->PosX == x * CHIP_SIZE && character->myStatus->PosY == y * CHIP_SIZE) stage->CheckOnUnit(x, y, character->myStatus->myTeam);
 			}
 		}
 	}

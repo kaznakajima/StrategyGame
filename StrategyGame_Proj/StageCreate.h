@@ -61,4 +61,7 @@ public:
 
 	// ステージの状態を更新
 	void StageUpdate(int x, int y);
+
+	// ユニットがいるマス目をチェック
+	void CheckOnUnit(int x, int y, string str);
 };

@@ -41,11 +41,11 @@ void GameScene::TurnChange(bool playerTurn)
 
 	// プレイヤーターン
 	if (playerTurn) {
-		DrawGraph(moveX, 0, turnChangeImg, true);
+		DrawGraph((int)moveX, 0, turnChangeImg, true);
 	}
 	// エネミーターン
 	else {
-		DrawGraph(moveX, 0, turnChangeImg, true);
+		DrawGraph((int)moveX, 0, turnChangeImg, true);
 		
 	}
 
@@ -67,7 +67,6 @@ void GameScene::TurnChange(bool playerTurn)
 void GameScene::Update()
 {
 	if (characterMgr->playerTurn) {
-
 		KeyInput::Instance()->InputCalc(characterMgr);
 
 		Draw();
@@ -105,7 +104,7 @@ void GameScene::Draw()
 	}
 
 	// 描画
-	DrawGraph(0.0f - KeyInput::Instance()->cameraPos.x, 0.0f - KeyInput::Instance()->cameraPos.y, stageImg, true);
+	DrawGraph(0 - (int)KeyInput::Instance()->cameraPos.x, 0 - (int)KeyInput::Instance()->cameraPos.y, stageImg, true);
 
 	if (KeyInput::Instance()->isSelect == true && characterMgr->attack == false) {
 		characterMgr->Draw();

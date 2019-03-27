@@ -26,9 +26,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	StageCreate::Instance()->Open(STAGE_FILE_1);
 
-	while (ScreenFlip() == 0 && ProcessMessage() == 0 && ClearDrawScreen() == 0 && KeyInput::Instance()->UpdateInput() == 0)
+	while (ProcessMessage() == 0 && ClearDrawScreen() == 0 && KeyInput::Instance()->UpdateInput() == 0)
 	{
-		c_Scene->Update();
+		c_Scene->Update(); 
+		
+		ScreenFlip();
 	}
 
 	// I—¹

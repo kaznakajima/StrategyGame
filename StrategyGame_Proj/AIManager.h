@@ -15,6 +15,8 @@ public:
 	// AI‚ğ“®‚©‚·‚©‚Ç‚¤‚©
 	bool AIMove;
 
+	bool isDebug = false;
+
 	// ‰Šú‰»
 	void Initialize();
 

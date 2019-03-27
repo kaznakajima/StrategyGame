@@ -1,6 +1,7 @@
 #pragma once
 #include "DxLib.h"
 #include "StageCreate.h"
+#include "AttackPhase.h"
 #include <vector>
 #include <array>
 #include <stdio.h>
@@ -43,6 +44,7 @@ public:
 	// キャラクターのパラメータ
 	typedef struct {
 		string NAME;
+		int MaxHP;
 		int HP;
 		int POWER;
 		int TECHNIQUE;
@@ -76,7 +78,7 @@ public:
 		bool isSelect;      // 選択されているか
 		bool canMove = true;       // 移動可能か
 		bool isAttack;     // 攻撃中か
-		bool canAttack;   // 攻撃可能か
+		bool canAttack = false;   // 攻撃可能か
 		bool isDeath = false;      // 死亡判定
 	}STATUS ;
 
