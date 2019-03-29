@@ -5,6 +5,9 @@
 #define CHARACTER_DATA_1 "Resources\\CharacterData\\PlayerData.dat"
 #define CHARACTER_DATA_2 "Resources\\CharacterData\\PlayerData_1.dat"
 #define CHARACTER_DATA_3 "Resources\\CharacterData\\PlayerData_2.dat"
+#define DAMAGE_DETAIL "Resources\\image\\DamageDetail.png"
+#define HP_BAR "Resources\\image\\HP_Bar.png"
+#define HP_BARBOX "Resources\\image\\HP_BarBox.png"
 
 class CharacterManager : public Singleton<CharacterManager>
 {
@@ -58,11 +61,17 @@ public:
 	void ChoiseAttack(int x, int y);
 	// 攻撃の処理
 	void Attack();
+	// 攻撃中のデータ表示
+	void DrawAttackParam(Character* attackChara, Character* defenceChara);
 
 	// カメラとのオフセット計算
 	void SetCameraOffset(int dir, bool horizontal);
 
 private:
+	// HP用画像
+	int HpBar;
+	int HpBarBox;
+	int DamageDetail;
 	// 全体の攻撃回数
 	int attackCount = 0;
 	// 行動可能なユニット数

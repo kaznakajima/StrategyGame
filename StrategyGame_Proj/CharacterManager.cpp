@@ -6,18 +6,17 @@ const int PlayerNum = 4;
 
 AIManager* AIMgr;
 
-// キャラクターの情報
-vector<Character::STATUS> statusList;
-Character::STATUS status[PlayerNum];
-
 // 初期化
 void CharacterManager::Initialize()
 {
+	HpBar = LoadGraph(HP_BAR);
+	HpBarBox = LoadGraph(HP_BARBOX);
+	DamageDetail = LoadGraph(DAMAGE_DETAIL);
+
 	AIMgr = AIManager::Instance();
 
 	// キャラクターの追加
 	for (size_t num = 0; num < PlayerNum; num++) {
-		//statusList.push_back(status[num]);
 		character.push_back(new Character());
 	}
 
@@ -50,11 +49,16 @@ void CharacterManager::Update(int x, int y)
 		character[i]->CharacterAnim();
 	}
 
-	DrawFormatString(0, 0, GetColor(0, 0, 0), "[%d]", character.size());
-
 	if (isSelect == false) CharacterMove(x, y);
 
-	if (attack) Attack();
+	if (attack)
+	{
+		if (myCharacter == nullptr || eCharacter == nullptr) return;
+
+		DrawAttackParam(myCharacter, eCharacter);
+
+		Attack();
+	}
 }
 
 // ターン開始
@@ -236,6 +240,7 @@ void CharacterManager::ChoiseAttack(int x, int y)
 // 攻撃のアニメーション
 void CharacterManager::Attack()
 {
+
 	// 1回目の攻撃
 	if (myCharacter != nullptr && eCharacter != nullptr && attackCount < 2) {
 		if (myCharacter->myStatus->isAttack) attack = myCharacter->AttackAnimation(eCharacter, 1);
@@ -277,6 +282,37 @@ void CharacterManager::Attack()
 		if (moveableUnit != 0 && playerTurn == false) AIMgr->Play();
 		if (moveableUnit <= 0) StartTurn();
 	}
+}
+
+// 攻撃中のデータ表示
+void CharacterManager::DrawAttackParam(Character* attackChara, Character* defenceChara)
+{
+	float drawOffset = 150;
+
+	if (attackChara->myStatus->PosY >= STAGE1_HEIGHT / 2) {
+		drawOffset = -100;
+		DrawGraph(0, (int)drawOffset, DamageDetail, true);
+	}
+	else if (attackChara->myStatus->PosY < STAGE1_HEIGHT / 2) {
+		DrawGraph(0, (int)drawOffset, DamageDetail, true);
+	}
+
+	float A_drawPosX = 390.0f, A_drawPosY = 250 + drawOffset;
+	float D_drawPosX = 190.0f, D_drawPosY = 250 + drawOffset;
+
+	// 攻撃側の情報の描画
+	DrawFormatString(A_drawPosX, A_drawPosY - 50.0f, GetColor(0, 0, 0), attackChara->myStatus->myParam.NAME.c_str());
+	DrawExtendGraphF(A_drawPosX, A_drawPosY,
+		A_drawPosX + 100, A_drawPosY + 15, HpBarBox, true);
+	DrawExtendGraphF(A_drawPosX, A_drawPosY,
+		A_drawPosX + (100 * ((float)attackChara->myStatus->myParam.HP / (float)attackChara->myStatus->myParam.MaxHP)), A_drawPosY + 15, HpBar, true);
+
+	// 防御側の情報の描画
+	DrawFormatString(D_drawPosX, D_drawPosY - 50.0f, GetColor(0, 0, 0), defenceChara->myStatus->myParam.NAME.c_str());
+	DrawExtendGraphF(D_drawPosX, D_drawPosY,
+		D_drawPosX + 100, D_drawPosY + 15, HpBarBox, true);
+	DrawExtendGraphF(D_drawPosX, D_drawPosY,
+		D_drawPosX + (100 * ((float)defenceChara->myStatus->myParam.HP / (float)defenceChara->myStatus->myParam.MaxHP)), D_drawPosY + 15, HpBar, true);
 }
 
 // カメラとのオフセットの計算

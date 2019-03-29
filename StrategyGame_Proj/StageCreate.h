@@ -51,10 +51,8 @@ public:
 	// 移動可能かどうか
 	vector<vector<bool>> checkMove;
 
-	// ファイルを開く (string ファイル名 int マップのサイズ)
+	// ファイルを開く (string ファイル名)
 	void Open(string pass);
-
-	static void Draw(int);
 
 	// ステージ上のデータを取得
 	int GetData(int x, int y);

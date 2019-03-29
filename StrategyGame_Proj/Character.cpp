@@ -7,14 +7,10 @@
 // コンストラクタ
 Character::Character()
 {
-	HpBar = LoadGraph(HP_BAR);
-	HpBarBox = LoadGraph(HP_BARBOX);
 	MoveArea = LoadGraph(CAN_MOVE_AREA);
 	AttackArea = LoadGraph(CAN_ATTACK_AREA);
 	AttackDetail = LoadGraph(ATTACK_DETAIL);
-	DamageDetail = LoadGraph(DAMAGE_DETAIL);
 	LoadDivGraph(ARROW, 6, 6, 1, CHIP_SIZE, CHIP_SIZE, ArrowImage);
-
 
 	// インスタンス作成
 	stage = StageCreate::Instance();
@@ -45,7 +41,7 @@ Character::Character()
 	 LoadDivGraph(CHARACTER_IMG, 20, 4, 5, CHIP_SIZE, CHIP_SIZE, myStatus->Image);
 
 	 // パラメータ設定
-	 myStatus->myParam.NAME = name;
+	 myStatus->myParam.NAME = CharaName;
 	 myStatus->myParam.MaxHP = _param[(int)PLAYER_PARAM::HP];
 	 myStatus->myParam.HP = _param[(int)PLAYER_PARAM::HP];
 	 myStatus->myParam.POWER = _param[(int)PLAYER_PARAM::POWER];
@@ -77,7 +73,8 @@ Character::Character()
 		string tmp = "";
 		istringstream stream(str);
 		while (getline(stream, tmp, ',')) {
-			_param[num] = atoi(tmp.c_str());
+			if (num == 0) CharaName = tmp;
+			else _param[num] = atoi(tmp.c_str());
 			num++;
 		}
 	}
@@ -473,21 +470,6 @@ void Character::GetAttackDetail(Character* eCharacter)
 // 攻撃アニメーション
 bool Character::AttackAnimation(Character* eCharacter, int count)
 {
-	int drawOffset = 150;
-
-	if (myStatus->PosY >= STAGE1_HEIGHT / 2) {
-		drawOffset = -100;
-		SpriteDraw(0, drawOffset, DamageDetail);
-		DrawExtendGraph(myStatus->PosX, myStatus->PosY - 24, myStatus->PosX + (10 * myStatus->myParam.HP), myStatus->PosY - 24 + 15, HpBar, true);
-		DrawExtendGraph(eCharacter->myStatus->PosX, eCharacter->myStatus->PosY - 24, myStatus->PosX + (10 * eCharacter->myStatus->myParam.HP), eCharacter->myStatus->PosY - 24 + 15, HpBar, true);
-		//DrawExtendGraph(400, 100, 400 + (eCharacter->myStatus->myParam.HP * 10), 100 + 15, HpBar, true);
-	}
-	else if (myStatus->PosY < STAGE1_HEIGHT / 2) {
-		SpriteDraw(0, drawOffset, DamageDetail);
-		DrawExtendGraph(myStatus->PosX, myStatus->PosY - 24, myStatus->PosX + (10 * myStatus->myParam.HP), myStatus->PosY - 24 + 15, HpBar, true);
-		DrawExtendGraph(eCharacter->myStatus->PosX, eCharacter->myStatus->PosY - 24, myStatus->PosX + (10 * eCharacter->myStatus->myParam.HP), eCharacter->myStatus->PosY - 24 + 15, HpBar, true);
-		//DrawExtendGraph(400, 300, 400 + (eCharacter->myStatus->myParam.HP * 10), 300 + 15, HpBar, true);
-	}
 
 	// 攻撃方向を取得
 	int moveX = eCharacter->myStatus->PosX - myStatus->_PosX;
@@ -599,11 +581,11 @@ void Character::CharacterAttack(Character* eCharacter, int count)
 // 攻撃の処理
 void Character::CharacterDamage(Character* eCharacter, int damage)
 {
-	if (eCharacter->myStatus->myParam.HP == damage)  return;
+	if (eCharacter->myStatus->myParam.HP == damage && damage > 0)  return;
 
 	eCharacter->myStatus->myParam.HP--;
 
-	if (eCharacter->myStatus->myParam.HP < 0) {
+	if (eCharacter->myStatus->myParam.HP <= 0) {
 		eCharacter->myStatus->isDeath = true;
 		return;
 	}

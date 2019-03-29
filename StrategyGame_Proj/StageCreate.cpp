@@ -51,11 +51,6 @@ void StageCreate::Open(string pass)
 	}
 }
 
-void StageCreate::Draw(int PosX)
-{
-	
-}
-
 // 読み込んだステージ情報を取得
 int StageCreate::GetData(int x, int y) 
 {

@@ -16,9 +16,6 @@ using namespace std;
 #define ATTACK_DETAIL "Resources\\image\\AttackGraph.png"
 #define ARROW "Resources\\image\\Arrow.png"
 #define CHARACTER_IMG "Resources\\image\\Character_40×40.png"
-#define DAMAGE_DETAIL "Resources\\image\\DamageDetail.png"
-#define HP_BAR "Resources\\image\\HP_Bar.png"
-#define HP_BARBOX "Resources\\image\\HP_BarBox.png"
 
 class Character
 {
@@ -28,8 +25,8 @@ public:
 	// プレイヤーステータスの列挙
 	enum PLAYER_PARAM
 	{
-		NAME,
-		HP = 0,
+		NAME = 0,
+		HP,
 		POWER,
 		TECHNIQUE,
 		SPEED,
@@ -65,19 +62,19 @@ public:
 
 	// キャラクターのステータス
 	typedef struct {
-		PARAM myParam;  // 自身のパラメータ
-		string myTeam;  // 自身の陣営
-		int PosX;             // 現在のx座標
-		int PosY;             // 現在のy座標
-		int _PosX;           // 移動前のx座標
-		int _PosY;           // 移動前のy座標
-		int Image[20];    // キャラクター用画像
-		float AnimHandle;  // アニメーション用変数
-		int AttackRange;    // 攻撃範囲
-		bool animReset;  // アニメーションのリセット 
-		bool isSelect;      // 選択されているか
+		PARAM myParam;               // 自身のパラメータ
+		string myTeam;                   // 自身の陣営
+		int PosX;                             // 現在のx座標
+		int PosY;                             // 現在のy座標
+		int _PosX;                           // 移動前のx座標
+		int _PosY;                           // 移動前のy座標
+		int Image[20];                   // キャラクター用画像
+		float AnimHandle;              // アニメーション用変数
+		int AttackRange;                // 攻撃範囲
+		bool animReset;                // アニメーションのリセット 
+		bool isSelect;                    // 選択されているか
 		bool canMove = true;       // 移動可能か
-		bool isAttack;     // 攻撃中か
+		bool isAttack;                  // 攻撃中か
 		bool canAttack = false;   // 攻撃可能か
 		bool isDeath = false;      // 死亡判定
 	}STATUS ;
@@ -89,10 +86,10 @@ public:
 	unique_ptr<STATUS> myStatus = make_unique<STATUS>();
 
 	// 移動できるエリア
-	vector<vector<int>> moveToPos = vector<vector<int>>(10, vector<int>(15, -1));
+	vector<vector<int>> moveToPos = vector<vector<int>>(StageCreate::Instance()->MAP_SIZEY, vector<int>(StageCreate::Instance()->MAP_SIZEX, -1));
 
 	// 移動先の道筋かどうか
-	vector<vector<bool>> moveArrow = vector<vector<bool>>(10, vector<bool>(15, 0));
+	vector<vector<bool>> moveArrow = vector<vector<bool>>(StageCreate::Instance()->MAP_SIZEY, vector<bool>(StageCreate::Instance()->MAP_SIZEX, 0));
 
 	// 移動値
 	int moveCount;
@@ -138,17 +135,12 @@ public:
 	void MoveAreaClear(vector<Character*> _character);
 
 private:
-
-	// HP用画像
-	int HpBar;
-	int HpBarBox;
 	// 移動範囲
 	int MoveArea;
 	// 攻撃範囲
 	int AttackArea;
 	// 攻撃情報
 	int AttackDetail;
-	int DamageDetail;
 	// 移動経路
 	int ArrowImage[6];
 
@@ -156,5 +148,6 @@ private:
 	StageCreate* stage;
 
 	// パラメータ
-	int _param[9];
+	string CharaName;
+	int _param[10];
 };
