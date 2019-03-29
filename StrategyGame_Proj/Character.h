@@ -3,12 +3,8 @@
 #include "StageCreate.h"
 #include "AttackPhase.h"
 #include <vector>
-#include <array>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string>
-#include <fstream>
-#include <sstream>
 using namespace std;
 
 #define CAN_MOVE_AREA "Resources\\image\\CanMove.png"
@@ -25,8 +21,8 @@ public:
 	// プレイヤーステータスの列挙
 	enum PLAYER_PARAM
 	{
-		NAME = 0,
-		HP,
+		NAME,
+		HP = 0,
 		POWER,
 		TECHNIQUE,
 		SPEED,
@@ -95,9 +91,10 @@ public:
 	int moveCount;
 
 	// 初期化
-	void Character_Initialize(string pass, string name, string team, int posX, int posY);
+	void Character_Initialize(string pass, string team, int posX, int posY);
 	// パラメータ取得
 	void GetCharacterParam(string pass);
+	void SetParam(string name);
 
 	// 描画
 	void SpriteDraw(int x, int y, int img);
@@ -148,6 +145,6 @@ private:
 	StageCreate* stage;
 
 	// パラメータ
-	string CharaName;
-	int _param[10];
+	string name;
+	int _param[9];
 };

@@ -2,9 +2,10 @@
 #include "Character.h"
 
 // キャラクターのデータ
-#define CHARACTER_DATA_1 "Resources\\CharacterData\\PlayerData.dat"
-#define CHARACTER_DATA_2 "Resources\\CharacterData\\PlayerData_1.dat"
-#define CHARACTER_DATA_3 "Resources\\CharacterData\\PlayerData_2.dat"
+#define CHARACTER_DATA_1 "Resources\\CharacterData\\Load.dat"
+#define CHARACTER_DATA_2 "Resources\\CharacterData\\Support.dat"
+#define CHARACTER_DATA_3 "Resources\\CharacterData\\Enemy1.dat"
+#define CHARACTER_DATA_4 "Resources\\CharacterData\\Enemy2.dat"
 #define DAMAGE_DETAIL "Resources\\image\\DamageDetail.png"
 #define HP_BAR "Resources\\image\\HP_Bar.png"
 #define HP_BARBOX "Resources\\image\\HP_BarBox.png"

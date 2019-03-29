@@ -21,10 +21,10 @@ void CharacterManager::Initialize()
 	}
 
 	// ƒLƒƒƒ‰ƒNƒ^[‚Ì‰Šú‰»
-	character[0]->Character_Initialize(CHARACTER_DATA_1, "ƒGƒCƒŠ[ƒN", "Player", 240, 240);
-	character[1]->Character_Initialize(CHARACTER_DATA_2, "ƒ”ƒ@ƒ‹ƒ^[", "Enemy", 144, 240);
-	character[2]->Character_Initialize(CHARACTER_DATA_3, "ƒ[ƒg", "Player", 96, 384);
-	character[3]->Character_Initialize(CHARACTER_DATA_1, "ƒN[ƒK[", "Enemy", 336, 96);
+	character[0]->Character_Initialize(CHARACTER_DATA_1, "Player", 240, 240);
+	character[1]->Character_Initialize(CHARACTER_DATA_3, "Enemy", 144, 240);
+	character[2]->Character_Initialize(CHARACTER_DATA_2, "Player", 96, 384);
+	character[3]->Character_Initialize(CHARACTER_DATA_4, "Enemy", 336, 96);
 
 	// “GAI‚Ì‰Šú‰»
 	for (Character* _character : character) {
@@ -301,14 +301,14 @@ void CharacterManager::DrawAttackParam(Character* attackChara, Character* defenc
 	float D_drawPosX = 190.0f, D_drawPosY = 250 + drawOffset;
 
 	// UŒ‚‘¤‚Ìî•ñ‚Ì•`‰æ
-	DrawFormatString(A_drawPosX, A_drawPosY - 50.0f, GetColor(0, 0, 0), attackChara->myStatus->myParam.NAME.c_str());
+	DrawFormatString((int)A_drawPosX, (int)A_drawPosY - 50, GetColor(0, 0, 0), attackChara->myStatus->myParam.NAME.c_str());
 	DrawExtendGraphF(A_drawPosX, A_drawPosY,
 		A_drawPosX + 100, A_drawPosY + 15, HpBarBox, true);
 	DrawExtendGraphF(A_drawPosX, A_drawPosY,
 		A_drawPosX + (100 * ((float)attackChara->myStatus->myParam.HP / (float)attackChara->myStatus->myParam.MaxHP)), A_drawPosY + 15, HpBar, true);
 
 	// –hŒä‘¤‚Ìî•ñ‚Ì•`‰æ
-	DrawFormatString(D_drawPosX, D_drawPosY - 50.0f, GetColor(0, 0, 0), defenceChara->myStatus->myParam.NAME.c_str());
+	DrawFormatString((int)D_drawPosX, (int)D_drawPosY - 50, GetColor(0, 0, 0), defenceChara->myStatus->myParam.NAME.c_str());
 	DrawExtendGraphF(D_drawPosX, D_drawPosY,
 		D_drawPosX + 100, D_drawPosY + 15, HpBarBox, true);
 	DrawExtendGraphF(D_drawPosX, D_drawPosY,

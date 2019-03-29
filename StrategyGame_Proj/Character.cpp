@@ -24,7 +24,7 @@ Character::Character()
 	}
 }
 
- void Character::Character_Initialize(string pass, string name, string team, int posX, int posY)
+ void Character::Character_Initialize(string pass, string team, int posX, int posY)
 {
 	 //if (status == nullptr) return;
 
@@ -40,8 +40,34 @@ Character::Character()
 	 myStatus->myTeam = team;
 	 LoadDivGraph(CHARACTER_IMG, 20, 4, 5, CHIP_SIZE, CHIP_SIZE, myStatus->Image);
 
+}
+
+ // パラメータ取得
+ void Character::GetCharacterParam(string pass)
+ {
+	 int num = 0;
+	 string myName = "Player";
+
+	 ifstream ifs(pass);
+	 string str = "";
+	 // ファイルの中身を一行ずつ読み取る
+	while (getline(ifs, str)) {
+		string tmp = "";
+		istringstream stream(str);
+		while (getline(stream, tmp, ',')) {
+			if (num == 0) myName = tmp;
+			else _param[num - 1] = atoi(tmp.c_str());
+			num++;
+		}
+	}
+
+	SetParam(myName);
+ }
+
+ void Character::SetParam(string _name)
+ {
 	 // パラメータ設定
-	 myStatus->myParam.NAME = CharaName;
+	 myStatus->myParam.NAME = _name;
 	 myStatus->myParam.MaxHP = _param[(int)PLAYER_PARAM::HP];
 	 myStatus->myParam.HP = _param[(int)PLAYER_PARAM::HP];
 	 myStatus->myParam.POWER = _param[(int)PLAYER_PARAM::POWER];
@@ -59,25 +85,6 @@ Character::Character()
 	 myStatus->myParam.ATTACK_AVO = myStatus->myParam.SPEED * 2 + myStatus->myParam.LUCKY;
 	 // 命中率 (武器命中 + 技パラメータ * 2.5)
 	 myStatus->myParam.ATTACK_HIT = 85 + (int)(myStatus->myParam.TECHNIQUE * 2.5);
-}
-
- // パラメータ取得
- void Character::GetCharacterParam(string pass)
- {
-	 int num = 0;
-
-	 ifstream ifs(pass);
-	 string str = "";
-	 // ファイルの中身を一行ずつ読み取る
-	while (getline(ifs, str)) {
-		string tmp = "";
-		istringstream stream(str);
-		while (getline(stream, tmp, ',')) {
-			if (num == 0) CharaName = tmp;
-			else _param[num] = atoi(tmp.c_str());
-			num++;
-		}
-	}
  }
 
  // 移動再開(ターン開始時に呼び出す)
