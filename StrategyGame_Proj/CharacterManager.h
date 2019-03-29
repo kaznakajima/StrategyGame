@@ -22,6 +22,8 @@ public:
 	// 攻撃されるユニット
 	int blockUnitNum = 0;
 	Character* eCharacter = nullptr;
+	// 全体の攻撃回数
+	int attackCount = 0;
 
 	// ターン変更アニメーション
 	bool turnAnim;
@@ -73,8 +75,6 @@ private:
 	int HpBar;
 	int HpBarBox;
 	int DamageDetail;
-	// 全体の攻撃回数
-	int attackCount = 0;
 	// 行動可能なユニット数
 	int moveableUnit = 0;
 

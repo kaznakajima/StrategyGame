@@ -49,15 +49,22 @@ void CharacterManager::Update(int x, int y)
 		character[i]->CharacterAnim();
 	}
 
+	// ƒLƒƒƒ‰ƒNƒ^[ˆÚ“®
 	if (isSelect == false) CharacterMove(x, y);
 
-	if (attack)
-	{
-		if (myCharacter == nullptr || eCharacter == nullptr) return;
+	// UŒ‚
+	if (attack) Attack();
 
+	// UŒ‚’†‚Ìƒf[ƒ^•\Ž¦
+	if (myCharacter != nullptr && eCharacter != nullptr) {
+		if (TimeCount::Instance()->GetTimer(500.0f) >= 500.0f) {
+			myCharacter = nullptr;
+			eCharacter = nullptr;
+			if (moveableUnit != 0 && playerTurn == false) AIMgr->Play();
+			if (moveableUnit <= 0) StartTurn();
+			return;
+		}
 		DrawAttackParam(myCharacter, eCharacter);
-
-		Attack();
 	}
 }
 
@@ -240,9 +247,10 @@ void CharacterManager::ChoiseAttack(int x, int y)
 // UŒ‚‚ÌƒAƒjƒ[ƒVƒ‡ƒ“
 void CharacterManager::Attack()
 {
+	if (myCharacter == nullptr || eCharacter == nullptr) return;
 
 	// 1‰ñ–Ú‚ÌUŒ‚
-	if (myCharacter != nullptr && eCharacter != nullptr && attackCount < 2) {
+	if (myCharacter != nullptr && eCharacter != nullptr && attackCount < 1) {
 		if (myCharacter->myStatus->isAttack) attack = myCharacter->AttackAnimation(eCharacter, 1);
 		if (eCharacter->myStatus->isAttack) attack = eCharacter->AttackAnimation(myCharacter, 2);
 
@@ -262,11 +270,14 @@ void CharacterManager::Attack()
 		if (attack) return;
 	}
 
+	// UŒ‚I—¹
+	myCharacter->myStatus->isAttack = false;
+	eCharacter->myStatus->isAttack = false;
+
 	// ƒAƒjƒ[ƒVƒ‡ƒ“‚ªI‚í‚Á‚½‚È‚çUŒ‚I—¹
 	if (attack == false) {
+		TimeCount::Instance()->SetCount();
 		attackCount = 0;
-		myCharacter = nullptr;
-		eCharacter = nullptr;
 		moveableUnit--;
 		for (size_t num = 0; num < character.size(); num++) {
 			// Ž€–S‚µ‚½ƒ†ƒjƒbƒg‚ðœŠO‚·‚é
@@ -279,8 +290,6 @@ void CharacterManager::Attack()
 				}
 			}
 		}
-		if (moveableUnit != 0 && playerTurn == false) AIMgr->Play();
-		if (moveableUnit <= 0) StartTurn();
 	}
 }
 
@@ -302,6 +311,7 @@ void CharacterManager::DrawAttackParam(Character* attackChara, Character* defenc
 
 	// UŒ‚‘¤‚Ìî•ñ‚Ì•`‰æ
 	DrawFormatString((int)A_drawPosX, (int)A_drawPosY - 50, GetColor(0, 0, 0), attackChara->myStatus->myParam.NAME.c_str());
+	DrawFormatString((int)A_drawPosX - 30, (int)A_drawPosY, GetColor(0, 0, 0), "%d", attackChara->myStatus->myParam.HP);
 	DrawExtendGraphF(A_drawPosX, A_drawPosY,
 		A_drawPosX + 100, A_drawPosY + 15, HpBarBox, true);
 	DrawExtendGraphF(A_drawPosX, A_drawPosY,
@@ -309,6 +319,7 @@ void CharacterManager::DrawAttackParam(Character* attackChara, Character* defenc
 
 	// –hŒä‘¤‚Ìî•ñ‚Ì•`‰æ
 	DrawFormatString((int)D_drawPosX, (int)D_drawPosY - 50, GetColor(0, 0, 0), defenceChara->myStatus->myParam.NAME.c_str());
+	DrawFormatString((int)D_drawPosX - 30, (int)D_drawPosY, GetColor(0, 0, 0), "%d", defenceChara->myStatus->myParam.HP);
 	DrawExtendGraphF(D_drawPosX, D_drawPosY,
 		D_drawPosX + 100, D_drawPosY + 15, HpBarBox, true);
 	DrawExtendGraphF(D_drawPosX, D_drawPosY,

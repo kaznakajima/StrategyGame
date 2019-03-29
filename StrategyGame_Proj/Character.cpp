@@ -46,7 +46,6 @@ Character::Character()
  void Character::GetCharacterParam(string pass)
  {
 	 int num = 0;
-	 string myName = "Player";
 
 	 ifstream ifs(pass);
 	 string str = "";
@@ -55,19 +54,19 @@ Character::Character()
 		string tmp = "";
 		istringstream stream(str);
 		while (getline(stream, tmp, ',')) {
-			if (num == 0) myName = tmp;
+			if (num == 0) myStatus->myParam.NAME = tmp.c_str();
 			else _param[num - 1] = atoi(tmp.c_str());
 			num++;
 		}
 	}
 
-	SetParam(myName);
+	SetParam(name);
  }
 
  void Character::SetParam(string _name)
  {
 	 // パラメータ設定
-	 myStatus->myParam.NAME = _name;
+	 //myStatus->myParam.NAME = "Name";
 	 myStatus->myParam.MaxHP = _param[(int)PLAYER_PARAM::HP];
 	 myStatus->myParam.HP = _param[(int)PLAYER_PARAM::HP];
 	 myStatus->myParam.POWER = _param[(int)PLAYER_PARAM::POWER];
@@ -112,6 +111,7 @@ void Character::CharacterAnim()
 			myStatus->AnimHandle = 4.0f;
 	}
 
+	DrawFormatString(myStatus->PosX, myStatus->PosY, GetColor(0, 0, 0), name.c_str());
 	// xPos, yPosの位置にキャラクターを描画
 	DrawGraph(myStatus->PosX, myStatus->PosY, myStatus->Image[(int)myStatus->AnimHandle], true);
 

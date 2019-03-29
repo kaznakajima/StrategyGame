@@ -19,12 +19,8 @@ void AIManager::Initialize()
 // 更新
 void AIManager::Update()
 {
-	DrawFormatString(0, 48, GetColor(0, 0, 0), "%d", playerList.size());
 	if (myCharacter != nullptr) {
-		if (characterMgr->isSelect) {
-			//characterMgr->Draw();
-		}
-		if (myCharacter->myStatus->canAttack) characterMgr->DrawCheck(xPos, yPos);
+		if (myCharacter->myStatus->canAttack) characterMgr->DrawCheck(xPos, yPos); 
 	}
 }
 
@@ -42,6 +38,9 @@ void AIManager::CharacterCount(Character* character)
 // 初回起動
 void AIManager::Play()
 {
+	if (AIMove) return;
+
+	AIMove = true;
 	isMove = false;
 	myCharacter = nullptr;
 	int _minDistance = 100;
@@ -114,6 +113,7 @@ void AIManager::MoveSelect(Character* character)
 	}
 	characterMgr->GetMoveArrow(x, y);
 	characterMgr->KeyCheck(x, y);
+	AIMove = false;
 }
 
 // 移動先の選択

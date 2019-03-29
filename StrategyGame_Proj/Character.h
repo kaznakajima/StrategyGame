@@ -2,6 +2,7 @@
 #include "DxLib.h"
 #include "StageCreate.h"
 #include "AttackPhase.h"
+#include "TimeCount.h"
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
