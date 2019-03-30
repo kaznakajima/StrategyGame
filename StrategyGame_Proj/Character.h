@@ -37,7 +37,7 @@ public:
 
 	// キャラクターのパラメータ
 	typedef struct {
-		string NAME;
+		wstring NAME;
 		int MaxHP;
 		int HP;
 		int POWER;
@@ -131,6 +131,9 @@ public:
 
 	// 移動エリアのリセット
 	void MoveAreaClear(vector<Character*> _character);
+
+	// 終了処理
+	void Finalize();
 
 private:
 	// 移動範囲

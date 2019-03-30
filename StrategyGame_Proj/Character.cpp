@@ -54,7 +54,11 @@ Character::Character()
 		string tmp = "";
 		istringstream stream(str);
 		while (getline(stream, tmp, ',')) {
-			if (num == 0) myStatus->myParam.NAME = tmp.c_str();
+			if (num == 0) {
+				std::vector<wchar_t> buffer(MultiByteToWideChar(CP_UTF8, 0, tmp.c_str(), -1, nullptr, 0));
+				MultiByteToWideChar(CP_UTF8, 0, tmp.c_str(), -1, &buffer.front(), buffer.size());
+				myStatus->myParam.NAME = wstring(buffer.begin(), buffer.end());
+			}
 			else _param[num - 1] = atoi(tmp.c_str());
 			num++;
 		}
@@ -629,3 +633,8 @@ void Character::MoveAreaClear(vector<Character*> _character)
 	}
 }
 
+// I—¹ˆ—
+void Character::Finalize()
+{
+	//delete stage;
+}

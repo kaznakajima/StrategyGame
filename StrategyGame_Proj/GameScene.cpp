@@ -46,7 +46,6 @@ void GameScene::TurnChange(bool playerTurn)
 	// エネミーターン
 	else {
 		DrawGraph((int)moveX, 0, turnChangeImg, true);
-		
 	}
 
 	// 移動完了したら
@@ -66,24 +65,30 @@ void GameScene::TurnChange(bool playerTurn)
 // シーン全体の更新
 void GameScene::Update()
 {
+	// 自分のターン
 	if (characterMgr->playerTurn) {
+		// 入力待機
 		KeyInput::Instance()->InputCalc(characterMgr);
 
 		Draw();
 
 		characterMgr->Update(xPos, yPos);
 
+		// ターン開始演出
 		if (characterMgr->turnAnim) {
 			TurnChange(characterMgr->playerTurn);
 		}
 	}
+	// 敵のターン
 	else {
 		Draw();
 
+		// AIの更新
 		AIManager::Instance()->Update();
 
 		characterMgr->Update(AIManager::Instance()->x, AIManager::Instance()->y);
 
+		// ターン開始演出
 		if (characterMgr->turnAnim) {
 			TurnChange(characterMgr->playerTurn);
 		}
@@ -106,6 +111,7 @@ void GameScene::Draw()
 	// 描画
 	DrawGraph(0 - (int)KeyInput::Instance()->cameraPos.x, 0 - (int)KeyInput::Instance()->cameraPos.y, stageImg, true);
 
+	// キャラクター選択
 	if (KeyInput::Instance()->isSelect == true && characterMgr->attack == false) {
 		characterMgr->Draw();
 		characterMgr->GetMoveArrow(xPos, yPos);

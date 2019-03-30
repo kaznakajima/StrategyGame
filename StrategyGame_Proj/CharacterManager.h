@@ -15,6 +15,7 @@ class CharacterManager : public Singleton<CharacterManager>
 public:
 	// 生成するキャラクター
 	vector<Character*> character;
+	vector<unique_ptr<Character>> _character;
 
 	// 攻撃するユニット
 	int attackUnitNum = 0;
@@ -70,6 +71,9 @@ public:
 	// カメラとのオフセット計算
 	void SetCameraOffset(int dir, bool horizontal);
 
+	// 終了処理
+	void Finalize();
+
 private:
 	// HP用画像
 	int HpBar;
@@ -77,7 +81,4 @@ private:
 	int DamageDetail;
 	// 行動可能なユニット数
 	int moveableUnit = 0;
-
-	// 終了
-	void Finalize();
 };

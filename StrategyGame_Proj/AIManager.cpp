@@ -38,9 +38,6 @@ void AIManager::CharacterCount(Character* character)
 // 初回起動
 void AIManager::Play()
 {
-	if (AIMove) return;
-
-	AIMove = true;
 	isMove = false;
 	myCharacter = nullptr;
 	int _minDistance = 100;
@@ -68,30 +65,31 @@ void AIManager::MoveSelect(Character* character)
 
 	character->MoveRange(character->myStatus->PosX, character->myStatus->PosY, character->myStatus->myParam.MOVERANGE);
 
+	// プレイヤーユニットの
 	for (Character* _character : playerList) {
 		int moveX  = _character->myStatus->PosX, moveY = _character->myStatus->PosY;
-		if (moveY / CHIP_SIZE < 9 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE + 1][moveX / CHIP_SIZE] == true) {
+		if (moveY / CHIP_SIZE < 9 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE + character->myStatus->AttackRange][moveX / CHIP_SIZE] == true) {
 			ChoiseMovePoint(moveX, moveY + CHIP_SIZE);
 			if (isMove) {
 				xPos = moveX, yPos = moveY;
 				break;
 			}
 		}
-		if (moveY / CHIP_SIZE > 0 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE - 1][moveX / CHIP_SIZE] == true) {
+		if (moveY / CHIP_SIZE > 0 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE - character->myStatus->AttackRange][moveX / CHIP_SIZE] == true) {
 			ChoiseMovePoint(moveX, moveY - CHIP_SIZE);
 			if (isMove) {
 				xPos = moveX, yPos = moveY;
 				break;
 			}
 		}
-		if (moveX / CHIP_SIZE < 14 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE][moveX / CHIP_SIZE + 1] == true) {
+		if (moveX / CHIP_SIZE < 14 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE][moveX / CHIP_SIZE + character->myStatus->AttackRange] == true) {
 			ChoiseMovePoint(moveX + CHIP_SIZE, moveY);
 			if (isMove) {
 				xPos = moveX, yPos = moveY;
 				break;
 			}
 		}
-		if (moveX / CHIP_SIZE > 0 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE][moveX / CHIP_SIZE - 1] == true) {
+		if (moveX / CHIP_SIZE > 0 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE][moveX / CHIP_SIZE - character->myStatus->AttackRange] == true) {
 			ChoiseMovePoint(moveX - CHIP_SIZE, moveY);
 			if (isMove) {
 				xPos = moveX, yPos = moveY;
@@ -113,7 +111,6 @@ void AIManager::MoveSelect(Character* character)
 	}
 	characterMgr->GetMoveArrow(x, y);
 	characterMgr->KeyCheck(x, y);
-	AIMove = false;
 }
 
 // 移動先の選択

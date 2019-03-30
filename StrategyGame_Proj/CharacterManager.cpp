@@ -18,6 +18,7 @@ void CharacterManager::Initialize()
 	// キャラクターの追加
 	for (size_t num = 0; num < PlayerNum; num++) {
 		character.push_back(new Character());
+		_character.push_back(make_unique<Character>());
 	}
 
 	// キャラクターの初期化
@@ -41,7 +42,10 @@ void CharacterManager::Update(int x, int y)
 	GetAttackArea(x, y);
 
 	if (myCharacter != nullptr) {
-		DrawFormatString(0, 96, GetColor(0, 0, 0), myCharacter->myStatus->myParam.NAME.c_str());
+		std::vector<char> buffer(WideCharToMultiByte(CP_UTF8, 0, myCharacter->myStatus->myParam.NAME.c_str(), -1, nullptr, 0, nullptr, nullptr));
+		WideCharToMultiByte(CP_UTF8, 0, myCharacter->myStatus->myParam.NAME.c_str(), -1, &buffer.front(), buffer.size(), nullptr, nullptr);
+		DrawFormatString(0, 96, GetColor(0, 0, 0), string(buffer.begin(), buffer.end()).c_str());
+		//DrawFormatString(0, 96, GetColor(0, 0, 0), myCharacter->myStatus->myParam.NAME.c_str());
 	}
 
 	for (size_t i = 0; i < character.size(); i++) {
@@ -57,11 +61,13 @@ void CharacterManager::Update(int x, int y)
 
 	// 攻撃中のデータ表示
 	if (myCharacter != nullptr && eCharacter != nullptr) {
+		// 攻撃から約0.5秒たったら攻撃終了
 		if (TimeCount::Instance()->GetTimer(500.0f) >= 500.0f) {
 			myCharacter = nullptr;
 			eCharacter = nullptr;
+			moveableUnit--;
+			if (moveableUnit <= 0) { StartTurn(); return; }
 			if (moveableUnit != 0 && playerTurn == false) AIMgr->Play();
-			if (moveableUnit <= 0) StartTurn();
 			return;
 		}
 		DrawAttackParam(myCharacter, eCharacter);
@@ -108,6 +114,7 @@ void CharacterManager::DrawCheck(int x, int y)
 	}
 
 	for (size_t num = 0; num < character.size(); num++) {
+		// プレイヤーターン
 		if (playerTurn && character[num]->myStatus->myTeam == "Player") {
 			// カーソルが合っているユニットのみ表示
 			if (character[num]->myStatus->PosX == x && character[num]->myStatus->PosY == y) {
@@ -119,6 +126,7 @@ void CharacterManager::DrawCheck(int x, int y)
 				}
 			}
 		}
+		// 敵ターン
 		else if (playerTurn == false && character[num]->myStatus->myTeam == "Enemy") {
 			// カーソルが合っているユニットのみ表示
 			if (character[num]->myStatus->PosX == x && character[num]->myStatus->PosY == y) {
@@ -152,6 +160,7 @@ void CharacterManager::Draw()
 
 void CharacterManager::CharacterMove(int x, int y) 
 {
+	// 移動完了したかどうか
 	bool moveEnd = false;
 
 	// キャラクターの移動
@@ -278,10 +287,10 @@ void CharacterManager::Attack()
 	if (attack == false) {
 		TimeCount::Instance()->SetCount();
 		attackCount = 0;
-		moveableUnit--;
 		for (size_t num = 0; num < character.size(); num++) {
 			// 死亡したユニットを除外する
 			if (character[num]->myStatus->isDeath) {
+				delete character[num];
 				character.erase(character.begin() + num);
 				AIMgr->Initialize();
 				// 敵AIの初期化
@@ -298,19 +307,24 @@ void CharacterManager::DrawAttackParam(Character* attackChara, Character* defenc
 {
 	float drawOffset = 150;
 
-	if (attackChara->myStatus->PosY >= STAGE1_HEIGHT / 2) {
+	// 攻撃側ユニットの位置に応じて表示位置を変更
+	if (attackChara->myStatus->_PosY >= STAGE1_HEIGHT / 2) {
 		drawOffset = -100;
 		DrawGraph(0, (int)drawOffset, DamageDetail, true);
 	}
-	else if (attackChara->myStatus->PosY < STAGE1_HEIGHT / 2) {
+	else if (attackChara->myStatus->_PosY < STAGE1_HEIGHT / 2) {
 		DrawGraph(0, (int)drawOffset, DamageDetail, true);
 	}
 
+	// 情報(体力、名前)の表示位置の定義
 	float A_drawPosX = 390.0f, A_drawPosY = 250 + drawOffset;
 	float D_drawPosX = 190.0f, D_drawPosY = 250 + drawOffset;
 
 	// 攻撃側の情報の描画
-	DrawFormatString((int)A_drawPosX, (int)A_drawPosY - 50, GetColor(0, 0, 0), attackChara->myStatus->myParam.NAME.c_str());
+	std::vector<char> buffer(WideCharToMultiByte(CP_UTF8, 0, attackChara->myStatus->myParam.NAME.c_str(), -1, nullptr, 0, nullptr, nullptr));
+	WideCharToMultiByte(CP_UTF8, 0, attackChara->myStatus->myParam.NAME.c_str(), -1, &buffer.front(), buffer.size(), nullptr, nullptr);
+	DrawFormatString((int)A_drawPosX, (int)A_drawPosY - 50, GetColor(0, 0, 0), string(buffer.begin(), buffer.end()).c_str());
+	//DrawFormatString((int)A_drawPosX, (int)A_drawPosY - 50, GetColor(0, 0, 0), attackChara->myStatus->myParam.NAME.c_str());
 	DrawFormatString((int)A_drawPosX - 30, (int)A_drawPosY, GetColor(0, 0, 0), "%d", attackChara->myStatus->myParam.HP);
 	DrawExtendGraphF(A_drawPosX, A_drawPosY,
 		A_drawPosX + 100, A_drawPosY + 15, HpBarBox, true);
@@ -318,7 +332,10 @@ void CharacterManager::DrawAttackParam(Character* attackChara, Character* defenc
 		A_drawPosX + (100 * ((float)attackChara->myStatus->myParam.HP / (float)attackChara->myStatus->myParam.MaxHP)), A_drawPosY + 15, HpBar, true);
 
 	// 防御側の情報の描画
-	DrawFormatString((int)D_drawPosX, (int)D_drawPosY - 50, GetColor(0, 0, 0), defenceChara->myStatus->myParam.NAME.c_str());
+	std::vector<char> _buffer(WideCharToMultiByte(CP_UTF8, 0, defenceChara->myStatus->myParam.NAME.c_str(), -1, nullptr, 0, nullptr, nullptr));
+	WideCharToMultiByte(CP_UTF8, 0, defenceChara->myStatus->myParam.NAME.c_str(), -1, &buffer.front(), buffer.size(), nullptr, nullptr);
+	DrawFormatString((int)A_drawPosX, (int)A_drawPosY - 50, GetColor(0, 0, 0), string(_buffer.begin(), _buffer.end()).c_str());
+	//DrawFormatString((int)D_drawPosX, (int)D_drawPosY - 50, GetColor(0, 0, 0), defenceChara->myStatus->myParam.NAME.c_str());
 	DrawFormatString((int)D_drawPosX - 30, (int)D_drawPosY, GetColor(0, 0, 0), "%d", defenceChara->myStatus->myParam.HP);
 	DrawExtendGraphF(D_drawPosX, D_drawPosY,
 		D_drawPosX + 100, D_drawPosY + 15, HpBarBox, true);
@@ -334,10 +351,11 @@ void CharacterManager::SetCameraOffset(int dir, bool horizontal)
 	}
 }
 
+// 入力した地点のチェック
 void CharacterManager::KeyCheck(int x, int y)
 {
 	for (size_t i = 0; i < character.size(); i++) {
-		// カーソルが合っているユニットのみ表示
+		// カーソルが合っていなければ選択状態を解除
 		if (character[i]->myStatus->PosX != x || character[i]->myStatus->PosY != y) {
 			character[i]->OldPosX.clear();
 			character[i]->OldPosY.clear();
@@ -348,5 +366,9 @@ void CharacterManager::KeyCheck(int x, int y)
 }
 
 void CharacterManager::Finalize() {
-
+	for (size_t i = 0; i < character.size(); ++i) {
+		delete character[i];
+	}
+	delete myCharacter;
+	delete eCharacter;
 }
