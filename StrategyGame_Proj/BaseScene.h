@@ -16,6 +16,8 @@ public:
 	virtual void Update() = 0;
 	// 描画
 	virtual void Draw() = 0;
+	// 終了
+	virtual void Finalize() = 0;
 };
 
 // シーンを管理するクラス
@@ -23,6 +25,7 @@ class Scene
 {
 public:
 	Scene();
+	~Scene();
 
 	// シーンタイプ
 	enum SCENE {
@@ -32,12 +35,14 @@ public:
 	};
 
 	// シーン変更
-	static void ChangeScene(SCENE scene);
+	void ChangeScene(SCENE scene);
 	// シーンフェード
-	static void SceneFade(SCENE nextScene,int stageNum = 0);
+	void SceneFade(SCENE nextScene,int stageNum = 0);
 	// 更新
-	static void Update();
+	void Update();
 	// 描画
-	static void Draw();
+	void Draw();
+	// 終了
+	void Finalize();
 private:
 };

@@ -12,6 +12,11 @@ Scene::Scene()
 	ChangeScene(Scene::GAME);
 }
 
+Scene::~Scene()
+{
+
+}
+
 // シーン変更 (引数　変更先のシーン)
 void Scene::ChangeScene(SCENE scene)
 {
@@ -87,4 +92,9 @@ void Scene::SceneFade(SCENE nextScene, int stageNum)
 	// 描画のブレンドを切る
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 	ScreenFlip();
+}
+
+void Scene::Finalize()
+{
+	c_Scene->Finalize();
 }

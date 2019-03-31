@@ -3,14 +3,17 @@
 
 AIManager::AIManager()
 {
-	characterMgr = CharacterManager::Instance();
-
 	isMove = false;
+}
+
+AIManager::~AIManager() {
+	//Finalize();
 }
 
 // 初期化
 void AIManager::Initialize()
 {
+	myCharacter = nullptr;
 	// リストの初期化
 	playerList.clear();
 	enemyList.clear();
@@ -20,7 +23,7 @@ void AIManager::Initialize()
 void AIManager::Update()
 {
 	if (myCharacter != nullptr) {
-		if (myCharacter->myStatus->canAttack) characterMgr->DrawCheck(xPos, yPos); 
+		if (myCharacter->myStatus->canAttack) { CharacterManager::Instance()->DrawCheck(xPos, yPos); }
 	}
 }
 
@@ -39,7 +42,6 @@ void AIManager::CharacterCount(Character* character)
 void AIManager::Play()
 {
 	isMove = false;
-	myCharacter = nullptr;
 	int _minDistance = 100;
 
 	// プレイヤーに一番近いユニットを行動させる
@@ -59,9 +61,9 @@ void AIManager::MoveSelect(Character* character)
 {
 	x = character->myStatus->PosX, y = character->myStatus->PosY;
 
-	characterMgr->DrawCheck(x, y);
+	CharacterManager::Instance()->DrawCheck(x, y);
 
-	character->MoveAreaClear(characterMgr->character);
+	character->MoveAreaClear(CharacterManager::Instance()->character);
 
 	character->MoveRange(character->myStatus->PosX, character->myStatus->PosY, character->myStatus->myParam.MOVERANGE);
 
@@ -109,8 +111,8 @@ void AIManager::MoveSelect(Character* character)
 			}
 		}
 	}
-	characterMgr->GetMoveArrow(x, y);
-	characterMgr->KeyCheck(x, y);
+	CharacterManager::Instance()->GetMoveArrow(x, y);
+	CharacterManager::Instance()->KeyCheck(x, y);
 }
 
 // 移動先の選択
@@ -250,4 +252,11 @@ void AIManager::CheckCanMove(Character* character, int _x, int _y, Character* pl
 void AIManager::CharacterLost(Character* character)
 {
 
+}
+
+void AIManager::Finalize()
+{
+	for (Character* _character : playerList) delete _character;
+	for (Character* _character : enemyList) delete _character;
+	delete myCharacter;
 }

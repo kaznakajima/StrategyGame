@@ -3,16 +3,17 @@
 #include "StageCreate.h"
 #include "AttackPhase.h"
 #include "TimeCount.h"
+#include "FileManager.h"
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
 using namespace std;
 
-#define CAN_MOVE_AREA "Resources\\image\\CanMove.png"
-#define CAN_ATTACK_AREA "Resources\\image\\CanAttack.png"
-#define ATTACK_DETAIL "Resources\\image\\AttackGraph.png"
+#define CAN_MOVE_AREA "CanMove.png"
+#define CAN_ATTACK_AREA "CanAttack.png"
+#define ATTACK_DETAIL "AttackGraph.png"
 #define ARROW "Resources\\image\\Arrow.png"
-#define CHARACTER_IMG "Resources\\image\\Character_40×40.png"
+#define CHARACTER_IMG "Resources\\image\\_Character_40×40.png"
 
 class Character
 {
@@ -136,17 +137,8 @@ public:
 	void Finalize();
 
 private:
-	// 移動範囲
-	int MoveArea;
-	// 攻撃範囲
-	int AttackArea;
-	// 攻撃情報
-	int AttackDetail;
 	// 移動経路
 	int ArrowImage[6];
-
-	// ステージデータを読み込むクラスのインスタンス
-	StageCreate* stage;
 
 	// パラメータ
 	string name;

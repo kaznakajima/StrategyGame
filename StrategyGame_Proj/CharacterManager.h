@@ -6,16 +6,18 @@
 #define CHARACTER_DATA_2 "Resources\\CharacterData\\Support.dat"
 #define CHARACTER_DATA_3 "Resources\\CharacterData\\Enemy1.dat"
 #define CHARACTER_DATA_4 "Resources\\CharacterData\\Enemy2.dat"
-#define DAMAGE_DETAIL "Resources\\image\\DamageDetail.png"
-#define HP_BAR "Resources\\image\\HP_Bar.png"
-#define HP_BARBOX "Resources\\image\\HP_BarBox.png"
+#define DAMAGE_DETAIL "DamageDetail.png"
+#define HP_BAR "HP_Bar.png"
+#define HP_BARBOX "HP_BarBox.png"
 
 class CharacterManager : public Singleton<CharacterManager>
 {
 public:
+	~CharacterManager();
+
 	// 生成するキャラクター
 	vector<Character*> character;
-	vector<unique_ptr<Character>> _character;
+	// vector<unique_ptr<Character>> _character;
 
 	// 攻撃するユニット
 	int attackUnitNum = 0;

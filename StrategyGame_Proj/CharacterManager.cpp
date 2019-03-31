@@ -4,21 +4,21 @@
 // 生成するキャラクター数
 const int PlayerNum = 4;
 
-AIManager* AIMgr;
+CharacterManager::~CharacterManager() {
+	//Finalize();
+}
 
 // 初期化
 void CharacterManager::Initialize()
 {
-	HpBar = LoadGraph(HP_BAR);
-	HpBarBox = LoadGraph(HP_BARBOX);
-	DamageDetail = LoadGraph(DAMAGE_DETAIL);
-
-	AIMgr = AIManager::Instance();
+	FileManager::Instance()->GetFileHandle(HP_BAR);
+	FileManager::Instance()->GetFileHandle(HP_BARBOX);
+	FileManager::Instance()->GetFileHandle(DAMAGE_DETAIL);
 
 	// キャラクターの追加
 	for (size_t num = 0; num < PlayerNum; num++) {
 		character.push_back(new Character());
-		_character.push_back(make_unique<Character>());
+		//_character.push_back(make_unique<Character>());
 	}
 
 	// キャラクターの初期化
@@ -29,7 +29,7 @@ void CharacterManager::Initialize()
 
 	// 敵AIの初期化
 	for (Character* _character : character) {
-		AIMgr->CharacterCount(_character);
+		AIManager::Instance()->CharacterCount(_character);
 	}
 
 	StartTurn();
@@ -42,7 +42,7 @@ void CharacterManager::Update(int x, int y)
 	GetAttackArea(x, y);
 
 	if (myCharacter != nullptr) {
-		std::vector<char> buffer(WideCharToMultiByte(CP_UTF8, 0, myCharacter->myStatus->myParam.NAME.c_str(), -1, nullptr, 0, nullptr, nullptr));
+		vector<char> buffer(WideCharToMultiByte(CP_UTF8, 0, myCharacter->myStatus->myParam.NAME.c_str(), -1, nullptr, 0, nullptr, nullptr));
 		WideCharToMultiByte(CP_UTF8, 0, myCharacter->myStatus->myParam.NAME.c_str(), -1, &buffer.front(), buffer.size(), nullptr, nullptr);
 		DrawFormatString(0, 96, GetColor(0, 0, 0), string(buffer.begin(), buffer.end()).c_str());
 		//DrawFormatString(0, 96, GetColor(0, 0, 0), myCharacter->myStatus->myParam.NAME.c_str());
@@ -66,8 +66,20 @@ void CharacterManager::Update(int x, int y)
 			myCharacter = nullptr;
 			eCharacter = nullptr;
 			moveableUnit--;
+			for (size_t num = 0; num < character.size(); num++) {
+				// 死亡したユニットを除外する
+				if (character[num]->myStatus->isDeath) {
+					delete character[num];
+					character.erase(character.begin() + num);
+					AIManager::Instance()->Initialize();
+					// 敵AIの初期化
+					for (Character* _character : character) {
+						AIManager::Instance()->CharacterCount(_character);
+					}
+				}
+			}
 			if (moveableUnit <= 0) { StartTurn(); return; }
-			if (moveableUnit != 0 && playerTurn == false) AIMgr->Play();
+			if (moveableUnit != 0 && playerTurn == false) AIManager::Instance()->Play();
 			return;
 		}
 		DrawAttackParam(myCharacter, eCharacter);
@@ -86,10 +98,10 @@ void CharacterManager::StartTurn()
 		// 死亡したユニットを除外する
 		if (character[num]->myStatus->isDeath) {
 			character.erase(character.begin() + num);
-			AIMgr->Initialize();
+			AIManager::Instance()->Initialize();
 			// 敵AIの初期化
 			for (Character* _character : character) {
-				AIMgr->CharacterCount(_character);
+				AIManager::Instance()->CharacterCount(_character);
 			}
 		}
 		else {
@@ -178,7 +190,7 @@ void CharacterManager::CharacterMove(int x, int y)
 	}
 
 	// 行動可能なユニットがいないならターン終了
-	if (moveEnd && playerTurn == false && moveableUnit != 0) AIMgr->Play();
+	if (moveEnd && playerTurn == false && moveableUnit != 0) AIManager::Instance()->Play();
 	if (moveableUnit <= 0) StartTurn();
 }
 
@@ -211,6 +223,8 @@ void CharacterManager::GetMoveArrow(int x, int y)
 // 攻撃範囲表示
 void CharacterManager::GetAttackArea(int x, int y)
 {
+	if (attackCount != 0) return;
+
 	// 攻撃可能なユニットの取得
 	for (size_t num = 0; num < character.size(); num++) {
 		if (character[num]->myStatus->canAttack) {
@@ -219,6 +233,8 @@ void CharacterManager::GetAttackArea(int x, int y)
 			attack = true;
 		}
 	}
+
+	if (playerTurn == false) return;
 
 	// 攻撃可能な位置のユニットとの攻撃した際の詳細情報の表示
 	for (size_t num = 0; num < character.size(); num++) {
@@ -242,13 +258,13 @@ void CharacterManager::ChoiseAttack(int x, int y)
 		}
 
 		// 攻撃可能なユニットがいなかったら終了
-		if (myCharacter == character[num]) character[num]->myStatus->canAttack = false;
+		//if (myCharacter == character[num]) character[num]->myStatus->canAttack = false;
 	}
 	// 選択した位置に敵がいないなら終了
 	if (eCharacter == nullptr) {
 		attack = false;
 		moveableUnit--;
-		if (moveableUnit != 0 && playerTurn == false) AIMgr->Play();
+		if (moveableUnit != 0 && playerTurn == false) AIManager::Instance()->Play();
 		if (moveableUnit == 0) StartTurn();
 	}
 }
@@ -261,7 +277,7 @@ void CharacterManager::Attack()
 	// 1回目の攻撃
 	if (myCharacter != nullptr && eCharacter != nullptr && attackCount < 1) {
 		if (myCharacter->myStatus->isAttack) attack = myCharacter->AttackAnimation(eCharacter, 1);
-		if (eCharacter->myStatus->isAttack) attack = eCharacter->AttackAnimation(myCharacter, 2);
+		if (eCharacter->myStatus->isAttack && myCharacter->myStatus->isAttack == false) attack = eCharacter->AttackAnimation(myCharacter, 2);
 
 		// アニメーションが終わっていないならリターン
 		if (attack) return;
@@ -273,32 +289,18 @@ void CharacterManager::Attack()
 	// 2回目の攻撃
 	if (myCharacter != nullptr && eCharacter != nullptr && attackCount > 2) {
 		if (myCharacter->myStatus->isAttack) attack = myCharacter->AttackAnimation(eCharacter, 3);
-		if (eCharacter->myStatus->isAttack) attack = eCharacter->AttackAnimation(myCharacter, 4);
+		if (eCharacter->myStatus->isAttack&& myCharacter->myStatus->isAttack == false) attack = eCharacter->AttackAnimation(myCharacter, 4);
 		
 		// アニメーションが終わっていないならリターン
 		if (attack) return;
 	}
 
-	// 攻撃終了
-	myCharacter->myStatus->isAttack = false;
-	eCharacter->myStatus->isAttack = false;
-
 	// アニメーションが終わったなら攻撃終了
 	if (attack == false) {
 		TimeCount::Instance()->SetCount();
 		attackCount = 0;
-		for (size_t num = 0; num < character.size(); num++) {
-			// 死亡したユニットを除外する
-			if (character[num]->myStatus->isDeath) {
-				delete character[num];
-				character.erase(character.begin() + num);
-				AIMgr->Initialize();
-				// 敵AIの初期化
-				for (Character* _character : character) {
-					AIMgr->CharacterCount(_character);
-				}
-			}
-		}
+		myCharacter->myStatus->canAttack = false;
+		eCharacter->myStatus->canAttack = false;
 	}
 }
 
@@ -310,10 +312,10 @@ void CharacterManager::DrawAttackParam(Character* attackChara, Character* defenc
 	// 攻撃側ユニットの位置に応じて表示位置を変更
 	if (attackChara->myStatus->_PosY >= STAGE1_HEIGHT / 2) {
 		drawOffset = -100;
-		DrawGraph(0, (int)drawOffset, DamageDetail, true);
+		DrawGraph(0, (int)drawOffset, FileManager::Instance()->GetFileHandle(DAMAGE_DETAIL), true);
 	}
 	else if (attackChara->myStatus->_PosY < STAGE1_HEIGHT / 2) {
-		DrawGraph(0, (int)drawOffset, DamageDetail, true);
+		DrawGraph(0, (int)drawOffset, FileManager::Instance()->GetFileHandle(DAMAGE_DETAIL), true);
 	}
 
 	// 情報(体力、名前)の表示位置の定義
@@ -321,26 +323,26 @@ void CharacterManager::DrawAttackParam(Character* attackChara, Character* defenc
 	float D_drawPosX = 190.0f, D_drawPosY = 250 + drawOffset;
 
 	// 攻撃側の情報の描画
-	std::vector<char> buffer(WideCharToMultiByte(CP_UTF8, 0, attackChara->myStatus->myParam.NAME.c_str(), -1, nullptr, 0, nullptr, nullptr));
+	vector<char> buffer(WideCharToMultiByte(CP_UTF8, 0, attackChara->myStatus->myParam.NAME.c_str(), -1, nullptr, 0, nullptr, nullptr));
 	WideCharToMultiByte(CP_UTF8, 0, attackChara->myStatus->myParam.NAME.c_str(), -1, &buffer.front(), buffer.size(), nullptr, nullptr);
 	DrawFormatString((int)A_drawPosX, (int)A_drawPosY - 50, GetColor(0, 0, 0), string(buffer.begin(), buffer.end()).c_str());
 	//DrawFormatString((int)A_drawPosX, (int)A_drawPosY - 50, GetColor(0, 0, 0), attackChara->myStatus->myParam.NAME.c_str());
 	DrawFormatString((int)A_drawPosX - 30, (int)A_drawPosY, GetColor(0, 0, 0), "%d", attackChara->myStatus->myParam.HP);
 	DrawExtendGraphF(A_drawPosX, A_drawPosY,
-		A_drawPosX + 100, A_drawPosY + 15, HpBarBox, true);
+		A_drawPosX + 100, A_drawPosY + 15, FileManager::Instance()->GetFileHandle(HP_BARBOX), true);
 	DrawExtendGraphF(A_drawPosX, A_drawPosY,
-		A_drawPosX + (100 * ((float)attackChara->myStatus->myParam.HP / (float)attackChara->myStatus->myParam.MaxHP)), A_drawPosY + 15, HpBar, true);
+		A_drawPosX + (100 * ((float)attackChara->myStatus->myParam.HP / (float)attackChara->myStatus->myParam.MaxHP)), A_drawPosY + 15, FileManager::Instance()->GetFileHandle(HP_BAR), true);
 
 	// 防御側の情報の描画
-	std::vector<char> _buffer(WideCharToMultiByte(CP_UTF8, 0, defenceChara->myStatus->myParam.NAME.c_str(), -1, nullptr, 0, nullptr, nullptr));
-	WideCharToMultiByte(CP_UTF8, 0, defenceChara->myStatus->myParam.NAME.c_str(), -1, &buffer.front(), buffer.size(), nullptr, nullptr);
-	DrawFormatString((int)A_drawPosX, (int)A_drawPosY - 50, GetColor(0, 0, 0), string(_buffer.begin(), _buffer.end()).c_str());
+	vector<char> _buffer(WideCharToMultiByte(CP_UTF8, 0, defenceChara->myStatus->myParam.NAME.c_str(), -1, nullptr, 0, nullptr, nullptr));
+	WideCharToMultiByte(CP_UTF8, 0, defenceChara->myStatus->myParam.NAME.c_str(), -1, &_buffer.front(), _buffer.size(), nullptr, nullptr);
+	DrawFormatString((int)D_drawPosX, (int)D_drawPosY - 50, GetColor(0, 0, 0), string(_buffer.begin(), _buffer.end()).c_str());
 	//DrawFormatString((int)D_drawPosX, (int)D_drawPosY - 50, GetColor(0, 0, 0), defenceChara->myStatus->myParam.NAME.c_str());
 	DrawFormatString((int)D_drawPosX - 30, (int)D_drawPosY, GetColor(0, 0, 0), "%d", defenceChara->myStatus->myParam.HP);
 	DrawExtendGraphF(D_drawPosX, D_drawPosY,
-		D_drawPosX + 100, D_drawPosY + 15, HpBarBox, true);
+		D_drawPosX + 100, D_drawPosY + 15, FileManager::Instance()->GetFileHandle(HP_BARBOX), true);
 	DrawExtendGraphF(D_drawPosX, D_drawPosY,
-		D_drawPosX + (100 * ((float)defenceChara->myStatus->myParam.HP / (float)defenceChara->myStatus->myParam.MaxHP)), D_drawPosY + 15, HpBar, true);
+		D_drawPosX + (100 * ((float)defenceChara->myStatus->myParam.HP / (float)defenceChara->myStatus->myParam.MaxHP)), D_drawPosY + 15, FileManager::Instance()->GetFileHandle(HP_BAR), true);
 }
 
 // カメラとのオフセットの計算
@@ -366,9 +368,7 @@ void CharacterManager::KeyCheck(int x, int y)
 }
 
 void CharacterManager::Finalize() {
-	for (size_t i = 0; i < character.size(); ++i) {
-		delete character[i];
-	}
+	character.clear();
 	delete myCharacter;
 	delete eCharacter;
 }

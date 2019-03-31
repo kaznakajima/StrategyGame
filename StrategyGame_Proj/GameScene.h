@@ -15,6 +15,8 @@ public:
 
 	// 初期化
 	void Initialize();
+	// 終了
+	void Finalize();
 	// ファイル読み込み
 	void LoadFile();
 	// 読み込んだファイルの破棄

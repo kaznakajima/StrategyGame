@@ -7,6 +7,7 @@ class AIManager : public Singleton<AIManager>
 {
 public:
 	AIManager();
+	~AIManager();
 
 	// 移動先の座標
 	int x = 0, y = 0; 
@@ -19,6 +20,8 @@ public:
 
 	// 初期化
 	void Initialize();
+	// 終了
+	void Finalize();
 
 	// 更新
 	void Update();
@@ -29,8 +32,6 @@ public:
 	// 初回起動
 	void Play();
 private:
-	// CharacterManagerのインスタンス
-	CharacterManager* characterMgr;
 
 	// 敵(AI)キャラクターのリスト
 	vector<Character*> enemyList;

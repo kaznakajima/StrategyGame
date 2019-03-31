@@ -1,18 +1,15 @@
 #include "GameScene.h"
+#include "FileManager.h"
 #include "KeyInput.h"
 #include "CharacterManager.h"
 #include "AIManager.h"
 
-CharacterManager* characterMgr;
-
 // コンストラクタ
 GameScene::GameScene()
 {
-	characterMgr = CharacterManager::Instance();
-
 	Initialize();
 
-	characterMgr->Initialize();
+	CharacterManager::Instance()->Initialize();
 }
 
 // 初期化
@@ -52,7 +49,7 @@ void GameScene::TurnChange(bool playerTurn)
 	if (moveX < 0) {
 		WaitTimer(1000);
 		moveX = 672;
-		characterMgr->turnAnim = false;
+		CharacterManager::Instance()->turnAnim = false;
 		if (playerTurn) turnChangeImg = LoadGraph(ENEMYTURN_IMG);
 		// エネミーターン
 		else {
@@ -66,17 +63,17 @@ void GameScene::TurnChange(bool playerTurn)
 void GameScene::Update()
 {
 	// 自分のターン
-	if (characterMgr->playerTurn) {
+	if (CharacterManager::Instance()->playerTurn) {
 		// 入力待機
-		KeyInput::Instance()->InputCalc(characterMgr);
+		KeyInput::Instance()->InputCalc(CharacterManager::Instance());
 
 		Draw();
 
-		characterMgr->Update(xPos, yPos);
+		CharacterManager::Instance()->Update(xPos, yPos);
 
 		// ターン開始演出
-		if (characterMgr->turnAnim) {
-			TurnChange(characterMgr->playerTurn);
+		if (CharacterManager::Instance()->turnAnim) {
+			TurnChange(CharacterManager::Instance()->playerTurn);
 		}
 	}
 	// 敵のターン
@@ -86,11 +83,11 @@ void GameScene::Update()
 		// AIの更新
 		AIManager::Instance()->Update();
 
-		characterMgr->Update(AIManager::Instance()->x, AIManager::Instance()->y);
+		CharacterManager::Instance()->Update(AIManager::Instance()->x, AIManager::Instance()->y);
 
 		// ターン開始演出
-		if (characterMgr->turnAnim) {
-			TurnChange(characterMgr->playerTurn);
+		if (CharacterManager::Instance()->turnAnim) {
+			TurnChange(CharacterManager::Instance()->playerTurn);
 		}
 	}
 }
@@ -99,7 +96,7 @@ void GameScene::Update()
 void GameScene::Draw()
 {
 	// 座標更新
-	if (characterMgr->playerTurn) {
+	if (CharacterManager::Instance()->playerTurn) {
 		xPos = KeyInput::Instance()->xPos;
 		yPos = KeyInput::Instance()->yPos;
 	}
@@ -112,12 +109,18 @@ void GameScene::Draw()
 	DrawGraph(0 - (int)KeyInput::Instance()->cameraPos.x, 0 - (int)KeyInput::Instance()->cameraPos.y, stageImg, true);
 
 	// キャラクター選択
-	if (KeyInput::Instance()->isSelect == true && characterMgr->attack == false) {
-		characterMgr->Draw();
-		characterMgr->GetMoveArrow(xPos, yPos);
+	if (KeyInput::Instance()->isSelect == true && CharacterManager::Instance()->attack == false) {
+		CharacterManager::Instance()->Draw();
+		CharacterManager::Instance()->GetMoveArrow(xPos, yPos);
 	}
 
 	// カーソル表示
 	DrawGraph(xPos, yPos, cursorImg, true);
+}
+
+void GameScene::Finalize()
+{
+	AIManager::Instance()->Finalize();
+	CharacterManager::Instance()->Finalize();
 }
 

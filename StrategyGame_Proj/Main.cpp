@@ -1,11 +1,12 @@
 #include "KeyInput.h"
 #include "StageCreate.h"
 #include "BaseScene.h"
+#include "FileManager.h"
 
 // î•ñ‚Ì‰Šú‰»
 void Init()
 {
-
+	FileManager::Instance()->Initialize();
 }
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
@@ -32,6 +33,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		
 		ScreenFlip();
 	}
+
+	c_Scene->Finalize();
 
 	// I—¹
 	DxLib_End();
