@@ -312,15 +312,17 @@ void CharacterManager::DrawAttackParam(Character* attackChara, Character* defenc
 	// 攻撃側ユニットの位置に応じて表示位置を変更
 	if (attackChara->myStatus->_PosY >= STAGE1_HEIGHT / 2) {
 		drawOffset = -100;
-		DrawGraph(0, (int)drawOffset, FileManager::Instance()->GetFileHandle(DAMAGE_DETAIL), true);
+		//DrawGraph(0, (int)drawOffset, FileManager::Instance()->GetFileHandle(DAMAGE_DETAIL), true);
+		DrawRotaGraph(336, 240 + (int)drawOffset, 1.0f, 0.0f, FileManager::Instance()->GetFileHandle(DAMAGE_DETAIL), true);
 	}
 	else if (attackChara->myStatus->_PosY < STAGE1_HEIGHT / 2) {
-		DrawGraph(0, (int)drawOffset, FileManager::Instance()->GetFileHandle(DAMAGE_DETAIL), true);
+		//DrawGraph(0, (int)drawOffset, FileManager::Instance()->GetFileHandle(DAMAGE_DETAIL), true);
+		DrawRotaGraph(336, 240 + (int)drawOffset, 1.0f, 0.0f, FileManager::Instance()->GetFileHandle(DAMAGE_DETAIL), true);
 	}
 
 	// 情報(体力、名前)の表示位置の定義
-	float A_drawPosX = 390.0f, A_drawPosY = 250 + drawOffset;
-	float D_drawPosX = 190.0f, D_drawPosY = 250 + drawOffset;
+	float A_drawPosX = 390.0f, A_drawPosY = 260 + drawOffset;
+	float D_drawPosX = 190.0f, D_drawPosY = 260 + drawOffset;
 
 	// 攻撃側の情報の描画
 	vector<char> buffer(WideCharToMultiByte(CP_UTF8, 0, attackChara->myStatus->myParam.NAME.c_str(), -1, nullptr, 0, nullptr, nullptr));
@@ -368,7 +370,7 @@ void CharacterManager::KeyCheck(int x, int y)
 }
 
 void CharacterManager::Finalize() {
-	character.clear();
-	delete myCharacter;
-	delete eCharacter;
+	if (character.empty() == false) for (Character* _character : character) delete _character;
+	if (myCharacter != nullptr) delete myCharacter;
+	if (eCharacter != nullptr) delete eCharacter;
 }

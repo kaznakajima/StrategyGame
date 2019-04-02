@@ -38,15 +38,17 @@ void GameScene::TurnChange(bool playerTurn)
 
 	// プレイヤーターン
 	if (playerTurn) {
-		DrawGraph((int)moveX, 0, turnChangeImg, true);
+		//DrawGraph((int)moveX, 0, turnChangeImg, true);
+		DrawRotaGraph((int)moveX, 240, 1.0f, 0.0f, turnChangeImg, true);
 	}
 	// エネミーターン
 	else {
-		DrawGraph((int)moveX, 0, turnChangeImg, true);
+		//DrawGraph((int)moveX, 0, turnChangeImg, true);
+		DrawRotaGraph((int)moveX, 240, 1.0f, 0.0f, turnChangeImg, true);
 	}
 
 	// 移動完了したら
-	if (moveX < 0) {
+	if (moveX < 336) {
 		WaitTimer(1000);
 		moveX = 672;
 		CharacterManager::Instance()->turnAnim = false;

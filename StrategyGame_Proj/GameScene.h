@@ -4,8 +4,8 @@
 // ステージ画像とカーソル画像
 #define FIELD_IMG "Resources\\image\\Field.png"
 #define CURSOR_IMG "Resources\\image\\Cursor.png"
-#define PLAYERTURN_IMG "Resources\\image\\TurnStart_P.png"
-#define ENEMYTURN_IMG "Resources\\image\\TurnStart_E.png"
+#define PLAYERTURN_IMG "Resources\\image\\PlayerTurn.png"
+#define ENEMYTURN_IMG "Resources\\image\\EnemyTurn.png"
 
 class GameScene : public BaseScene
 {
