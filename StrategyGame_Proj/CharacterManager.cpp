@@ -370,7 +370,7 @@ void CharacterManager::KeyCheck(int x, int y)
 }
 
 void CharacterManager::Finalize() {
-	if (character.empty() == false) for (Character* _character : character) delete _character;
+	if (character.empty() == false) { for (Character* _character : character) delete _character; character.clear(); }
 	if (myCharacter != nullptr) delete myCharacter;
 	if (eCharacter != nullptr) delete eCharacter;
 }

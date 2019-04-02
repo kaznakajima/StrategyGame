@@ -6,9 +6,7 @@ AIManager::AIManager()
 	isMove = false;
 }
 
-AIManager::~AIManager() {
-	//Finalize();
-}
+AIManager::~AIManager() { }
 
 // 初期化
 void AIManager::Initialize()
@@ -23,19 +21,15 @@ void AIManager::Initialize()
 void AIManager::Update()
 {
 	if (myCharacter != nullptr) {
-		if (myCharacter->myStatus->canAttack) { CharacterManager::Instance()->DrawCheck(xPos, yPos); }
+		if (myCharacter->myStatus->canAttack) CharacterManager::Instance()->DrawCheck(xPos, yPos);
 	}
 }
 
 // 現在の敵(AI)、プレイヤーのカウント
 void AIManager::CharacterCount(Character* character)
 {
-	if (character->myStatus->myTeam == "Player") {
-		playerList.push_back(character);
-	}
-	else if (character->myStatus->myTeam == "Enemy") {
-		enemyList.push_back(character);
-	} 
+	if (character->myStatus->myTeam == "Player") playerList.push_back(character);
+	else if (character->myStatus->myTeam == "Enemy") enemyList.push_back(character); 
 }
 
 // 初回起動
@@ -53,10 +47,11 @@ void AIManager::Play()
 		}
 	}
 
+	// 移動先の選択
 	if (myCharacter != nullptr) MoveSelect(myCharacter);
 }
 
-// 動かすキャラクターの選択
+// 移動先の選択
 void AIManager::MoveSelect(Character* character)
 {
 	x = character->myStatus->PosX, y = character->myStatus->PosY;
@@ -67,9 +62,10 @@ void AIManager::MoveSelect(Character* character)
 
 	character->MoveRange(character->myStatus->PosX, character->myStatus->PosY, character->myStatus->myParam.MOVERANGE);
 
-	// プレイヤーユニットの
+	// プレイヤーユニットの周囲を検索
 	for (Character* _character : playerList) {
 		int moveX  = _character->myStatus->PosX, moveY = _character->myStatus->PosY;
+		// キャラクターの周囲が移動可能な場合なら移動先に登録
 		if (moveY / CHIP_SIZE < 9 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE + character->myStatus->AttackRange][moveX / CHIP_SIZE] == true) {
 			ChoiseMovePoint(moveX, moveY + CHIP_SIZE);
 			if (isMove) {
@@ -77,6 +73,7 @@ void AIManager::MoveSelect(Character* character)
 				break;
 			}
 		}
+		// キャラクターの周囲が移動可能な場合なら移動先に登録
 		if (moveY / CHIP_SIZE > 0 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE - character->myStatus->AttackRange][moveX / CHIP_SIZE] == true) {
 			ChoiseMovePoint(moveX, moveY - CHIP_SIZE);
 			if (isMove) {
@@ -84,6 +81,7 @@ void AIManager::MoveSelect(Character* character)
 				break;
 			}
 		}
+		// キャラクターの周囲が移動可能な場合なら移動先に登録
 		if (moveX / CHIP_SIZE < 14 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE][moveX / CHIP_SIZE + character->myStatus->AttackRange] == true) {
 			ChoiseMovePoint(moveX + CHIP_SIZE, moveY);
 			if (isMove) {
@@ -91,6 +89,7 @@ void AIManager::MoveSelect(Character* character)
 				break;
 			}
 		}
+		// キャラクターの周囲が移動可能な場合なら移動先に登録
 		if (moveX / CHIP_SIZE > 0 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE][moveX / CHIP_SIZE - character->myStatus->AttackRange] == true) {
 			ChoiseMovePoint(moveX - CHIP_SIZE, moveY);
 			if (isMove) {
@@ -256,7 +255,9 @@ void AIManager::CharacterLost(Character* character)
 
 void AIManager::Finalize()
 {
-	if (playerList.empty() == false) for (Character* _character : playerList) delete _character;
-	if (enemyList.empty() == false) for (Character* _character : enemyList) delete _character;
+	/*if (playerList.empty() == false) for (Character* _character : playerList) delete _character;
+	if (enemyList.empty() == false) for (Character* _character : enemyList) delete _character;*/
+	if (playerList.empty() == false) playerList.clear();
+	if (enemyList.empty() == false) enemyList.clear();
 	if (myCharacter != nullptr) delete myCharacter;
 }

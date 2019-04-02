@@ -24,7 +24,8 @@ public:
 	enum PLAYER_PARAM
 	{
 		NAME,
-		HP = 0,
+		LEVEL = 0,
+		HP,
 		POWER,
 		TECHNIQUE,
 		SPEED,
@@ -39,6 +40,7 @@ public:
 	// キャラクターのパラメータ
 	typedef struct {
 		wstring NAME;
+		int LEVEL;
 		int MaxHP;
 		int HP;
 		int POWER;
@@ -61,6 +63,7 @@ public:
 	// キャラクターのステータス
 	typedef struct {
 		PARAM myParam;               // 自身のパラメータ
+		string myData;                    // 自身のデータ
 		string myTeam;                   // 自身の陣営
 		int PosX;                             // 現在のx座標
 		int PosY;                             // 現在のy座標
@@ -140,7 +143,10 @@ private:
 	// 移動経路
 	int ArrowImage[6];
 
+	// レベルアップ
+	void LevelUp();
+
 	// パラメータ
 	string name;
-	int _param[9];
+	int _param[10];
 };

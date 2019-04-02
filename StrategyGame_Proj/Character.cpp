@@ -31,6 +31,7 @@ Character::Character()
 	 GetCharacterParam(pass);
 
 	 // ステータス設定
+	 myStatus->myData = pass;
 	 myStatus->PosX = posX;
 	 myStatus->PosY = posY;
 	 myStatus->_PosX = posX;
@@ -71,6 +72,7 @@ Character::Character()
  {
 	 // パラメータ設定
 	 //myStatus->myParam.NAME = "Name";
+	 myStatus->myParam.LEVEL = _param[(int)PLAYER_PARAM::LEVEL];
 	 myStatus->myParam.MaxHP = _param[(int)PLAYER_PARAM::HP];
 	 myStatus->myParam.HP = _param[(int)PLAYER_PARAM::HP];
 	 myStatus->myParam.POWER = _param[(int)PLAYER_PARAM::POWER];
@@ -602,6 +604,7 @@ void Character::CharacterDamage(Character* eCharacter, int damage)
 
 	if (eCharacter->myStatus->myParam.HP <= 0) {
 		eCharacter->myStatus->isDeath = true;
+		LevelUp();
 		return;
 	}
 
@@ -635,6 +638,21 @@ void Character::MoveAreaClear(vector<Character*> _character)
 			}
 		}
 	}
+}
+
+// ユニットのレベルアップ
+void Character::LevelUp()
+{
+	// ファイルを開く
+	FILE* fp;
+	fopen_s(&fp, myStatus->myData.c_str(), "wb");
+	if (fp == nullptr) return;
+	myStatus->myParam.HP += 10;
+
+	for (size_t num = 0; num < 10; ++num) {
+	}
+	fwrite(&myStatus->myParam, sizeof(myStatus->myParam), 100, fp);
+	fclose(fp);
 }
 
 // 終了処理
