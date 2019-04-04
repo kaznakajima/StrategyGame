@@ -67,12 +67,11 @@ Character::Character()
 
  void Character::SetParam(string _name)
  {
-	 /*FILE* fp;
-	 fopen_s(&fp, _name.c_str(), "rb");
-	 if (fp == nullptr) return;
+	 /*fstream file;
+	 file.open(_name, ios::binary | ios::in);
+	 file.read((char*)&myStatus->myParam, sizeof(myStatus->myParam));
 
-	 fread(&myStatus->myParam, sizeof(myStatus->myParam), 1, fp);
-	 fclose(fp);*/
+	 file.close();*/
 
 	 // パラメータ設定
 	 myStatus->myParam.LEVEL = _param[(int)PLAYER_PARAM::LEVEL];
@@ -478,11 +477,13 @@ void Character::GetAttackDetail(Character* eCharacter)
 	DrawFormatString(80 + drawOffset, 150, GetColor(255, 255, 0), "命中");
 
 	DrawFormatString(120 + drawOffset, 100, GetColor(0, 0, 255), "%d", myStatus->myParam.HP);
+	DrawFormatString(45 + drawOffset, 80, GetColor(0, 0, 0), myStatus->myParam.NAME.c_str());
 	DrawFormatString(120 + drawOffset, 125, GetColor(0, 0, 255), "%d", mySTR);
 	if (mySPD >= 4) DrawFormatString(130 + drawOffset, 130, GetColor(255, 255, 255), "×2");
 	DrawFormatString(120 + drawOffset, 150, GetColor(0, 0, 255), "%d", myHitness);
 
 	DrawFormatString(45 + drawOffset, 100, GetColor(0, 0, 255), "%d", eCharacter->myStatus->myParam.HP);
+	DrawFormatString(45 + drawOffset, 300, GetColor(0, 0, 0), eCharacter->myStatus->myParam.NAME.c_str());
 	DrawFormatString(45 + drawOffset, 125, GetColor(0, 0, 255), "%d", eSTR);
 	if (mySPD <= -4) DrawFormatString(55 + drawOffset, 130, GetColor(255, 255, 255), "×2");
 	DrawFormatString(45 + drawOffset, 150, GetColor(0, 0, 255), "%d", eHitness);
@@ -563,7 +564,7 @@ void Character::CharacterAttack(Character* eCharacter, int count)
 	int myHitness = myStatus->myParam.ATTACK_HIT - eCharacter->myStatus->myParam.ATTACK_AVO;
 
 	// 確率（命中力）
-	double probability = myHitness;
+	int probability = myHitness;
 
 	// 乱数の初期化
 	srand((unsigned)time(NULL));
@@ -648,23 +649,11 @@ void Character::MoveAreaClear(vector<Character*> _character)
 void Character::LevelUp()
 {
 	// ファイルを開く
-	FILE* fp;
-	fopen_s(&fp, myStatus->myData.c_str(), "w");
-	if (fp == nullptr) return;
+	fstream file;
+	file.open(myStatus->myData, ios::binary | ios::out);
+	file.write((char*)&myStatus->myParam, sizeof(myStatus->myParam));
 
-	fprintf(fp, myStatus->myParam.NAME.c_str() + ',');
-	fprintf(fp, "%d", myStatus->myParam.LEVEL + ',');
-	fprintf(fp, "%d", myStatus->myParam.HP + ',');
-	fprintf(fp, "%d", myStatus->myParam.POWER + ',');
-	fprintf(fp, "%d", myStatus->myParam.TECHNIQUE + ',');
-	fprintf(fp, "%d", myStatus->myParam.SPEED + ',');
-	fprintf(fp, "%d", myStatus->myParam.LUCKY + ',');
-	fprintf(fp, "%d", myStatus->myParam.DEFENCE + ',');
-	fprintf(fp, "%d", myStatus->myParam.MAGIC_DEFENCE + ',');
-	fprintf(fp, "%d", myStatus->myParam.PHYSIQUE + ',');
-	fprintf(fp, "%d", myStatus->myParam.MOVERANGE + ',');
-
-	fclose(fp);
+	file.close();
 }
 
 // 終了処理
