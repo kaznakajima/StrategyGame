@@ -24,7 +24,7 @@ Character::Character()
 	}
 }
 
- void Character::Character_Initialize(string pass, string team, int posX, int posY)
+ void Character::Character_Initialize(string pass, string name, string team, int posX, int posY)
 {
 	 //if (status == nullptr) return;
 
@@ -32,6 +32,7 @@ Character::Character()
 
 	 // ステータス設定
 	 myStatus->myData = pass;
+	 myStatus->NAME = name;
 	 myStatus->PosX = posX;
 	 myStatus->PosY = posY;
 	 myStatus->_PosX = posX;
@@ -56,7 +57,7 @@ Character::Character()
 		string tmp = "";
 		istringstream stream(str);
 		while (getline(stream, tmp, ',')) {
-			if (num == 0) myStatus->myParam.NAME = tmp;
+			if (num == 0);
 			else _param[num - 1] = atoi(tmp.c_str());
 			num++;
 		}
@@ -67,25 +68,14 @@ Character::Character()
 
  void Character::SetParam(string _name)
  {
-	 /*fstream file;
-	 file.open(_name, ios::binary | ios::in);
+	 fstream file;
+	 file.open(_name, ios::in | ios::binary);
 	 file.read((char*)&myStatus->myParam, sizeof(myStatus->myParam));
 
-	 file.close();*/
+	 file.close();
 
-	 // パラメータ設定
-	 myStatus->myParam.LEVEL = _param[(int)PLAYER_PARAM::LEVEL];
-	 myStatus->myParam.MaxHP = _param[(int)PLAYER_PARAM::HP];
-	 myStatus->myParam.HP = _param[(int)PLAYER_PARAM::HP];
-	 myStatus->myParam.POWER = _param[(int)PLAYER_PARAM::POWER];
-	 myStatus->myParam.TECHNIQUE = _param[(int)PLAYER_PARAM::TECHNIQUE];
-	 myStatus->myParam.SPEED = _param[(int)PLAYER_PARAM::SPEED];
-	 myStatus->myParam.LUCKY = _param[(int)PLAYER_PARAM::LUCKY];
-	 myStatus->myParam.DEFENCE = _param[(int)PLAYER_PARAM::DEFENCE];
-	 myStatus->myParam.MAGIC_DEFENCE = _param[(int)PLAYER_PARAM::MAGIC_DEFENCE];
-	 myStatus->myParam.PHYSIQUE = _param[(int)PLAYER_PARAM::PHYSIQUE];
-	 myStatus->myParam.MOVERANGE = _param[(int)PLAYER_PARAM::MOVERANGE];
-
+	 // MaxHPの設定
+	 myStatus->myParam.MaxHP = myStatus->myParam.HP;
 	 // 必殺率 (技パラメータ / 2)
 	 myStatus->myParam.ATTACK_CLT = myStatus->myParam.TECHNIQUE / 2;
 	 // 回比率 (速さパラメータ * 2 + 幸運パラメータ)
@@ -118,7 +108,6 @@ void Character::CharacterAnim()
 		myStatus->AnimHandle += 0.1f;
 		if (myStatus->AnimHandle > 7.0f && myStatus->canMove)
 			myStatus->AnimHandle = 4.0f; 
-		GetAttackDetail(this);
 	}
 	else {
 		if (myStatus->canMove == false && myStatus->canAttack == false) myStatus->AnimHandle = 3.0f; 
@@ -477,13 +466,14 @@ void Character::GetAttackDetail(Character* eCharacter)
 	DrawFormatString(80 + drawOffset, 150, GetColor(255, 255, 0), "命中");
 
 	DrawFormatString(120 + drawOffset, 100, GetColor(0, 0, 255), "%d", myStatus->myParam.HP);
-	DrawFormatString(45 + drawOffset, 80, GetColor(0, 0, 0), myStatus->myParam.NAME.c_str());
+	DrawFormatString(120 + drawOffset, 175, GetColor(0, 0, 255), "%d", myStatus->myParam.MOVERANGE);
+	DrawFormatString(45 + drawOffset, 65, GetColor(0, 0, 0), myStatus->NAME.c_str());
 	DrawFormatString(120 + drawOffset, 125, GetColor(0, 0, 255), "%d", mySTR);
 	if (mySPD >= 4) DrawFormatString(130 + drawOffset, 130, GetColor(255, 255, 255), "×2");
 	DrawFormatString(120 + drawOffset, 150, GetColor(0, 0, 255), "%d", myHitness);
 
 	DrawFormatString(45 + drawOffset, 100, GetColor(0, 0, 255), "%d", eCharacter->myStatus->myParam.HP);
-	DrawFormatString(45 + drawOffset, 300, GetColor(0, 0, 0), eCharacter->myStatus->myParam.NAME.c_str());
+	DrawFormatString(100 + drawOffset, 330, GetColor(255, 255, 255), eCharacter->myStatus->NAME.c_str());
 	DrawFormatString(45 + drawOffset, 125, GetColor(0, 0, 255), "%d", eSTR);
 	if (mySPD <= -4) DrawFormatString(55 + drawOffset, 130, GetColor(255, 255, 255), "×2");
 	DrawFormatString(45 + drawOffset, 150, GetColor(0, 0, 255), "%d", eHitness);

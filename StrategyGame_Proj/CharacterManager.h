@@ -1,11 +1,17 @@
 #pragma once
 #include "Character.h"
 
+// ユニット名
+#define NAME_LOAD "Load"
+#define NAME_SUPPORT "Support"
+#define NAME_ENEMY1 "Enemy1"
+#define NAME_ENEMY2 "Enemy2"
+
 // キャラクターのデータ
-#define CHARACTER_DATA_1 "Resources\\CharacterData\\Load.dat"
-#define CHARACTER_DATA_2 "Resources\\CharacterData\\Support.dat"
-#define CHARACTER_DATA_3 "Resources\\CharacterData\\Enemy1.dat"
-#define CHARACTER_DATA_4 "Resources\\CharacterData\\Enemy2.dat"
+#define CHARACTER_DATA_1 "Resources\\CharacterData\\ロード.dat"
+#define CHARACTER_DATA_2 "Resources\\CharacterData\\サポート.dat"
+#define CHARACTER_DATA_3 "Resources\\CharacterData\\敵1.dat"
+#define CHARACTER_DATA_4 "Resources\\CharacterData\\敵2.dat"
 #define DAMAGE_DETAIL "DamageDetail.png"
 #define HP_BAR "HP_Bar.png"
 #define HP_BARBOX "HP_BarBox.png"

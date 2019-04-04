@@ -23,7 +23,6 @@ public:
 	// プレイヤーステータスの列挙
 	enum PLAYER_PARAM
 	{
-		NAME,
 		LEVEL = 0,
 		HP,
 		POWER,
@@ -39,7 +38,6 @@ public:
 
 	// キャラクターのパラメータ
 	typedef struct {
-		string NAME;
 		int LEVEL;
 		int MaxHP;
 		int HP;
@@ -63,6 +61,7 @@ public:
 	// キャラクターのステータス
 	typedef struct {
 		PARAM myParam;               // 自身のパラメータ
+		string NAME;                      // ユニット名
 		string myData;                    // 自身のデータ
 		string myTeam;                   // 自身の陣営
 		int PosX;                             // 現在のx座標
@@ -96,7 +95,7 @@ public:
 	int moveCount;
 
 	// 初期化
-	void Character_Initialize(string pass, string team, int posX, int posY);
+	void Character_Initialize(string pass, string name, string team, int posX, int posY);
 	// パラメータ取得
 	void GetCharacterParam(string pass);
 	void SetParam(string name);
