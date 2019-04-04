@@ -39,7 +39,7 @@ public:
 
 	// キャラクターのパラメータ
 	typedef struct {
-		wstring NAME;
+		string NAME;
 		int LEVEL;
 		int MaxHP;
 		int HP;

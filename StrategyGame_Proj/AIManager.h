@@ -39,7 +39,7 @@ private:
 	vector<Character*> playerList;
 
 	// 操作するキャラクターのインスタンス
-	Character* myCharacter;
+	Character* myCharacter = nullptr;
 
 	// 移動判定
 	bool isMove;

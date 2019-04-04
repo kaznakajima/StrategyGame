@@ -41,6 +41,7 @@ Character::Character()
 	 myStatus->myTeam = team;
 	 LoadDivGraph(CHARACTER_IMG, 20, 4, 5, CHIP_SIZE, CHIP_SIZE, myStatus->Image);
 
+	 //LevelUp();
 }
 
  // パラメータ取得
@@ -55,11 +56,7 @@ Character::Character()
 		string tmp = "";
 		istringstream stream(str);
 		while (getline(stream, tmp, ',')) {
-			if (num == 0) {
-				std::vector<wchar_t> buffer(MultiByteToWideChar(CP_UTF8, 0, tmp.c_str(), -1, nullptr, 0));
-				MultiByteToWideChar(CP_UTF8, 0, tmp.c_str(), -1, &buffer.front(), buffer.size());
-				myStatus->myParam.NAME = wstring(buffer.begin(), buffer.end());
-			}
+			if (num == 0) myStatus->myParam.NAME = tmp;
 			else _param[num - 1] = atoi(tmp.c_str());
 			num++;
 		}
@@ -70,8 +67,6 @@ Character::Character()
 
  void Character::SetParam(string _name)
  {
-	 // パラメータ設定
-	 //myStatus->myParam.NAME = "Name";
 	 /*FILE* fp;
 	 fopen_s(&fp, _name.c_str(), "rb");
 	 if (fp == nullptr) return;
@@ -79,6 +74,7 @@ Character::Character()
 	 fread(&myStatus->myParam, sizeof(myStatus->myParam), 1, fp);
 	 fclose(fp);*/
 
+	 // パラメータ設定
 	 myStatus->myParam.LEVEL = _param[(int)PLAYER_PARAM::LEVEL];
 	 myStatus->myParam.MaxHP = _param[(int)PLAYER_PARAM::HP];
 	 myStatus->myParam.HP = _param[(int)PLAYER_PARAM::HP];
@@ -122,7 +118,8 @@ void Character::CharacterAnim()
 	if (myStatus->isSelect) {
 		myStatus->AnimHandle += 0.1f;
 		if (myStatus->AnimHandle > 7.0f && myStatus->canMove)
-			myStatus->AnimHandle = 4.0f;
+			myStatus->AnimHandle = 4.0f; 
+		GetAttackDetail(this);
 	}
 	else {
 		if (myStatus->canMove == false && myStatus->canAttack == false) myStatus->AnimHandle = 3.0f; 
@@ -652,22 +649,20 @@ void Character::LevelUp()
 {
 	// ファイルを開く
 	FILE* fp;
-	fopen_s(&fp, myStatus->myData.c_str(), "wb");
+	fopen_s(&fp, myStatus->myData.c_str(), "w");
 	if (fp == nullptr) return;
-	myStatus->myParam.HP += 10;
-	myStatus->myParam.LEVEL++;
 
-	fwrite(&myStatus->myParam, sizeof(myStatus->myParam), 1, fp);
-
-	/*fwrite(&myStatus->myParam.NAME, sizeof(string), 1, fp);
-	fwrite(&myStatus->myParam.LEVEL, sizeof(int), 1, fp);
-	fwrite(&myStatus->myParam.HP, sizeof(int), 1, fp);
-	fwrite(&myStatus->myParam.POWER, sizeof(int), 1, fp);
-	fwrite(&myStatus->myParam.TECHNIQUE, sizeof(int), 1, fp);
-	fwrite(&myStatus->myParam.SPEED, sizeof(int), 1, fp);
-	fwrite(&myStatus->myParam.LUCKY, sizeof(int), 1, fp);
-	fwrite(&myStatus->myParam.DEFENCE, sizeof(int), 1, fp);
-	fwrite(&myStatus->myParam.MAGIC_DEFENCE, sizeof(int), 1, fp);*/
+	fprintf(fp, myStatus->myParam.NAME.c_str() + ',');
+	fprintf(fp, "%d", myStatus->myParam.LEVEL + ',');
+	fprintf(fp, "%d", myStatus->myParam.HP + ',');
+	fprintf(fp, "%d", myStatus->myParam.POWER + ',');
+	fprintf(fp, "%d", myStatus->myParam.TECHNIQUE + ',');
+	fprintf(fp, "%d", myStatus->myParam.SPEED + ',');
+	fprintf(fp, "%d", myStatus->myParam.LUCKY + ',');
+	fprintf(fp, "%d", myStatus->myParam.DEFENCE + ',');
+	fprintf(fp, "%d", myStatus->myParam.MAGIC_DEFENCE + ',');
+	fprintf(fp, "%d", myStatus->myParam.PHYSIQUE + ',');
+	fprintf(fp, "%d", myStatus->myParam.MOVERANGE + ',');
 
 	fclose(fp);
 }

@@ -22,7 +22,7 @@ void CharacterManager::Initialize()
 	}
 
 	// ƒLƒƒƒ‰ƒNƒ^[‚Ì‰Šú‰»
-	character[0]->Character_Initialize(CHARACTER_DATA_1, "Player", 240, 240);
+	character[0]->Character_Initialize(CHARACTER_DATA_1, "Player", 192, 240);
 	character[1]->Character_Initialize(CHARACTER_DATA_3, "Enemy", 144, 240);
 	character[2]->Character_Initialize(CHARACTER_DATA_2, "Player", 96, 384);
 	character[3]->Character_Initialize(CHARACTER_DATA_4, "Enemy", 336, 96);
@@ -42,9 +42,9 @@ void CharacterManager::Update(int x, int y)
 	GetAttackArea(x, y);
 
 	if (myCharacter != nullptr) {
-		vector<char> buffer(WideCharToMultiByte(CP_UTF8, 0, myCharacter->myStatus->myParam.NAME.c_str(), -1, nullptr, 0, nullptr, nullptr));
-		WideCharToMultiByte(CP_UTF8, 0, myCharacter->myStatus->myParam.NAME.c_str(), -1, &buffer.front(), buffer.size(), nullptr, nullptr);
-		DrawFormatString(0, 96, GetColor(0, 0, 0), string(buffer.begin(), buffer.end()).c_str());
+		/*vector<char> buffer(WideCharToMultiByte(CP_UTF8, 0, myCharacter->myStatus->myParam.NAME.c_str(), -1, nullptr, 0, nullptr, nullptr));
+		WideCharToMultiByte(CP_UTF8, 0, myCharacter->myStatus->myParam.NAME.c_str(), -1, &buffer.front(), buffer.size(), nullptr, nullptr);*/
+		DrawFormatString(0, 96, GetColor(0, 0, 0), myCharacter->myStatus->myParam.NAME.c_str());
 		//DrawFormatString(0, 96, GetColor(0, 0, 0), myCharacter->myStatus->myParam.NAME.c_str());
 	}
 
@@ -325,10 +325,7 @@ void CharacterManager::DrawAttackParam(Character* attackChara, Character* defenc
 	float D_drawPosX = 190.0f, D_drawPosY = 260 + drawOffset;
 
 	// UŒ‚‘¤‚Ìî•ñ‚Ì•`‰æ
-	vector<char> buffer(WideCharToMultiByte(CP_UTF8, 0, attackChara->myStatus->myParam.NAME.c_str(), -1, nullptr, 0, nullptr, nullptr));
-	WideCharToMultiByte(CP_UTF8, 0, attackChara->myStatus->myParam.NAME.c_str(), -1, &buffer.front(), buffer.size(), nullptr, nullptr);
-	DrawFormatString((int)A_drawPosX, (int)A_drawPosY - 50, GetColor(0, 0, 0), string(buffer.begin(), buffer.end()).c_str());
-	//DrawFormatString((int)A_drawPosX, (int)A_drawPosY - 50, GetColor(0, 0, 0), attackChara->myStatus->myParam.NAME.c_str());
+	DrawFormatString((int)A_drawPosX, (int)A_drawPosY - 50, GetColor(0, 0, 0), attackChara->myStatus->myParam.NAME.c_str());
 	DrawFormatString((int)A_drawPosX - 30, (int)A_drawPosY, GetColor(0, 0, 0), "%d", attackChara->myStatus->myParam.HP);
 	DrawExtendGraphF(A_drawPosX, A_drawPosY,
 		A_drawPosX + 100, A_drawPosY + 15, FileManager::Instance()->GetFileHandle(HP_BARBOX), true);
@@ -336,10 +333,7 @@ void CharacterManager::DrawAttackParam(Character* attackChara, Character* defenc
 		A_drawPosX + (100 * ((float)attackChara->myStatus->myParam.HP / (float)attackChara->myStatus->myParam.MaxHP)), A_drawPosY + 15, FileManager::Instance()->GetFileHandle(HP_BAR), true);
 
 	// –hŒä‘¤‚Ìî•ñ‚Ì•`‰æ
-	vector<char> _buffer(WideCharToMultiByte(CP_UTF8, 0, defenceChara->myStatus->myParam.NAME.c_str(), -1, nullptr, 0, nullptr, nullptr));
-	WideCharToMultiByte(CP_UTF8, 0, defenceChara->myStatus->myParam.NAME.c_str(), -1, &_buffer.front(), _buffer.size(), nullptr, nullptr);
-	DrawFormatString((int)D_drawPosX, (int)D_drawPosY - 50, GetColor(0, 0, 0), string(_buffer.begin(), _buffer.end()).c_str());
-	//DrawFormatString((int)D_drawPosX, (int)D_drawPosY - 50, GetColor(0, 0, 0), defenceChara->myStatus->myParam.NAME.c_str());
+	DrawFormatString((int)D_drawPosX, (int)D_drawPosY - 50, GetColor(0, 0, 0), defenceChara->myStatus->myParam.NAME.c_str());
 	DrawFormatString((int)D_drawPosX - 30, (int)D_drawPosY, GetColor(0, 0, 0), "%d", defenceChara->myStatus->myParam.HP);
 	DrawExtendGraphF(D_drawPosX, D_drawPosY,
 		D_drawPosX + 100, D_drawPosY + 15, FileManager::Instance()->GetFileHandle(HP_BARBOX), true);
@@ -370,7 +364,7 @@ void CharacterManager::KeyCheck(int x, int y)
 }
 
 void CharacterManager::Finalize() {
-	if (character.empty() == false) { for (Character* _character : character) delete _character; character.clear(); }
+	if (character.empty() == false) character.clear();
 	if (myCharacter != nullptr) delete myCharacter;
 	if (eCharacter != nullptr) delete eCharacter;
 }

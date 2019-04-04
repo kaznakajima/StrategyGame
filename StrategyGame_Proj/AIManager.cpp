@@ -255,9 +255,6 @@ void AIManager::CharacterLost(Character* character)
 
 void AIManager::Finalize()
 {
-	/*if (playerList.empty() == false) for (Character* _character : playerList) delete _character;
-	if (enemyList.empty() == false) for (Character* _character : enemyList) delete _character;*/
 	if (playerList.empty() == false) playerList.clear();
 	if (enemyList.empty() == false) enemyList.clear();
-	if (myCharacter != nullptr) delete myCharacter;
 }
