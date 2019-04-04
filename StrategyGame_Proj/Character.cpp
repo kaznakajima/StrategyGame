@@ -65,13 +65,20 @@ Character::Character()
 		}
 	}
 
-	SetParam(name);
+	SetParam(pass);
  }
 
  void Character::SetParam(string _name)
  {
 	 // ƒpƒ‰ƒ[ƒ^Ý’è
 	 //myStatus->myParam.NAME = "Name";
+	 /*FILE* fp;
+	 fopen_s(&fp, _name.c_str(), "rb");
+	 if (fp == nullptr) return;
+
+	 fread(&myStatus->myParam, sizeof(myStatus->myParam), 1, fp);
+	 fclose(fp);*/
+
 	 myStatus->myParam.LEVEL = _param[(int)PLAYER_PARAM::LEVEL];
 	 myStatus->myParam.MaxHP = _param[(int)PLAYER_PARAM::HP];
 	 myStatus->myParam.HP = _param[(int)PLAYER_PARAM::HP];
@@ -648,10 +655,20 @@ void Character::LevelUp()
 	fopen_s(&fp, myStatus->myData.c_str(), "wb");
 	if (fp == nullptr) return;
 	myStatus->myParam.HP += 10;
+	myStatus->myParam.LEVEL++;
 
-	for (size_t num = 0; num < 10; ++num) {
-	}
-	fwrite(&myStatus->myParam, sizeof(myStatus->myParam), 100, fp);
+	fwrite(&myStatus->myParam, sizeof(myStatus->myParam), 1, fp);
+
+	/*fwrite(&myStatus->myParam.NAME, sizeof(string), 1, fp);
+	fwrite(&myStatus->myParam.LEVEL, sizeof(int), 1, fp);
+	fwrite(&myStatus->myParam.HP, sizeof(int), 1, fp);
+	fwrite(&myStatus->myParam.POWER, sizeof(int), 1, fp);
+	fwrite(&myStatus->myParam.TECHNIQUE, sizeof(int), 1, fp);
+	fwrite(&myStatus->myParam.SPEED, sizeof(int), 1, fp);
+	fwrite(&myStatus->myParam.LUCKY, sizeof(int), 1, fp);
+	fwrite(&myStatus->myParam.DEFENCE, sizeof(int), 1, fp);
+	fwrite(&myStatus->myParam.MAGIC_DEFENCE, sizeof(int), 1, fp);*/
+
 	fclose(fp);
 }
 
