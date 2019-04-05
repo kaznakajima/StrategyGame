@@ -7,6 +7,10 @@
 // コンストラクタ
 Character::Character()
 {
+	itemCount = 0;
+
+	AddItem(IRON_SWORD);
+
 	FileManager::Instance()->GetFileHandle(CAN_MOVE_AREA);
 	FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA);
 	FileManager::Instance()->GetFileHandle(ATTACK_DETAIL);
@@ -41,47 +45,26 @@ Character::Character()
 	 myStatus->AttackRange = 1;
 	 myStatus->myTeam = team;
 	 LoadDivGraph(CHARACTER_IMG, 20, 4, 5, CHIP_SIZE, CHIP_SIZE, myStatus->Image);
-
-	 //LevelUp();
 }
 
  // パラメータ取得
  void Character::GetCharacterParam(string pass)
  {
-	 int num = 0;
-
-	 ifstream ifs(pass);
-	 string str = "";
-	 // ファイルの中身を一行ずつ読み取る
-	while (getline(ifs, str)) {
-		string tmp = "";
-		istringstream stream(str);
-		while (getline(stream, tmp, ',')) {
-			if (num == 0);
-			else _param[num - 1] = atoi(tmp.c_str());
-			num++;
-		}
-	}
-
-	SetParam(pass);
- }
-
- void Character::SetParam(string _name)
- {
 	 fstream file;
-	 file.open(_name, ios::in | ios::binary);
+	 file.open(pass, ios::in | ios::binary);
 	 file.read((char*)&myStatus->myParam, sizeof(myStatus->myParam));
 
 	 file.close();
 
 	 // MaxHPの設定
 	 myStatus->myParam.MaxHP = myStatus->myParam.HP;
+
 	 // 必殺率 (技パラメータ / 2)
-	 myStatus->myParam.ATTACK_CLT = myStatus->myParam.TECHNIQUE / 2;
+	 myStatus->myParam.ATTACK_CLT = myStatus->myParam.TECHNIQUE / 2 + Item[0]->myParam.CLT;
 	 // 回比率 (速さパラメータ * 2 + 幸運パラメータ)
 	 myStatus->myParam.ATTACK_AVO = myStatus->myParam.SPEED * 2 + myStatus->myParam.LUCKY;
 	 // 命中率 (武器命中 + 技パラメータ * 2.5)
-	 myStatus->myParam.ATTACK_HIT = 85 + (int)(myStatus->myParam.TECHNIQUE * 2.5);
+	 myStatus->myParam.ATTACK_HIT = Item[0]->myParam.HIT + (int)(myStatus->myParam.TECHNIQUE * 2.5);
  }
 
  // 移動再開(ターン開始時に呼び出す)
@@ -113,7 +96,6 @@ void Character::CharacterAnim()
 		if (myStatus->canMove == false && myStatus->canAttack == false) myStatus->AnimHandle = 3.0f; 
 	}
 
-	DrawFormatString(myStatus->PosX, myStatus->PosY, GetColor(0, 0, 0), name.c_str());
 	// xPos, yPosの位置にキャラクターを描画
 	DrawGraph(myStatus->PosX, myStatus->PosY, myStatus->Image[(int)myStatus->AnimHandle], true);
 
@@ -439,9 +421,15 @@ void Character::AttackableDraw()
 void Character::GetAttackDetail(Character* eCharacter)
 {
 	// 威力 (攻撃側の力 - 守備側の守備力)
-	int mySTR = myStatus->myParam.POWER - eCharacter->myStatus->myParam.DEFENCE;
+	if (Item.empty() == false) myStatus->myParam.ATTACK_STR = myStatus->myParam.POWER + Item[0]->myParam.POWER;
+	else myStatus->myParam.ATTACK_STR = 0;
+
+	if (eCharacter->Item.empty() == false) eCharacter->myStatus->myParam.ATTACK_STR = eCharacter->myStatus->myParam.POWER + eCharacter->Item[0]->myParam.POWER;
+	else eCharacter->myStatus->myParam.ATTACK_STR = 0;
+
+	int mySTR = myStatus->myParam.ATTACK_STR - eCharacter->myStatus->myParam.DEFENCE;
 	if (mySTR < 0) mySTR = 0;
-	int eSTR = eCharacter->myStatus->myParam.POWER - myStatus->myParam.DEFENCE;
+	int eSTR = eCharacter->myStatus->myParam.ATTACK_STR - myStatus->myParam.DEFENCE;
 	if (eSTR < 0) eSTR = 0;
 
 	// 速さ判定(4以上大きければ2回攻撃)
@@ -449,7 +437,9 @@ void Character::GetAttackDetail(Character* eCharacter)
 
 	// 命中力 (攻撃側の命中率 - 守備側の回避率)
 	int myHitness = myStatus->myParam.ATTACK_HIT - eCharacter->myStatus->myParam.ATTACK_AVO;
+	if (myHitness > 100) myHitness = 100;
 	int eHitness = eCharacter->myStatus->myParam.ATTACK_HIT - eCharacter->myStatus->myParam.ATTACK_AVO;
+	if (eHitness > 100) eHitness = 100;
 
 	int drawOffset = 0;
 
@@ -543,7 +533,7 @@ bool Character::AttackAnimation(Character* eCharacter, int count)
 void Character::CharacterAttack(Character* eCharacter, int count)
 {
 	// ダメージ計算
-	int damage = myStatus->myParam.POWER - eCharacter->myStatus->myParam.DEFENCE;
+	int damage = myStatus->myParam.ATTACK_STR - eCharacter->myStatus->myParam.DEFENCE;
 	// マイナスは0
 	if (damage < 0) damage = 0;
 
@@ -552,6 +542,7 @@ void Character::CharacterAttack(Character* eCharacter, int count)
 
 	// 命中力 (攻撃側の命中率 - 守備側の回避率)
 	int myHitness = myStatus->myParam.ATTACK_HIT - eCharacter->myStatus->myParam.ATTACK_AVO;
+	if (myHitness > 100) myHitness = 100;
 
 	// 確率（命中力）
 	int probability = myHitness;
@@ -633,6 +624,16 @@ void Character::MoveAreaClear(vector<Character*> _character)
 			}
 		}
 	}
+}
+
+// アイテムの追加
+void Character::AddItem(string itemName)
+{
+	if (itemCount == 5) return;
+
+	Item.push_back(new Weapon());
+	Item[0]->ParamInitialize(itemName);
+	itemCount++;
 }
 
 // ユニットのレベルアップ

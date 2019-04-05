@@ -1,7 +1,7 @@
 #pragma once
 #include "DxLib.h"
 #include "StageCreate.h"
-#include "AttackPhase.h"
+#include "Weapon.h"
 #include "TimeCount.h"
 #include "FileManager.h"
 #include <vector>
@@ -19,22 +19,6 @@ class Character
 {
 public:
 	Character();
-
-	// プレイヤーステータスの列挙
-	enum PLAYER_PARAM
-	{
-		LEVEL = 0,
-		HP,
-		POWER,
-		TECHNIQUE,
-		SPEED,
-		LUCKY,
-		DEFENCE,
-		MAGIC_DEFENCE,
-		PHYSIQUE,
-		MOVERANGE,
-		TEAM
-	};
 
 	// キャラクターのパラメータ
 	typedef struct {
@@ -83,7 +67,10 @@ public:
 	vector<int> OldPosX;
 	vector<int> OldPosY;
 
+	// 自身のステータス
 	unique_ptr<STATUS> myStatus = make_unique<STATUS>();
+	// 自身の使用する武器
+	vector<Weapon*> Item;
 
 	// 移動できるエリア
 	vector<vector<int>> moveToPos = vector<vector<int>>(StageCreate::Instance()->MAP_SIZEY, vector<int>(StageCreate::Instance()->MAP_SIZEX, -1));
@@ -98,7 +85,6 @@ public:
 	void Character_Initialize(string pass, string name, string team, int posX, int posY);
 	// パラメータ取得
 	void GetCharacterParam(string pass);
-	void SetParam(string name);
 
 	// 描画
 	void SpriteDraw(int x, int y, int img);
@@ -142,10 +128,15 @@ private:
 	// 移動経路
 	int ArrowImage[6];
 
+	// アイテム追加
+	void AddItem(string itemName);
+
 	// レベルアップ
 	void LevelUp();
 
+	// アイテムの所持数
+	int itemCount = 0;
+
 	// パラメータ
-	string name;
 	int _param[10];
 };

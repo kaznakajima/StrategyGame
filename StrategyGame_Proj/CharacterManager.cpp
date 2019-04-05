@@ -41,13 +41,6 @@ void CharacterManager::Update(int x, int y)
 	// 攻撃範囲検索
 	GetAttackArea(x, y);
 
-	if (myCharacter != nullptr) {
-		/*vector<char> buffer(WideCharToMultiByte(CP_UTF8, 0, myCharacter->myStatus->myParam.NAME.c_str(), -1, nullptr, 0, nullptr, nullptr));
-		WideCharToMultiByte(CP_UTF8, 0, myCharacter->myStatus->myParam.NAME.c_str(), -1, &buffer.front(), buffer.size(), nullptr, nullptr);*/
-		DrawFormatString(0, 96, GetColor(0, 0, 0), myCharacter->myStatus->NAME.c_str());
-		//DrawFormatString(0, 96, GetColor(0, 0, 0), myCharacter->myStatus->myParam.NAME.c_str());
-	}
-
 	for (size_t i = 0; i < character.size(); i++) {
 		// アニメーション
 		character[i]->CharacterAnim();
@@ -312,11 +305,9 @@ void CharacterManager::DrawAttackParam(Character* attackChara, Character* defenc
 	// 攻撃側ユニットの位置に応じて表示位置を変更
 	if (attackChara->myStatus->_PosY >= STAGE1_HEIGHT / 2) {
 		drawOffset = -100;
-		//DrawGraph(0, (int)drawOffset, FileManager::Instance()->GetFileHandle(DAMAGE_DETAIL), true);
 		DrawRotaGraph(336, 240 + (int)drawOffset, 1.0f, 0.0f, FileManager::Instance()->GetFileHandle(DAMAGE_DETAIL), true);
 	}
 	else if (attackChara->myStatus->_PosY < STAGE1_HEIGHT / 2) {
-		//DrawGraph(0, (int)drawOffset, FileManager::Instance()->GetFileHandle(DAMAGE_DETAIL), true);
 		DrawRotaGraph(336, 240 + (int)drawOffset, 1.0f, 0.0f, FileManager::Instance()->GetFileHandle(DAMAGE_DETAIL), true);
 	}
 
