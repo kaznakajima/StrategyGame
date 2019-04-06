@@ -16,9 +16,12 @@ GameScene::GameScene()
 void GameScene::Initialize()
 {
 	// 画像の読み込み
-	stageImg = LoadGraph(FIELD_IMG);
+	FileManager::Instance()->GetFileHandle(FIELD_IMG);
+	FileManager::Instance()->GetFileHandle(CURSOR_IMG);
+	turnChangeImg = FileManager::Instance()->GetFileHandle(PLAYERTURN_IMG);
+	/*stageImg = LoadGraph(FIELD_IMG);
 	cursorImg = LoadGraph(CURSOR_IMG);
-	turnChangeImg = LoadGraph(PLAYERTURN_IMG);
+	turnChangeImg = LoadGraph(PLAYERTURN_IMG);*/
 }
 
 void GameScene::LoadFile()
@@ -49,14 +52,33 @@ void GameScene::TurnChange(bool playerTurn)
 
 	// 移動完了したら
 	if (moveX < 336) {
+
+		for (int volume = 0; volume < 256; volume += 3) {
+			AudioManager::Instance()->VolumeFade(volume);
+		}
+
 		WaitTimer(1000);
 		moveX = 672;
 		CharacterManager::Instance()->turnAnim = false;
-		if (playerTurn) turnChangeImg = LoadGraph(ENEMYTURN_IMG);
+		AudioManager::Instance()->playSE(SE_TURNSTART);
+
+		if (playerTurn) { 
+			turnChangeImg = FileManager::Instance()->GetFileHandle(ENEMYTURN_IMG);
+			AudioManager::Instance()->playBGM(BGM_PLAYER);
+
+			for (int volume = 256; volume >= 0; volume -= 3) {
+				AudioManager::Instance()->VolumeFade(volume);
+			}
+		}
 		// エネミーターン
 		else {
 			AIManager::Instance()->Play();
-			turnChangeImg = LoadGraph(PLAYERTURN_IMG);
+			turnChangeImg = FileManager::Instance()->GetFileHandle(PLAYERTURN_IMG);
+			AudioManager::Instance()->playBGM(BGM_ENEMY);
+
+			for (int volume = 256; volume >= 0; volume -= 3) {
+				AudioManager::Instance()->VolumeFade(volume);
+			}
 		}
 	}
 }
@@ -108,7 +130,7 @@ void GameScene::Draw()
 	}
 
 	// 描画
-	DrawGraph(0 - (int)KeyInput::Instance()->cameraPos.x, 0 - (int)KeyInput::Instance()->cameraPos.y, stageImg, true);
+	DrawGraph(0 - (int)KeyInput::Instance()->cameraPos.x, 0 - (int)KeyInput::Instance()->cameraPos.y, FileManager::Instance()->GetFileHandle(FIELD_IMG), true);
 
 	// キャラクター選択
 	if (KeyInput::Instance()->isSelect == true && CharacterManager::Instance()->attack == false) {
@@ -117,7 +139,7 @@ void GameScene::Draw()
 	}
 
 	// カーソル表示
-	DrawGraph(xPos, yPos, cursorImg, true);
+	DrawGraph(xPos, yPos, FileManager::Instance()->GetFileHandle(CURSOR_IMG), true);
 }
 
 void GameScene::Finalize()

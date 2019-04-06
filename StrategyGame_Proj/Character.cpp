@@ -1,5 +1,6 @@
 #include "Character.h"
 #include "KeyInput.h"
+#include "AudioManager.h"
 #include <time.h>
 
 #define PI 3.141592654
@@ -59,12 +60,16 @@ Character::Character()
 	 // MaxHPの設定
 	 myStatus->myParam.MaxHP = myStatus->myParam.HP;
 
+	 // 攻撃速度
+	 int weight = Item[0]->myParam.WEIGHT - myStatus->myParam.PHYSIQUE;
+	 if (weight < 0) weight = 0;
+	 myStatus->myParam.ATTACK_SPEED = myStatus->myParam.SPEED - weight;
 	 // 必殺率 (技パラメータ / 2)
 	 myStatus->myParam.ATTACK_CLT = myStatus->myParam.TECHNIQUE / 2 + Item[0]->myParam.CLT;
-	 // 回比率 (速さパラメータ * 2 + 幸運パラメータ)
-	 myStatus->myParam.ATTACK_AVO = myStatus->myParam.SPEED * 2 + myStatus->myParam.LUCKY;
+	 // 回避率 (速さパラメータ * 2 + 幸運パラメータ)
+	 myStatus->myParam.ATTACK_AVO = myStatus->myParam.ATTACK_SPEED * 2 + myStatus->myParam.LUCKY;
 	 // 命中率 (武器命中 + 技パラメータ * 2.5)
-	 myStatus->myParam.ATTACK_HIT = Item[0]->myParam.HIT + (int)(myStatus->myParam.TECHNIQUE * 2.5);
+	 myStatus->myParam.ATTACK_HIT = Item[0]->myParam.HIT + (int)(myStatus->myParam.TECHNIQUE * 2) + (int)(myStatus->myParam.LUCKY / 2);
  }
 
  // 移動再開(ターン開始時に呼び出す)
@@ -552,6 +557,7 @@ void Character::CharacterAttack(Character* eCharacter, int count)
 	if (GetRand(100) <= probability) {
 		int _damage = eCharacter->myStatus->myParam.HP - damage;
 		CharacterDamage(eCharacter, _damage);
+		AudioManager::Instance()->playSE(SE_DAMAGE);
 		// 敵が倒せたらその時点で戦闘終了
 		if (eCharacter->myStatus->isDeath) {
 			myStatus->isAttack = false;
@@ -631,7 +637,7 @@ void Character::AddItem(string itemName)
 {
 	if (itemCount == 5) return;
 
-	Item.push_back(new Weapon());
+	Item.push_back(make_unique<Weapon>());
 	Item[0]->ParamInitialize(itemName);
 	itemCount++;
 }

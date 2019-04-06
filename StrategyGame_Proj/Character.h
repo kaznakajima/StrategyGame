@@ -70,7 +70,7 @@ public:
 	// 自身のステータス
 	unique_ptr<STATUS> myStatus = make_unique<STATUS>();
 	// 自身の使用する武器
-	vector<Weapon*> Item;
+	vector<unique_ptr<Weapon>> Item;
 
 	// 移動できるエリア
 	vector<vector<int>> moveToPos = vector<vector<int>>(StageCreate::Instance()->MAP_SIZEY, vector<int>(StageCreate::Instance()->MAP_SIZEX, -1));

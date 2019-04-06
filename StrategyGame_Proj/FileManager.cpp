@@ -38,12 +38,12 @@ int FileManager::LoadFile(string key)
 		directory = GRAPH_DIRECTORY + key;
 		handle = LoadGraph(directory.c_str());
 	}
-	else
-		if (extension == "mp3" || extension == "wave" || extension == "ogg") {
+	else if (extension == "mp3" || extension == "wave" || extension == "ogg") {
 			//オーディオ
 			directory = AUDIO_DIRECTORY + key;
 			handle = LoadSoundMem(directory.c_str());
-		}
+	}
+	else extension = "error";
 
 
 	if (extension == "error") {

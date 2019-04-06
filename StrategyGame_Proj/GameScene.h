@@ -1,11 +1,12 @@
 #pragma once
 #include "BaseScene.h"
+#include "AudioManager.h"
 
 // ステージ画像とカーソル画像
-#define FIELD_IMG "Resources\\image\\Field.png"
-#define CURSOR_IMG "Resources\\image\\Cursor.png"
-#define PLAYERTURN_IMG "Resources\\image\\PlayerTurn.png"
-#define ENEMYTURN_IMG "Resources\\image\\EnemyTurn.png"
+#define FIELD_IMG "Field.png"
+#define CURSOR_IMG "Cursor.png"
+#define PLAYERTURN_IMG "PlayerTurn.png"
+#define ENEMYTURN_IMG "EnemyTurn.png"
 
 class GameScene : public BaseScene
 {
