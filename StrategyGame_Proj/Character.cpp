@@ -1,6 +1,5 @@
 #include "Character.h"
 #include "KeyInput.h"
-#include "AudioManager.h"
 #include <time.h>
 
 #define PI 3.141592654
@@ -423,7 +422,7 @@ void Character::AttackableDraw()
 }
 
 // 攻撃の詳細表示
-void Character::GetAttackDetail(Character* eCharacter)
+void Character::GetAttackDetail(shared_ptr<Character> const &eCharacter)
 {
 	// 威力 (攻撃側の力 - 守備側の守備力)
 	if (Item.empty() == false) myStatus->myParam.ATTACK_STR = myStatus->myParam.POWER + Item[0]->myParam.POWER;
@@ -448,10 +447,10 @@ void Character::GetAttackDetail(Character* eCharacter)
 
 	int drawOffset = 0;
 
-	if (myStatus->PosX > STAGE1_WIDTH / 2) { 
+	if (myStatus->PosX > STAGE1_WIDTH / 2) {
 		SpriteDraw(drawOffset, 0, FileManager::Instance()->GetFileHandle(ATTACK_DETAIL));
 	}
-	else if (myStatus->PosX < STAGE1_WIDTH / 2) { 
+	else if (myStatus->PosX < STAGE1_WIDTH / 2) {
 		drawOffset = 480;
 		SpriteDraw(drawOffset, 0, FileManager::Instance()->GetFileHandle(ATTACK_DETAIL));
 	}
@@ -475,7 +474,7 @@ void Character::GetAttackDetail(Character* eCharacter)
 }
 
 // 攻撃アニメーション
-bool Character::AttackAnimation(Character* eCharacter, int count)
+bool Character::AttackAnimation(shared_ptr<Character> const &eCharacter, int count)
 {
 
 	// 攻撃方向を取得
@@ -484,9 +483,9 @@ bool Character::AttackAnimation(Character* eCharacter, int count)
 
 	if (moveX > 0) {
 		// 攻撃アニメーション
-		if(myStatus->animReset) myStatus->PosX -= 6;
+		if (myStatus->animReset) myStatus->PosX -= 6;
 		else myStatus->PosX += 6;
-		
+
 		if (myStatus->PosX - myStatus->_PosX == CHIP_SIZE) myStatus->animReset = true;
 		if (myStatus->PosX == myStatus->_PosX) {
 			CharacterAttack(eCharacter, count);
@@ -535,8 +534,15 @@ bool Character::AttackAnimation(Character* eCharacter, int count)
 }
 
 // キャラクターの攻撃
-void Character::CharacterAttack(Character* eCharacter, int count)
+void Character::CharacterAttack(shared_ptr<Character> const &eCharacter, int count)
 {
+	// 威力 (攻撃側の力 - 守備側の守備力)
+	if (Item.empty() == false) myStatus->myParam.ATTACK_STR = myStatus->myParam.POWER + Item[0]->myParam.POWER;
+	else myStatus->myParam.ATTACK_STR = myStatus->myParam.POWER;
+
+	if (eCharacter->Item.empty() == false) eCharacter->myStatus->myParam.ATTACK_STR = eCharacter->myStatus->myParam.POWER + eCharacter->Item[0]->myParam.POWER;
+	else eCharacter->myStatus->myParam.ATTACK_STR = eCharacter->myStatus->myParam.POWER;
+
 	// ダメージ計算
 	int damage = myStatus->myParam.ATTACK_STR - eCharacter->myStatus->myParam.DEFENCE;
 	// マイナスは0
@@ -566,7 +572,7 @@ void Character::CharacterAttack(Character* eCharacter, int count)
 	}
 
 	// 攻撃終了
-	myStatus->isAttack = false; 
+	myStatus->isAttack = false;
 
 	// 敵の反撃
 	if (count < 2 && myStatus->AttackRange == eCharacter->myStatus->AttackRange) {
@@ -588,7 +594,7 @@ void Character::CharacterAttack(Character* eCharacter, int count)
 }
 
 // 攻撃の処理
-void Character::CharacterDamage(Character* eCharacter, int damage)
+void Character::CharacterDamage(shared_ptr<Character> const &eCharacter, int damage)
 {
 	if (eCharacter->myStatus->myParam.HP == damage && damage > 0)  return;
 
@@ -596,7 +602,6 @@ void Character::CharacterDamage(Character* eCharacter, int damage)
 
 	if (eCharacter->myStatus->myParam.HP <= 0) {
 		eCharacter->myStatus->isDeath = true;
-		LevelUp();
 		return;
 	}
 
@@ -618,15 +623,15 @@ void Character::SetCameraOffset(int dir, bool horizontal)
 	}
 }
 
-void Character::MoveAreaClear(vector<Character*> _character)
+void Character::MoveAreaClear(vector<shared_ptr<Character>> const &_character)
 {
 	for (int y = 0; y < StageCreate::Instance()->MAP_SIZEY; y++) {
 		for (int x = 0; x < StageCreate::Instance()->MAP_SIZEX; x++) {
 			moveToPos[y][x] = -1;
-			moveArrow[y][x] = false; 
+			moveArrow[y][x] = false;
 			StageCreate::Instance()->StageUpdate(x, y);
-			for (Character* character : _character) {
-				if (character->myStatus->PosX == x * CHIP_SIZE && character->myStatus->PosY == y * CHIP_SIZE) StageCreate::Instance()->CheckOnUnit(x, y, character->myStatus->myTeam);
+			for (size_t num = 0; num < _character.size();++num) {
+				if (_character[num]->myStatus->PosX == x * CHIP_SIZE && _character[num]->myStatus->PosY == y * CHIP_SIZE) StageCreate::Instance()->CheckOnUnit(x, y, _character[num]->myStatus->myTeam);
 			}
 		}
 	}
@@ -656,5 +661,5 @@ void Character::LevelUp()
 // 終了処理
 void Character::Finalize()
 {
-	//delete stage;
+
 }

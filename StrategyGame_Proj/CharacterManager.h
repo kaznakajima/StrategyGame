@@ -22,15 +22,14 @@ public:
 	~CharacterManager();
 
 	// 生成するキャラクター
-	vector<Character*> character;
-	// vector<unique_ptr<Character>> _character;
+	vector<shared_ptr<Character>> _character;
 
 	// 攻撃するユニット
 	int attackUnitNum = 0;
-	Character* myCharacter = nullptr;
+	shared_ptr<Character> _myCharacter = nullptr;
 	// 攻撃されるユニット
 	int blockUnitNum = 0;
-	Character* eCharacter = nullptr;
+	shared_ptr<Character> _eCharacter = nullptr;
 	// 全体の攻撃回数
 	int attackCount = 0;
 
@@ -74,7 +73,7 @@ public:
 	// 攻撃の処理
 	void Attack();
 	// 攻撃中のデータ表示
-	void DrawAttackParam(Character* attackChara, Character* defenceChara);
+	void DrawAttackParam(shared_ptr<Character> const &attackChara, shared_ptr<Character> const &defenceChara);
 
 	// カメラとのオフセット計算
 	void SetCameraOffset(int dir, bool horizontal);

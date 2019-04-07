@@ -1,6 +1,7 @@
 #pragma once
 #include "DxLib.h"
 #include "StageCreate.h"
+#include "AudioManager.h"
 #include "Weapon.h"
 #include "TimeCount.h"
 #include "FileManager.h"
@@ -107,19 +108,19 @@ public:
 	// 攻撃範囲描画
 	void AttackableDraw();
 	// 攻撃の詳細情報表示
-	void GetAttackDetail(Character* eCharacter);
+	void GetAttackDetail(shared_ptr<Character> const &eCharacter);
 	// 攻撃アニメーション
-	bool AttackAnimation(Character* eCharacter, int count);
+	bool AttackAnimation(shared_ptr<Character> const &eCharacter, int count);
 	// 攻撃の計算
-	void CharacterAttack(Character* eCharacter, int count);
+	void CharacterAttack(shared_ptr<Character> const &eCharacter, int count);
 	// 攻撃の処理
-	void CharacterDamage(Character* eCharacter, int damage);
+	void CharacterDamage(shared_ptr<Character> const &eCharacter, int damage);
 
 	// カメラとのオフセット計算
 	void SetCameraOffset(int dir, bool horizontal);
 
 	// 移動エリアのリセット
-	void MoveAreaClear(vector<Character*> _character);
+	void MoveAreaClear(vector<shared_ptr<Character>> const &_character);
 
 	// 終了処理
 	void Finalize();

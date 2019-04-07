@@ -11,25 +11,25 @@ AIManager::~AIManager() { }
 // 初期化
 void AIManager::Initialize()
 {
-	myCharacter = nullptr;
+	_myCharacter = nullptr;
 	// リストの初期化
-	playerList.clear();
-	enemyList.clear();
+	_playerList.clear();
+	_enemyList.clear();
 }
 
 // 更新
 void AIManager::Update()
 {
-	if (myCharacter != nullptr) {
-		if (myCharacter->myStatus->canAttack) CharacterManager::Instance()->DrawCheck(xPos, yPos);
+	if (_myCharacter != nullptr) {
+		if (_myCharacter->myStatus->canAttack) CharacterManager::Instance()->DrawCheck(xPos, yPos);
 	}
 }
 
 // 現在の敵(AI)、プレイヤーのカウント
-void AIManager::CharacterCount(Character* character)
+void AIManager::CharacterCount(shared_ptr<Character> const &character)
 {
-	if (character->myStatus->myTeam == "Player") playerList.push_back(character);
-	else if (character->myStatus->myTeam == "Enemy") enemyList.push_back(character); 
+	if (character->myStatus->myTeam == "Player") _playerList.push_back(character);
+	else if (character->myStatus->myTeam == "Enemy") _enemyList.push_back(character);
 }
 
 // 初回起動
@@ -39,32 +39,32 @@ void AIManager::Play()
 	int _minDistance = 100;
 
 	// プレイヤーに一番近いユニットを行動させる
-	for (Character* character : enemyList) {
+	for (size_t num = 0; num < _enemyList.size(); ++num) {
 		// 一番近いキャラクターを選択
-		if (_minDistance > GetDistancePlayer(character, playerList) && character->myStatus->canMove) {
-			_minDistance = GetDistancePlayer(character, playerList);
-			myCharacter = character;
+		if (_minDistance > GetDistancePlayer(_enemyList[num], _playerList) && _enemyList[num]->myStatus->canMove) {
+			_minDistance = GetDistancePlayer(_enemyList[num], _playerList);
+			_myCharacter = _enemyList[num];
 		}
 	}
 
 	// 移動先の選択
-	if (myCharacter != nullptr) MoveSelect(myCharacter);
+	if (_myCharacter != nullptr) MoveSelect(_myCharacter);
 }
 
 // 移動先の選択
-void AIManager::MoveSelect(Character* character)
+void AIManager::MoveSelect(shared_ptr<Character> const &character)
 {
 	x = character->myStatus->PosX, y = character->myStatus->PosY;
 
 	CharacterManager::Instance()->DrawCheck(x, y);
 
-	character->MoveAreaClear(CharacterManager::Instance()->character);
+	character->MoveAreaClear(CharacterManager::Instance()->_character);
 
 	character->MoveRange(character->myStatus->PosX, character->myStatus->PosY, character->myStatus->myParam.MOVERANGE);
 
 	// プレイヤーユニットの周囲を検索
-	for (Character* _character : playerList) {
-		int moveX  = _character->myStatus->PosX, moveY = _character->myStatus->PosY;
+	for (size_t num = 0; num < _playerList.size(); ++num) {
+		int moveX = _playerList[num]->myStatus->PosX, moveY = _playerList[num]->myStatus->PosY;
 		// キャラクターの周囲が移動可能な場合なら移動先に登録
 		if (moveY / CHIP_SIZE < 9 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE + character->myStatus->AttackRange][moveX / CHIP_SIZE] == true) {
 			ChoiseMovePoint(moveX, moveY + CHIP_SIZE);
@@ -106,7 +106,7 @@ void AIManager::MoveSelect(Character* character)
 		// プレイヤー方向に向かって移動
 		for (int stageY = 0; stageY < StageCreate::Instance()->MAP_SIZEY; stageY++) {
 			for (int stageX = 0; stageX < StageCreate::Instance()->MAP_SIZEX; stageX++) {
-				GetMovePoint(character, stageX, stageY, playerList);
+				GetMovePoint(character, stageX, stageY, _playerList);
 			}
 		}
 	}
@@ -128,7 +128,7 @@ void AIManager::ChoiseMovePoint(int _x, int _y)
 }
 
 // プレイヤー側のキャラクターの取得
-int AIManager::GetDistancePlayer(Character* character, vector<Character*> playerList)
+int AIManager::GetDistancePlayer(shared_ptr<Character> const &character, vector<shared_ptr<Character>> const &playerList)
 {
 	// プレイヤー側のキャラクターとの距離
 	int offsetX = 0, offsetY = 0, offsetTotal = 0;
@@ -136,10 +136,10 @@ int AIManager::GetDistancePlayer(Character* character, vector<Character*> player
 	int _minDistance = 100;
 
 	// プレイヤーからの距離の計算
-	for (Character* playerSt : playerList) {
+	for (size_t num = 0; num < _playerList.size(); ++num) {
 		offsetTotal = 0;
-		offsetX = abs(character->myStatus->PosX - playerSt->myStatus->PosX) / CHIP_SIZE;
-		offsetY = abs(character->myStatus->PosY - playerSt->myStatus->PosY) / CHIP_SIZE;
+		offsetX = abs(character->myStatus->PosX - _playerList[num]->myStatus->PosX) / CHIP_SIZE;
+		offsetY = abs(character->myStatus->PosY - _playerList[num]->myStatus->PosY) / CHIP_SIZE;
 		offsetTotal = offsetX + offsetY;
 
 		// 最短距離の更新
@@ -152,7 +152,7 @@ int AIManager::GetDistancePlayer(Character* character, vector<Character*> player
 }
 
 // 移動地点を検索
-void AIManager::GetMovePoint(Character* character, int _x, int _y, vector<Character*> playerList)
+void AIManager::GetMovePoint(shared_ptr<Character> const &character, int _x, int _y, vector<shared_ptr<Character>> const &playerList)
 {
 	if (StageCreate::Instance()->checkMove[_y][_x] == false || StageCreate::Instance()->onUnit[_y][_x] != "NONE") return;
 
@@ -164,18 +164,18 @@ void AIManager::GetMovePoint(Character* character, int _x, int _y, vector<Charac
 	if (character->moveToPos[_y][_x] > 0 && moveCost >= character->moveToPos[_y][_x]) {
 		moveCost = character->moveToPos[_y][_x];
 		// プレイヤーからの距離の計算
-		for (Character* playerSt : playerList) {
+		for (size_t num = 0; num < _playerList.size(); ++num) {
 			offsetTotal = 0, _offsetTotal = 0;
-			offsetX = abs(_x * CHIP_SIZE - playerSt->myStatus->PosX) / CHIP_SIZE;
-			offsetY = abs(_y * CHIP_SIZE - playerSt->myStatus->PosY) / CHIP_SIZE;
+			offsetX = abs(_x * CHIP_SIZE - _playerList[num]->myStatus->PosX) / CHIP_SIZE;
+			offsetY = abs(_y * CHIP_SIZE - _playerList[num]->myStatus->PosY) / CHIP_SIZE;
 			offsetTotal = offsetX + offsetY;
-			_offsetX = abs(x - playerSt->myStatus->PosX) / CHIP_SIZE;
-			_offsetY = abs(y - playerSt->myStatus->PosY) / CHIP_SIZE;
+			_offsetX = abs(x - _playerList[num]->myStatus->PosX) / CHIP_SIZE;
+			_offsetY = abs(y - _playerList[num]->myStatus->PosY) / CHIP_SIZE;
 			_offsetTotal = _offsetX + _offsetY;
 
 			// 最短距離の更新
 			if (offsetTotal <= _offsetTotal) {
-				CheckCanMove(character, playerSt->myStatus->PosX / CHIP_SIZE, playerSt->myStatus->PosY / CHIP_SIZE, playerSt);
+				CheckCanMove(character, _playerList[num]->myStatus->PosX / CHIP_SIZE, _playerList[num]->myStatus->PosY / CHIP_SIZE, _playerList[num]);
 				if (isMove == false) {
 					x = moveToX;
 					y = moveToY;
@@ -189,7 +189,7 @@ void AIManager::GetMovePoint(Character* character, int _x, int _y, vector<Charac
 	}
 }
 
-void AIManager::CheckCanMove(Character* character, int _x, int _y, Character* playerSt)
+void AIManager::CheckCanMove(shared_ptr<Character> const &character, int _x, int _y, shared_ptr<Character> const &playerSt)
 {
 	if (StageCreate::Instance()->stageList[_y][_x] > 0) return;
 
@@ -255,6 +255,6 @@ void AIManager::CharacterLost(Character* character)
 
 void AIManager::Finalize()
 {
-	if (playerList.empty() == false) playerList.clear();
-	if (enemyList.empty() == false) enemyList.clear();
+	if (_playerList.empty() == false) _playerList.clear();
+	if (_enemyList.empty() == false) _enemyList.clear();
 }

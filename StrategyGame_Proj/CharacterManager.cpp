@@ -17,19 +17,18 @@ void CharacterManager::Initialize()
 
 	// キャラクターの追加
 	for (size_t num = 0; num < PlayerNum; num++) {
-		character.push_back(new Character());
-		//_character.push_back(make_unique<Character>());
+		_character.push_back(make_shared<Character>());
 	}
 
 	// キャラクターの初期化
-	character[0]->Character_Initialize(CHARACTER_DATA_1, NAME_LOAD, "Player", 192, 240);
-	character[1]->Character_Initialize(CHARACTER_DATA_3, NAME_ENEMY1, "Enemy", 144, 240);
-	character[2]->Character_Initialize(CHARACTER_DATA_2, NAME_SUPPORT, "Player", 96, 384);
-	character[3]->Character_Initialize(CHARACTER_DATA_4, NAME_ENEMY2, "Enemy", 336, 96);
+	_character[0]->Character_Initialize(CHARACTER_DATA_1, NAME_LOAD, "Player", 192, 240);
+	_character[1]->Character_Initialize(CHARACTER_DATA_3, NAME_ENEMY1, "Enemy", 144, 240);
+	_character[2]->Character_Initialize(CHARACTER_DATA_2, NAME_SUPPORT, "Player", 96, 384);
+	_character[3]->Character_Initialize(CHARACTER_DATA_4, NAME_ENEMY2, "Enemy", 336, 96);
 
 	// 敵AIの初期化
-	for (Character* _character : character) {
-		AIManager::Instance()->CharacterCount(_character);
+	for (size_t num = 0; num < _character.size(); ++num) {
+		AIManager::Instance()->CharacterCount(_character[num]);
 	}
 
 	StartTurn();
@@ -41,9 +40,9 @@ void CharacterManager::Update(int x, int y)
 	// 攻撃範囲検索
 	GetAttackArea(x, y);
 
-	for (size_t i = 0; i < character.size(); i++) {
+	for (size_t i = 0; i < _character.size(); i++) {
 		// アニメーション
-		character[i]->CharacterAnim();
+		_character[i]->CharacterAnim();
 	}
 
 	// キャラクター移動
@@ -53,21 +52,21 @@ void CharacterManager::Update(int x, int y)
 	if (attack) Attack();
 
 	// 攻撃中のデータ表示
-	if (myCharacter != nullptr && eCharacter != nullptr) {
+	if (_myCharacter != nullptr && _eCharacter != nullptr) {
 		// 攻撃から約0.5秒たったら攻撃終了
 		if (TimeCount::Instance()->GetTimer(500.0f) >= 500.0f) {
-			myCharacter = nullptr;
-			eCharacter = nullptr;
+			_myCharacter.reset();
+			_eCharacter.reset();
 			moveableUnit--;
-			for (size_t num = 0; num < character.size(); num++) {
+			for (size_t num = 0; num < _character.size(); num++) {
 				// 死亡したユニットを除外する
-				if (character[num]->myStatus->isDeath) {
-					delete character[num];
-					character.erase(character.begin() + num);
+				if (_character[num]->myStatus->isDeath) {
+					_character[num].reset();
+					_character.erase(_character.begin() + num);
 					AIManager::Instance()->Initialize();
 					// 敵AIの初期化
-					for (Character* _character : character) {
-						AIManager::Instance()->CharacterCount(_character);
+					for (size_t num = 0; num < _character.size(); ++num) {
+						AIManager::Instance()->CharacterCount(_character[num]);
 					}
 				}
 			}
@@ -75,7 +74,7 @@ void CharacterManager::Update(int x, int y)
 			if (moveableUnit != 0 && playerTurn == false) AIManager::Instance()->Play();
 			return;
 		}
-		DrawAttackParam(myCharacter, eCharacter);
+		DrawAttackParam(_myCharacter, _eCharacter);
 	}
 }
 
@@ -85,27 +84,29 @@ void CharacterManager::StartTurn()
 	playerTurn = !playerTurn;
 	moveableUnit = 0;
 
-	for (size_t num = 0; num < character.size(); num++) {
-		character[num]->TurnStart();
+	for (size_t num = 0; num < _character.size(); num++) {
+		_character[num]->TurnStart();
 
 		// 死亡したユニットを除外する
-		if (character[num]->myStatus->isDeath) {
-			character.erase(character.begin() + num);
+		if (_character[num]->myStatus->isDeath) {
+			_character[num].reset();
+			_character.erase(_character.begin() + num);
 			AIManager::Instance()->Initialize();
 			// 敵AIの初期化
-			for (Character* _character : character) {
-				AIManager::Instance()->CharacterCount(_character);
+			for (size_t num = 0; num < _character.size(); ++num) {
+				AIManager::Instance()->CharacterCount(_character[num]);
 			}
 		}
 		else {
 			// 移動可能なユニットのカウント
 		    // プレイヤー側ユニットの計算
-			if (playerTurn && character[num]->myStatus->myTeam == "Player") moveableUnit++;
+			if (playerTurn && _character[num]->myStatus->myTeam == "Player") moveableUnit++;
 			// 敵側ユニットの計算
-			else if (playerTurn == false && character[num]->myStatus->myTeam == "Enemy") moveableUnit++;
+			else if (playerTurn == false && _character[num]->myStatus->myTeam == "Enemy") moveableUnit++;
 		}
 	}
 
+	AudioManager::Instance()->playSE(SE_TURNSTART);
 	turnAnim = true;
 }
 
@@ -118,26 +119,26 @@ void CharacterManager::DrawCheck(int x, int y)
 		return;
 	}
 
-	for (size_t num = 0; num < character.size(); num++) {
+	for (size_t num = 0; num < _character.size(); num++) {
 		// プレイヤーターン
-		if (playerTurn && character[num]->myStatus->myTeam == "Player") {
+		if (playerTurn && _character[num]->myStatus->myTeam == "Player") {
 			// カーソルが合っているユニットのみ表示
-			if (character[num]->myStatus->PosX == x && character[num]->myStatus->PosY == y) {
-				if (character[num]->myStatus->canMove) {
-					character[num]->myStatus->isSelect = true;
-					character[num]->myStatus->AnimHandle = 4.0f;
+			if (_character[num]->myStatus->PosX == x && _character[num]->myStatus->PosY == y) {
+				if (_character[num]->myStatus->canMove) {
+					_character[num]->myStatus->isSelect = true;
+					_character[num]->myStatus->AnimHandle = 4.0f;
 					isSelect = true;
 					attack = false;
 				}
 			}
 		}
 		// 敵ターン
-		else if (playerTurn == false && character[num]->myStatus->myTeam == "Enemy") {
+		else if (playerTurn == false && _character[num]->myStatus->myTeam == "Enemy") {
 			// カーソルが合っているユニットのみ表示
-			if (character[num]->myStatus->PosX == x && character[num]->myStatus->PosY == y) {
-				if (character[num]->myStatus->canMove) {
-					character[num]->myStatus->isSelect = true;
-					character[num]->myStatus->AnimHandle = 4.0f;
+			if (_character[num]->myStatus->PosX == x && _character[num]->myStatus->PosY == y) {
+				if (_character[num]->myStatus->canMove) {
+					_character[num]->myStatus->isSelect = true;
+					_character[num]->myStatus->AnimHandle = 4.0f;
 					isSelect = true;
 					attack = false;
 				}
@@ -150,14 +151,14 @@ void CharacterManager::DrawCheck(int x, int y)
 // 描画処理
 void CharacterManager::Draw()
 {
-	for (size_t num = 0; num < character.size(); num++) {
+	for (size_t num = 0; num < _character.size(); num++) {
 		// 移動順路を記録しつつ移動範囲と攻撃範囲の描画
-		if (character[num]->myStatus->isSelect) {
-			character[num]->MoveAreaClear(character);
-			character[num]->OldPosX.push_back(character[num]->myStatus->PosX);
-			character[num]->OldPosY.push_back(character[num]->myStatus->PosY);
-			character[num]->MoveRange(character[num]->myStatus->PosX, character[num]->myStatus->PosY, character[num]->myStatus->myParam.MOVERANGE);
-			character[num]->AttackRange();
+		if (_character[num]->myStatus->isSelect) {
+			_character[num]->MoveAreaClear(_character);
+			_character[num]->OldPosX.push_back(_character[num]->myStatus->PosX);
+			_character[num]->OldPosY.push_back(_character[num]->myStatus->PosY);
+			_character[num]->MoveRange(_character[num]->myStatus->PosX, _character[num]->myStatus->PosY, _character[num]->myStatus->myParam.MOVERANGE);
+			_character[num]->AttackRange();
 			return;
 		}
 	}
@@ -169,13 +170,13 @@ void CharacterManager::CharacterMove(int x, int y)
 	bool moveEnd = false;
 
 	// キャラクターの移動
-	for (size_t num = 0; num < character.size(); num++) {
-		if (character[num]->myStatus->isSelect) {
-			isMove = character[num]->CharacterMove(x, y);
+	for (size_t num = 0; num < _character.size(); num++) {
+		if (_character[num]->myStatus->isSelect) {
+			isMove = _character[num]->CharacterMove(x, y);
 
 			// 移動が完了し、攻撃しないなら行動終了
-			if (isMove == false && character[num]->myStatus->canMove == false
-				&& character[num]->myStatus->canAttack == false) {
+			if (isMove == false && _character[num]->myStatus->canMove == false
+				&& _character[num]->myStatus->canAttack == false) {
 				moveableUnit--;
 				moveEnd = true;
 			}
@@ -189,25 +190,25 @@ void CharacterManager::CharacterMove(int x, int y)
 
 // 移動値の取得
 void CharacterManager::GetMoveCount(int x, int y) {
-	for (size_t num = 0; num < character.size(); num++) {
-		character[num]->OldPosX.push_back(x);
-		character[num]->OldPosY.push_back(y);
-		character[num]->moveCount++;
+	for (size_t num = 0; num < _character.size(); num++) {
+		_character[num]->OldPosX.push_back(x);
+		_character[num]->OldPosY.push_back(y);
+		_character[num]->moveCount++;
 	}
 }
 
 void CharacterManager::GetMoveArrow(int x, int y)
 {
 	// 移動順路を描画
-	for (size_t num = 0; num < character.size(); num++) {
-		if (character[num]->myStatus->isSelect) {
-			character[num]->DrawMoveArrow(x, y, 5);
+	for (size_t num = 0; num < _character.size(); num++) {
+		if (_character[num]->myStatus->isSelect) {
+			_character[num]->DrawMoveArrow(x, y, 5);
 
 			// ユニットの位置に戻ったら順路をクリア
-			if (character[num]->myStatus->PosX == x && character[num]->myStatus->PosY == y) {
-				character[num]->OldPosX.clear();
-				character[num]->OldPosY.clear();
-				character[num]->moveCount = 0;
+			if (_character[num]->myStatus->PosX == x && _character[num]->myStatus->PosY == y) {
+				_character[num]->OldPosX.clear();
+				_character[num]->OldPosY.clear();
+				_character[num]->moveCount = 0;
 			}
 		}
 	}
@@ -219,10 +220,10 @@ void CharacterManager::GetAttackArea(int x, int y)
 	if (attackCount != 0) return;
 
 	// 攻撃可能なユニットの取得
-	for (size_t num = 0; num < character.size(); num++) {
-		if (character[num]->myStatus->canAttack) {
-			myCharacter = character[num];
-			myCharacter->AttackableDraw();
+	for (size_t num = 0; num < _character.size(); num++) {
+		if (_character[num]->myStatus->canAttack) {
+			_myCharacter = _character[num];
+			_myCharacter->AttackableDraw();
 			attack = true;
 		}
 	}
@@ -230,11 +231,11 @@ void CharacterManager::GetAttackArea(int x, int y)
 	if (playerTurn == false) return;
 
 	// 攻撃可能な位置のユニットとの攻撃した際の詳細情報の表示
-	for (size_t num = 0; num < character.size(); num++) {
-		if (myCharacter != nullptr && myCharacter->myStatus->canAttack) {
-			if (character[num]->myStatus->PosX == x && character[num]->myStatus->PosY == y
+	for (size_t num = 0; num < _character.size(); num++) {
+		if (_myCharacter != nullptr && _myCharacter->myStatus->canAttack) {
+			if (_character[num]->myStatus->PosX == x && _character[num]->myStatus->PosY == y
 				&& StageCreate::Instance()->onUnit[y / CHIP_SIZE][x / CHIP_SIZE] == "Enemy") {
-				if (myCharacter->myStatus->myTeam != character[num]->myStatus->myTeam) myCharacter->GetAttackDetail(character[num]);
+				if (_myCharacter->myStatus->myTeam != _character[num]->myStatus->myTeam) _myCharacter->GetAttackDetail(_character[num]);
 			}
 		}
 	}
@@ -244,17 +245,17 @@ void CharacterManager::GetAttackArea(int x, int y)
 void CharacterManager::ChoiseAttack(int x, int y)
 {
 	// 選択した位置に敵がいたら攻撃対象のリファレンスを作成
-	for (size_t num = 0; num < character.size(); num++) {
-		if (myCharacter != character[num] && character[num]->myStatus->PosX == x && character[num]->myStatus->PosY == y) {
-			eCharacter = character[num];
-			myCharacter->myStatus->isAttack = true;
+	for (size_t num = 0; num < _character.size(); num++) {
+		if (_myCharacter != _character[num] && _character[num]->myStatus->PosX == x && _character[num]->myStatus->PosY == y) {
+			_eCharacter = _character[num];
+			_myCharacter->myStatus->isAttack = true;
 		}
 
 		// 攻撃可能なユニットがいなかったら終了
 		//if (myCharacter == character[num]) character[num]->myStatus->canAttack = false;
 	}
 	// 選択した位置に敵がいないなら終了
-	if (eCharacter == nullptr) {
+	if (_eCharacter == nullptr) {
 		attack = false;
 		moveableUnit--;
 		if (moveableUnit != 0 && playerTurn == false) AIManager::Instance()->Play();
@@ -265,12 +266,12 @@ void CharacterManager::ChoiseAttack(int x, int y)
 // 攻撃のアニメーション
 void CharacterManager::Attack()
 {
-	if (myCharacter == nullptr || eCharacter == nullptr) return;
+	if (_myCharacter == nullptr || _eCharacter == nullptr) return;
 
 	// 1回目の攻撃
-	if (myCharacter != nullptr && eCharacter != nullptr && attackCount < 1) {
-		if (myCharacter->myStatus->isAttack) attack = myCharacter->AttackAnimation(eCharacter, 1);
-		if (eCharacter->myStatus->isAttack && myCharacter->myStatus->isAttack == false) attack = eCharacter->AttackAnimation(myCharacter, 2);
+	if (_myCharacter != nullptr && _eCharacter != nullptr && attackCount < 1) {
+		if (_myCharacter->myStatus->isAttack) attack = _myCharacter->AttackAnimation(_eCharacter, 1);
+		if (_eCharacter->myStatus->isAttack && _myCharacter->myStatus->isAttack == false) attack = _eCharacter->AttackAnimation(_myCharacter, 2);
 
 		// アニメーションが終わっていないならリターン
 		if (attack) return;
@@ -280,9 +281,9 @@ void CharacterManager::Attack()
 	if(attack == false) attackCount = 3;
 
 	// 2回目の攻撃
-	if (myCharacter != nullptr && eCharacter != nullptr && attackCount > 2) {
-		if (myCharacter->myStatus->isAttack) attack = myCharacter->AttackAnimation(eCharacter, 3);
-		if (eCharacter->myStatus->isAttack&& myCharacter->myStatus->isAttack == false) attack = eCharacter->AttackAnimation(myCharacter, 4);
+	if (_myCharacter != nullptr && _eCharacter != nullptr && attackCount > 2) {
+		if (_myCharacter->myStatus->isAttack) attack = _myCharacter->AttackAnimation(_eCharacter, 3);
+		if (_eCharacter->myStatus->isAttack&& _myCharacter->myStatus->isAttack == false) attack = _eCharacter->AttackAnimation(_myCharacter, 4);
 		
 		// アニメーションが終わっていないならリターン
 		if (attack) return;
@@ -292,13 +293,13 @@ void CharacterManager::Attack()
 	if (attack == false) {
 		TimeCount::Instance()->SetCount();
 		attackCount = 0;
-		myCharacter->myStatus->canAttack = false;
-		eCharacter->myStatus->canAttack = false;
+		_myCharacter->myStatus->canAttack = false;
+		_eCharacter->myStatus->canAttack = false;
 	}
 }
 
 // 攻撃中のデータ表示
-void CharacterManager::DrawAttackParam(Character* attackChara, Character* defenceChara)
+void CharacterManager::DrawAttackParam(shared_ptr<Character> const &attackChara, shared_ptr<Character> const &defenceChara)
 {
 	float drawOffset = 150;
 
@@ -335,27 +336,27 @@ void CharacterManager::DrawAttackParam(Character* attackChara, Character* defenc
 // カメラとのオフセットの計算
 void CharacterManager::SetCameraOffset(int dir, bool horizontal)
 {
-	for (size_t num = 0; num < character.size(); num++) {
-		character[num]->SetCameraOffset(dir, horizontal);
+	for (size_t num = 0; num < _character.size(); num++) {
+		_character[num]->SetCameraOffset(dir, horizontal);
 	}
 }
 
 // 入力した地点のチェック
 void CharacterManager::KeyCheck(int x, int y)
 {
-	for (size_t i = 0; i < character.size(); i++) {
+	for (size_t num = 0; num < _character.size(); num++) {
 		// カーソルが合っていなければ選択状態を解除
-		if (character[i]->myStatus->PosX != x || character[i]->myStatus->PosY != y) {
-			character[i]->OldPosX.clear();
-			character[i]->OldPosY.clear();
-			character[i]->moveCount = 0;
+		if (_character[num]->myStatus->PosX != x || _character[num]->myStatus->PosY != y) {
+			_character[num]->OldPosX.clear();
+			_character[num]->OldPosY.clear();
+			_character[num]->moveCount = 0;
 			isSelect = false;
 		}
 	}
 }
 
 void CharacterManager::Finalize() {
-	if (character.empty() == false) character.clear();
-	if (myCharacter != nullptr) delete myCharacter;
-	if (eCharacter != nullptr) delete eCharacter;
+	if (_character.empty() == false) _character.clear();
+	if (_myCharacter != nullptr) _myCharacter.reset();
+	if (_eCharacter != nullptr) _eCharacter.reset();
 }

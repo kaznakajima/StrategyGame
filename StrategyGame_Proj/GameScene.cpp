@@ -60,7 +60,6 @@ void GameScene::TurnChange(bool playerTurn)
 		WaitTimer(1000);
 		moveX = 672;
 		CharacterManager::Instance()->turnAnim = false;
-		AudioManager::Instance()->playSE(SE_TURNSTART);
 
 		if (playerTurn) { 
 			turnChangeImg = FileManager::Instance()->GetFileHandle(ENEMYTURN_IMG);
