@@ -16,11 +16,6 @@ using namespace std;
 #define STAGE1_WIDTH 720
 #define STAGE1_HEIGHT 480
 
-#define STAGE_LONG_SIZE 100
-
-//#define MAP_SIZEX 15
-//#define MAP_SIZEY 10
-
 #define CHIP_SIZE 48
 
 /*

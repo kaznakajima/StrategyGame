@@ -14,9 +14,6 @@ Character::Character()
 	FileManager::Instance()->GetFileHandle(CAN_MOVE_AREA);
 	FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA);
 	FileManager::Instance()->GetFileHandle(ATTACK_DETAIL);
-	//MoveArea = LoadGraph(CAN_MOVE_AREA);
-	//AttackArea = LoadGraph(CAN_ATTACK_AREA);
-	//AttackDetail = LoadGraph(ATTACK_DETAIL);
 	LoadDivGraph(ARROW, 6, 6, 1, CHIP_SIZE, CHIP_SIZE, ArrowImage);
 
 	for (size_t y = 0; y < StageCreate::Instance()->MAP_SIZEY; y++) {
@@ -67,7 +64,7 @@ Character::Character()
 	 myStatus->myParam.ATTACK_CLT = myStatus->myParam.TECHNIQUE / 2 + Item[0]->myParam.CLT;
 	 // 回避率 (速さパラメータ * 2 + 幸運パラメータ)
 	 myStatus->myParam.ATTACK_AVO = myStatus->myParam.ATTACK_SPEED * 2 + myStatus->myParam.LUCKY;
-	 // 命中率 (武器命中 + 技パラメータ * 2.5)
+	 // 命中率 (武器命中 + 技パラメータ * 2 + 幸運パラメータ / 2)
 	 myStatus->myParam.ATTACK_HIT = Item[0]->myParam.HIT + (int)(myStatus->myParam.TECHNIQUE * 2) + (int)(myStatus->myParam.LUCKY / 2);
  }
 

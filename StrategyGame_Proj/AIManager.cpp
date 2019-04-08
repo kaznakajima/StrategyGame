@@ -65,7 +65,8 @@ void AIManager::MoveSelect(shared_ptr<Character> const &character)
 	// プレイヤーユニットの周囲を検索
 	for (size_t num = 0; num < _playerList.size(); ++num) {
 		int moveX = _playerList[num]->myStatus->PosX, moveY = _playerList[num]->myStatus->PosY;
-		// キャラクターの周囲が移動可能な場合なら移動先に登録
+		// ユニットの周囲が移動可能な場合なら移動先に登録
+		// 右
 		if (moveY / CHIP_SIZE < 9 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE + character->myStatus->AttackRange][moveX / CHIP_SIZE] == true) {
 			ChoiseMovePoint(moveX, moveY + CHIP_SIZE);
 			if (isMove) {
@@ -73,7 +74,8 @@ void AIManager::MoveSelect(shared_ptr<Character> const &character)
 				break;
 			}
 		}
-		// キャラクターの周囲が移動可能な場合なら移動先に登録
+		// ユニットの周囲が移動可能な場合なら移動先に登録
+		// 左
 		if (moveY / CHIP_SIZE > 0 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE - character->myStatus->AttackRange][moveX / CHIP_SIZE] == true) {
 			ChoiseMovePoint(moveX, moveY - CHIP_SIZE);
 			if (isMove) {
@@ -81,7 +83,8 @@ void AIManager::MoveSelect(shared_ptr<Character> const &character)
 				break;
 			}
 		}
-		// キャラクターの周囲が移動可能な場合なら移動先に登録
+		// ユニットの周囲が移動可能な場合なら移動先に登録
+		// 下
 		if (moveX / CHIP_SIZE < 14 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE][moveX / CHIP_SIZE + character->myStatus->AttackRange] == true) {
 			ChoiseMovePoint(moveX + CHIP_SIZE, moveY);
 			if (isMove) {
@@ -89,7 +92,8 @@ void AIManager::MoveSelect(shared_ptr<Character> const &character)
 				break;
 			}
 		}
-		// キャラクターの周囲が移動可能な場合なら移動先に登録
+		// ユニットの周囲が移動可能な場合なら移動先に登録
+		// 上
 		if (moveX / CHIP_SIZE > 0 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE][moveX / CHIP_SIZE - character->myStatus->AttackRange] == true) {
 			ChoiseMovePoint(moveX - CHIP_SIZE, moveY);
 			if (isMove) {
@@ -166,15 +170,18 @@ void AIManager::GetMovePoint(shared_ptr<Character> const &character, int _x, int
 		// プレイヤーからの距離の計算
 		for (size_t num = 0; num < _playerList.size(); ++num) {
 			offsetTotal = 0, _offsetTotal = 0;
+			// 距離の検出
 			offsetX = abs(_x * CHIP_SIZE - _playerList[num]->myStatus->PosX) / CHIP_SIZE;
 			offsetY = abs(_y * CHIP_SIZE - _playerList[num]->myStatus->PosY) / CHIP_SIZE;
 			offsetTotal = offsetX + offsetY;
+			// 現在の最短距離の検出
 			_offsetX = abs(x - _playerList[num]->myStatus->PosX) / CHIP_SIZE;
 			_offsetY = abs(y - _playerList[num]->myStatus->PosY) / CHIP_SIZE;
 			_offsetTotal = _offsetX + _offsetY;
 
 			// 最短距離の更新
 			if (offsetTotal <= _offsetTotal) {
+				// 移動可能化チェック
 				CheckCanMove(character, _playerList[num]->myStatus->PosX / CHIP_SIZE, _playerList[num]->myStatus->PosY / CHIP_SIZE, _playerList[num]);
 				if (isMove == false) {
 					x = moveToX;
@@ -189,10 +196,13 @@ void AIManager::GetMovePoint(shared_ptr<Character> const &character, int _x, int
 	}
 }
 
+// 移動可能な地点かチェックする
 void AIManager::CheckCanMove(shared_ptr<Character> const &character, int _x, int _y, shared_ptr<Character> const &playerSt)
 {
+	// 移動不可能な地点ならリターン
 	if (StageCreate::Instance()->stageList[_y][_x] > 0) return;
 
+	// 最短距離の地点を格納しリターン
 	if (character->moveToPos[_y][_x] == moveCost && StageCreate::Instance()->onUnit[_y][_x] == "NONE") {
 		isMove = true;
 		int disX = abs(_x * CHIP_SIZE - playerSt->myStatus->PosX) / CHIP_SIZE, disY = abs(_y * CHIP_SIZE - playerSt->myStatus->PosY) / CHIP_SIZE;
@@ -205,8 +215,11 @@ void AIManager::CheckCanMove(shared_ptr<Character> const &character, int _x, int
 		return;
 	}
 
+	// 最短距離のユニットとの距離を測る
 	int moveX = (character->myStatus->PosX - _x * CHIP_SIZE) / CHIP_SIZE, moveY = (character->myStatus->PosY - _y * CHIP_SIZE) / CHIP_SIZE;
+
 	if (moveX > character->myStatus->PosX / CHIP_SIZE || moveY > character->myStatus->PosY / CHIP_SIZE) {
+		// ユニットに向かってルートを逆探知していく
 		if (_x + 1 < 14 && StageCreate::Instance()->stageList[_y][_x + 1] <= 0) {
 			CheckCanMove(character, _x + 1, _y, playerSt);
 		}
