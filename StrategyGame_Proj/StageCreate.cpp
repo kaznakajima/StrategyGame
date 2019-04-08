@@ -1,21 +1,20 @@
 #include "StageCreate.h"
 
-// マップの構造体
-struct Cell {
-	// ステージの情報
-	int map_gh;
-	string map_str;
-};
-
-// マップの状態を保存
-vector<vector<Cell>> cell;
-
+// コンストラクタ
 StageCreate::StageCreate()
 {
+	
+}
+
+// ステージの初期化
+void StageCreate::Stage_Initialize()
+{
+	// 配列の初期化
 	stageList = vector<vector<int>>(MAP_SIZEY, vector<int>(MAP_SIZEX, 0));
 	onUnit = vector<vector<string>>(MAP_SIZEY, vector<string>(MAP_SIZEX, "NONE"));
 	checkMove = vector<vector<bool>>(MAP_SIZEY, vector<bool>(MAP_SIZEX, false));
 	cell = vector<vector<Cell>>(MAP_SIZEY, vector<Cell>(MAP_SIZEX));
+	terrain = vector<vector<TERRAIN_PARAM>>(MAP_SIZEY, vector<TERRAIN_PARAM>(MAP_SIZEX));
 }
 
 void StageCreate::Open(string pass)
@@ -23,7 +22,7 @@ void StageCreate::Open(string pass)
 	// ファイルの列
 	int width = 0;
 	// ファイルの行
-	int height = 0;
+	int height = -1;
 
 	ifstream ifs(pass);
 	string str = "";
@@ -34,14 +33,24 @@ void StageCreate::Open(string pass)
 		istringstream stream(str);
 
 		while (getline(stream, tmp, ',')) {
-			// 文字列を保存
-			cell[height][width].map_str = tmp;
-			// 文字列をint型に変更
-			int num = atoi(cell[height][width].map_str.c_str());
-			// データを保存
-			cell[height][width].map_gh = num;
-			// 次の文字へ
-			width++;
+			if (height == -1) {
+				if (width == 0) MAP_SIZEX = atoi(tmp.c_str());
+				else { 
+					MAP_SIZEY = atoi(tmp.c_str()); 
+					Stage_Initialize();
+				}
+				width++;
+			}
+			else {
+				// 文字列をint型に変更
+				int num = atoi(tmp.c_str());
+				// データを保存
+				cell[height][width].map_gh = num;
+				// 地形効果をセット
+				SetTerrainParam(width, height, cell[height][width].map_gh);
+				// 次の文字へ
+				width++;
+			}
 		}
 
 		// 先頭へ
@@ -69,4 +78,82 @@ void StageCreate::StageUpdate(int x, int y)
 void StageCreate::CheckOnUnit(int x, int y, string str)
 {
 	onUnit[y][x] = str;
+}
+
+// 地形効果をセットする
+void StageCreate::SetTerrainParam(int x, int y, int paramData)
+{
+	TERRAIN_PARAM _param;
+	fstream file;
+	switch (paramData)
+	{
+	// 門
+	case 0:
+		file.open(FileManager::Instance()->GetDataName(TERRAIN_GATE), ios::in | ios::binary);
+		file.read((char*)&_param, sizeof(_param));
+		terrain[y][x].DEF = _param.DEF;
+		terrain[y][x].AVO = _param.AVO;
+
+		// 名前を保存
+		cell[y][x].map_str = FileManager::Instance()->GetFileName(TERRAIN_GATE);
+
+		file.close();
+		break;
+	// 森
+	case -2:
+		file.open(FileManager::Instance()->GetDataName(TERRAIN_FOREST), ios::in | ios::binary);
+		file.read((char*)&_param, sizeof(_param));
+		terrain[y][x].DEF = _param.DEF;
+		terrain[y][x].AVO = _param.AVO;
+
+		// 名前を保存
+		cell[y][x].map_str = FileManager::Instance()->GetFileName(TERRAIN_FOREST);
+
+		file.close();
+		break;
+	// 家
+	case -3:
+		file.open(FileManager::Instance()->GetDataName(TERRAIN_HOUSE), ios::in | ios::binary);
+		file.read((char*)&_param, sizeof(_param));
+		terrain[y][x].DEF = _param.DEF;
+		terrain[y][x].AVO = _param.AVO;
+
+		// 名前を保存
+		cell[y][x].map_str = FileManager::Instance()->GetFileName(TERRAIN_HOUSE);
+
+		file.close();
+		break;
+	// 砦
+	case -4:
+		file.open(FileManager::Instance()->GetDataName(TERRAIN_FORT), ios::in | ios::binary);
+		file.read((char*)&_param, sizeof(_param));
+		terrain[y][x].DEF = _param.DEF;
+		terrain[y][x].AVO = _param.AVO;
+
+		// 名前を保存
+		cell[y][x].map_str = FileManager::Instance()->GetFileName(TERRAIN_FORT);
+
+		file.close();
+		break;
+	// 地形効果なし
+	default:
+		terrain[y][x].DEF = 0;
+		terrain[y][x].AVO = 0;
+		cell[y][x].map_str = "--";
+		break;
+	}
+}
+
+// 地形効果を取得する
+int StageCreate::GetTerrainParam(int x, int y, string _param)
+{
+	int returnParam = 0;
+	if (_param == "DEF") {
+		returnParam = terrain[y][x].DEF;
+	}
+	else if (_param == "AVO") {
+		returnParam = terrain[y][x].AVO;
+	}
+
+	return returnParam;
 }

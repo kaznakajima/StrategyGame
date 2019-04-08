@@ -25,15 +25,15 @@ Character::Character()
 	}
 }
 
- void Character::Character_Initialize(string pass, string name, string team, int posX, int posY)
+ void Character::Character_Initialize(string pass, string team, int posX, int posY)
 {
 	 //if (status == nullptr) return;
 
-	 GetCharacterParam(pass);
+	 GetCharacterParam(FileManager::Instance()->GetDataName(pass));
 
 	 // ステータス設定
 	 myStatus->myData = pass;
-	 myStatus->NAME = name;
+	 myStatus->NAME = FileManager::Instance()->GetFileName(pass);
 	 myStatus->PosX = posX;
 	 myStatus->PosY = posY;
 	 myStatus->_PosX = posX;
@@ -99,6 +99,10 @@ void Character::CharacterAnim()
 
 	// xPos, yPosの位置にキャラクターを描画
 	DrawGraph(myStatus->PosX, myStatus->PosY, myStatus->Image[(int)myStatus->AnimHandle], true);
+
+	DrawFormatString(myStatus->PosX, myStatus->PosY, GetColor(0, 0, 0), "%d, %d",
+		StageCreate::Instance()->GetTerrainParam(myStatus->PosX / CHIP_SIZE, myStatus->PosY / CHIP_SIZE, "DEF"),
+		StageCreate::Instance()->GetTerrainParam(myStatus->PosX / CHIP_SIZE, myStatus->PosY / CHIP_SIZE, "AVO"));
 
 	// 選択中でないユニットの位置にチェック
 	if (myStatus->isSelect == false) StageCreate::Instance()->onUnit[myStatus->PosY / CHIP_SIZE][myStatus->PosX / CHIP_SIZE] = myStatus->myTeam;
@@ -428,18 +432,22 @@ void Character::GetAttackDetail(shared_ptr<Character> const &eCharacter)
 	if (eCharacter->Item.empty() == false) eCharacter->myStatus->myParam.ATTACK_STR = eCharacter->myStatus->myParam.POWER + eCharacter->Item[0]->myParam.POWER;
 	else eCharacter->myStatus->myParam.ATTACK_STR = 0;
 
-	int mySTR = myStatus->myParam.ATTACK_STR - eCharacter->myStatus->myParam.DEFENCE;
+	int mySTR = myStatus->myParam.ATTACK_STR - (eCharacter->myStatus->myParam.DEFENCE +
+		StageCreate::Instance()->GetTerrainParam(eCharacter->myStatus->PosX / CHIP_SIZE, eCharacter->myStatus->PosY / CHIP_SIZE, "DEF"));
 	if (mySTR < 0) mySTR = 0;
-	int eSTR = eCharacter->myStatus->myParam.ATTACK_STR - myStatus->myParam.DEFENCE;
+	int eSTR = eCharacter->myStatus->myParam.ATTACK_STR - (myStatus->myParam.DEFENCE +
+		StageCreate::Instance()->GetTerrainParam(myStatus->PosX / CHIP_SIZE, myStatus->PosY / CHIP_SIZE, "DEF"));;
 	if (eSTR < 0) eSTR = 0;
 
 	// 速さ判定(4以上大きければ2回攻撃)
 	int mySPD = myStatus->myParam.SPEED - eCharacter->myStatus->myParam.SPEED;
 
 	// 命中力 (攻撃側の命中率 - 守備側の回避率)
-	int myHitness = myStatus->myParam.ATTACK_HIT - eCharacter->myStatus->myParam.ATTACK_AVO;
+	int myHitness = myStatus->myParam.ATTACK_HIT - (eCharacter->myStatus->myParam.ATTACK_AVO +
+		StageCreate::Instance()->GetTerrainParam(eCharacter->myStatus->PosX / CHIP_SIZE, eCharacter->myStatus->PosY / CHIP_SIZE, "AVO"));
 	if (myHitness > 100) myHitness = 100;
-	int eHitness = eCharacter->myStatus->myParam.ATTACK_HIT - eCharacter->myStatus->myParam.ATTACK_AVO;
+	int eHitness = eCharacter->myStatus->myParam.ATTACK_HIT - (myStatus->myParam.ATTACK_AVO +
+		StageCreate::Instance()->GetTerrainParam(myStatus->PosX / CHIP_SIZE, myStatus->PosY / CHIP_SIZE, "AVO"));
 	if (eHitness > 100) eHitness = 100;
 
 	int drawOffset = 0;
@@ -541,7 +549,8 @@ void Character::CharacterAttack(shared_ptr<Character> const &eCharacter, int cou
 	else eCharacter->myStatus->myParam.ATTACK_STR = eCharacter->myStatus->myParam.POWER;
 
 	// ダメージ計算
-	int damage = myStatus->myParam.ATTACK_STR - eCharacter->myStatus->myParam.DEFENCE;
+	int damage = myStatus->myParam.ATTACK_STR - (eCharacter->myStatus->myParam.DEFENCE + 
+		StageCreate::Instance()->GetTerrainParam(eCharacter->myStatus->PosX / CHIP_SIZE, eCharacter->myStatus->PosY / CHIP_SIZE, "DEF"));
 	// マイナスは0
 	if (damage < 0) damage = 0;
 
@@ -549,7 +558,8 @@ void Character::CharacterAttack(shared_ptr<Character> const &eCharacter, int cou
 	myStatus->myParam.ATTACK_SPEED = myStatus->myParam.SPEED - eCharacter->myStatus->myParam.SPEED;
 
 	// 命中力 (攻撃側の命中率 - 守備側の回避率)
-	int myHitness = myStatus->myParam.ATTACK_HIT - eCharacter->myStatus->myParam.ATTACK_AVO;
+	int myHitness = myStatus->myParam.ATTACK_HIT - (eCharacter->myStatus->myParam.ATTACK_AVO + 
+		StageCreate::Instance()->GetTerrainParam(eCharacter->myStatus->PosX / CHIP_SIZE, eCharacter->myStatus->PosY / CHIP_SIZE, "AVO"));
 	if (myHitness > 100) myHitness = 100;
 
 	// 確率（命中力）
@@ -649,7 +659,7 @@ void Character::LevelUp()
 {
 	// ファイルを開く
 	fstream file;
-	file.open(myStatus->myData, ios::binary | ios::out);
+	file.open(FileManager::Instance()->GetDataName(myStatus->myData), ios::binary | ios::out);
 	file.write((char*)&myStatus->myParam, sizeof(myStatus->myParam));
 
 	file.close();

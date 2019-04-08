@@ -73,6 +73,25 @@ void FileManager::LoadFile(string file, int numAll, int numX, int numY, int size
 	}
 }
 
+// データネームの取得
+string FileManager::GetDataName(string file)
+{
+	string directory, extension;
+	int handle;
+
+	//拡張子
+	extension = GetExtension(file);
+
+	if (extension == "dat") {
+		directory = CHARADATA_DIRECTORY + file;
+	}
+	else if (extension == "dat_t") {
+		directory = TERRAINDATA_DIRECTORY + file;
+	}
+
+	return directory;
+}
+
 // ロードできたかどうか
 bool FileManager::LoadCheck(string key)
 {

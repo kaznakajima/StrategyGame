@@ -21,10 +21,10 @@ void CharacterManager::Initialize()
 	}
 
 	// キャラクターの初期化
-	_character[0]->Character_Initialize(CHARACTER_DATA_1, NAME_LOAD, "Player", 192, 240);
-	_character[1]->Character_Initialize(CHARACTER_DATA_3, NAME_ENEMY1, "Enemy", 144, 240);
-	_character[2]->Character_Initialize(CHARACTER_DATA_2, NAME_SUPPORT, "Player", 96, 384);
-	_character[3]->Character_Initialize(CHARACTER_DATA_4, NAME_ENEMY2, "Enemy", 336, 96);
+	_character[0]->Character_Initialize(CHARACTER_DATA_1, "Player", 240, 240);
+	_character[1]->Character_Initialize(CHARACTER_DATA_3, "Enemy", 144, 240);
+	_character[2]->Character_Initialize(CHARACTER_DATA_2, "Player", 96, 384);
+	_character[3]->Character_Initialize(CHARACTER_DATA_4, "Enemy", 336, 96);
 
 	// 敵AIの初期化
 	for (size_t num = 0; num < _character.size(); ++num) {

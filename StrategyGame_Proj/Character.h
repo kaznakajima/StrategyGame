@@ -4,7 +4,6 @@
 #include "AudioManager.h"
 #include "Weapon.h"
 #include "TimeCount.h"
-#include "FileManager.h"
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
@@ -83,7 +82,7 @@ public:
 	int moveCount;
 
 	// ‰Šú‰»
-	void Character_Initialize(string pass, string name, string team, int posX, int posY);
+	void Character_Initialize(string pass, string team, int posX, int posY);
 	// ƒpƒ‰ƒ[ƒ^æ“¾
 	void GetCharacterParam(string pass);
 

@@ -22,10 +22,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	Init();
 
+	StageCreate::Instance()->Open(STAGE_FILE_1);
+
 	// シーン管理クラスのインスタンス
 	unique_ptr<Scene> c_Scene = make_unique<Scene>();
-
-	StageCreate::Instance()->Open(STAGE_FILE_1);
 
 	while (ProcessMessage() == 0 && ClearDrawScreen() == 0 && KeyInput::Instance()->UpdateInput() == 0)
 	{
