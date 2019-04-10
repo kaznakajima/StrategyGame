@@ -12,6 +12,7 @@ using namespace std;
 #define CAN_MOVE_AREA "CanMove.png"
 #define CAN_ATTACK_AREA "CanAttack.png"
 #define ATTACK_DETAIL "AttackGraph.png"
+#define CHARACTER_DETAIL "CharacterParam.png"
 #define ARROW "Resources\\image\\Arrow.png"
 #define CHARACTER_IMG "Resources\\image\\_Character_40×40.png"
 
@@ -46,21 +47,19 @@ public:
 	typedef struct {
 		PARAM myParam;               // 自身のパラメータ
 		string NAME;                      // ユニット名
-		string myData;                    // 自身のデータ
-		string myTeam;                   // 自身の陣営
-		int PosX;                             // 現在のx座標
-		int PosY;                             // 現在のy座標
-		int _PosX;                           // 移動前のx座標
-		int _PosY;                           // 移動前のy座標
+		string myData;                   // 自身のパラメータデータ
+		string myTeam;                  // 自身の陣営
+		int xPos, yPos;                   // 現在のx座標, 現在のy座標
+		int _xPos, _yPos;               // 移動前のx座標, 移動前のy座標                           
 		int Image[20];                   // キャラクター用画像
 		float AnimHandle;              // アニメーション用変数
 		int AttackRange;                // 攻撃範囲
 		bool animReset;                // アニメーションのリセット 
 		bool isSelect;                    // 選択されているか
-		bool canMove = true;       // 移動可能か
-		bool isAttack;                  // 攻撃中か
-		bool canAttack = false;   // 攻撃可能か
-		bool isDeath = false;      // 死亡判定
+		bool canMove = true;        // 移動可能か
+		bool isAttack;                   // 攻撃中か
+		bool canAttack = false;     // 攻撃可能か
+		bool isDeath = false;        // 死亡判定
 	}STATUS ;
 
 	// 道筋
@@ -85,6 +84,11 @@ public:
 	void Character_Initialize(string pass, string team, int posX, int posY);
 	// パラメータ取得
 	void GetCharacterParam(string pass);
+	// ユニットの詳細情報表示
+	void DrawCharacterDetail();
+
+	// ユニットの位置を取得
+	VECTOR GetCharacterPosition();
 
 	// 描画
 	void SpriteDraw(int x, int y, int img);

@@ -18,6 +18,11 @@ public:
 	// 生成するキャラクター
 	vector<shared_ptr<Character>> _character;
 
+	// 敵(AI)キャラクターのリスト
+	vector<shared_ptr<Character>> _enemyList;
+	// プレイヤー側のキャラクターのリスト
+	vector<shared_ptr<Character>> _playerList;
+
 	// 攻撃するユニット
 	int attackUnitNum = 0;
 	shared_ptr<Character> _myCharacter = nullptr;
@@ -52,6 +57,13 @@ public:
 
 	// 入力検知
 	void KeyCheck(int x, int y);
+	// ユニットの詳細情報検索
+	bool isDetail;
+	void CheckDetail(int x, int y);
+	// 現在チェック中のユニット
+	shared_ptr<Character> checkCharacter = nullptr;
+	// チェックするユニットの変更
+	void ChangeDetailCharacter(shared_ptr<Character> const &character, int _index);
 
 	// 移動値の取得
 	void GetMoveCount(int x, int y);
@@ -76,6 +88,11 @@ public:
 	void Finalize();
 
 private:
+	// ユニットリストのリセット
+	void ResetCharacterList();
+	// 現在の敵(AI)、プレイヤーのカウント
+	void CharacterCount(shared_ptr<Character> const &character);
+
 	// HP用画像
 	int HpBar;
 	int HpBarBox;

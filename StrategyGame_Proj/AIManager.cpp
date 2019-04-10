@@ -13,8 +13,8 @@ void AIManager::Initialize()
 {
 	_myCharacter = nullptr;
 	// リストの初期化
-	_playerList.clear();
-	_enemyList.clear();
+	_playerList.clear(); _playerList = CharacterManager::Instance()->_playerList;
+	_enemyList.clear(); _enemyList = CharacterManager::Instance()->_enemyList;
 }
 
 // 更新
@@ -23,13 +23,6 @@ void AIManager::Update()
 	if (_myCharacter != nullptr) {
 		if (_myCharacter->myStatus->canAttack) CharacterManager::Instance()->DrawCheck(xPos, yPos);
 	}
-}
-
-// 現在の敵(AI)、プレイヤーのカウント
-void AIManager::CharacterCount(shared_ptr<Character> const &character)
-{
-	if (character->myStatus->myTeam == "Player") _playerList.push_back(character);
-	else if (character->myStatus->myTeam == "Enemy") _enemyList.push_back(character);
 }
 
 // 初回起動
@@ -54,17 +47,17 @@ void AIManager::Play()
 // 移動先の選択
 void AIManager::MoveSelect(shared_ptr<Character> const &character)
 {
-	x = character->myStatus->PosX, y = character->myStatus->PosY;
+	x = character->myStatus->xPos, y = character->myStatus->yPos;
 
 	CharacterManager::Instance()->DrawCheck(x, y);
 
 	character->MoveAreaClear(CharacterManager::Instance()->_character);
 
-	character->MoveRange(character->myStatus->PosX, character->myStatus->PosY, character->myStatus->myParam.MOVERANGE);
+	character->MoveRange(character->myStatus->xPos, character->myStatus->yPos, character->myStatus->myParam.MOVERANGE);
 
 	// プレイヤーユニットの周囲を検索
 	for (size_t num = 0; num < _playerList.size(); ++num) {
-		int moveX = _playerList[num]->myStatus->PosX, moveY = _playerList[num]->myStatus->PosY;
+		int moveX = _playerList[num]->myStatus->xPos, moveY = _playerList[num]->myStatus->yPos;
 		// ユニットの周囲が移動可能な場合なら移動先に登録
 		// 右
 		if (moveY / CHIP_SIZE < 9 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE + character->myStatus->AttackRange][moveX / CHIP_SIZE] == true) {
@@ -142,8 +135,8 @@ int AIManager::GetDistancePlayer(shared_ptr<Character> const &character, vector<
 	// プレイヤーからの距離の計算
 	for (size_t num = 0; num < _playerList.size(); ++num) {
 		offsetTotal = 0;
-		offsetX = abs(character->myStatus->PosX - _playerList[num]->myStatus->PosX) / CHIP_SIZE;
-		offsetY = abs(character->myStatus->PosY - _playerList[num]->myStatus->PosY) / CHIP_SIZE;
+		offsetX = abs(character->myStatus->xPos - _playerList[num]->myStatus->xPos) / CHIP_SIZE;
+		offsetY = abs(character->myStatus->yPos - _playerList[num]->myStatus->yPos) / CHIP_SIZE;
 		offsetTotal = offsetX + offsetY;
 
 		// 最短距離の更新
@@ -171,12 +164,12 @@ void AIManager::GetMovePoint(shared_ptr<Character> const &character, int _x, int
 		for (size_t num = 0; num < _playerList.size(); ++num) {
 			offsetTotal = 0, _offsetTotal = 0;
 			// 距離の検出
-			offsetX = abs(_x * CHIP_SIZE - _playerList[num]->myStatus->PosX) / CHIP_SIZE;
-			offsetY = abs(_y * CHIP_SIZE - _playerList[num]->myStatus->PosY) / CHIP_SIZE;
+			offsetX = abs(_x * CHIP_SIZE - _playerList[num]->myStatus->xPos) / CHIP_SIZE;
+			offsetY = abs(_y * CHIP_SIZE - _playerList[num]->myStatus->yPos) / CHIP_SIZE;
 			offsetTotal = offsetX + offsetY;
 			// 現在の最短距離の検出
-			_offsetX = abs(x - _playerList[num]->myStatus->PosX) / CHIP_SIZE;
-			_offsetY = abs(y - _playerList[num]->myStatus->PosY) / CHIP_SIZE;
+			_offsetX = abs(x - _playerList[num]->myStatus->xPos) / CHIP_SIZE;
+			_offsetY = abs(y - _playerList[num]->myStatus->yPos) / CHIP_SIZE;
 			_offsetTotal = _offsetX + _offsetY;
 
 			// 最短距離の更新
@@ -217,7 +210,7 @@ void AIManager::CheckCanMove(shared_ptr<Character> const &character, int _x, int
 	}*/
 
 	// 最短距離のユニットとの距離を測る
-	int moveX = (character->myStatus->PosX - _x * CHIP_SIZE) / CHIP_SIZE, moveY = (character->myStatus->PosY - _y * CHIP_SIZE) / CHIP_SIZE;
+	int moveX = (character->myStatus->xPos - _x * CHIP_SIZE) / CHIP_SIZE, moveY = (character->myStatus->yPos - _y * CHIP_SIZE) / CHIP_SIZE;
 	int offset = moveX + moveY;
 
 	// 最短距離の地点を格納しリターン

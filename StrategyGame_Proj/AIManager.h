@@ -26,9 +26,6 @@ public:
 	// 更新
 	void Update();
 
-	// 現在の敵(AI)、プレイヤーのカウント
-	void CharacterCount(shared_ptr<Character> const &character);
-
 	// 初回起動
 	void Play();
 private:

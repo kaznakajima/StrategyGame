@@ -2,7 +2,7 @@
 #include "AIManager.h"
 
 // 生成するキャラクター数
-const int PlayerNum = 4;
+const int PlayerNum = 5;
 
 CharacterManager::~CharacterManager() {
 	//Finalize();
@@ -28,10 +28,25 @@ void CharacterManager::Initialize()
 
 	// 敵AIの初期化
 	for (size_t num = 0; num < _character.size(); ++num) {
-		AIManager::Instance()->CharacterCount(_character[num]);
+		CharacterCount(_character[num]);
 	}
+	AIManager::Instance()->Initialize();
 
 	StartTurn();
+}
+
+// ユニットリストのリセット
+void CharacterManager::ResetCharacterList()
+{
+	_playerList.clear();
+	_enemyList.clear();
+}
+
+// // 現在の敵(AI)、プレイヤーのカウント
+void CharacterManager::CharacterCount(shared_ptr<Character> const & character)
+{
+	if (character->myStatus->myTeam == "Player") _playerList.push_back(character);
+	else if (character->myStatus->myTeam == "Enemy") _enemyList.push_back(character);
 }
 
 // キャラクター更新
@@ -40,10 +55,13 @@ void CharacterManager::Update(int x, int y)
 	// 攻撃範囲検索
 	GetAttackArea(x, y);
 
-	for (size_t i = 0; i < _character.size(); i++) {
+	for (size_t num = 0; num < _character.size(); ++num) {
 		// アニメーション
-		_character[i]->CharacterAnim();
+		_character[num]->CharacterAnim();
 	}
+
+	// 詳細情報描画
+	if (checkCharacter != nullptr) checkCharacter->DrawCharacterDetail();
 
 	// キャラクター移動
 	if (isSelect == false) CharacterMove(x, y);
@@ -63,11 +81,12 @@ void CharacterManager::Update(int x, int y)
 				if (_character[num]->myStatus->isDeath) {
 					_character[num].reset();
 					_character.erase(_character.begin() + num);
-					AIManager::Instance()->Initialize();
-					// 敵AIの初期化
+					// ユニットリストの初期化
+					ResetCharacterList();
 					for (size_t num = 0; num < _character.size(); ++num) {
-						AIManager::Instance()->CharacterCount(_character[num]);
+						CharacterCount(_character[num]);
 					}
+					AIManager::Instance()->Initialize();
 				}
 			}
 			if (moveableUnit <= 0) { StartTurn(); return; }
@@ -91,11 +110,12 @@ void CharacterManager::StartTurn()
 		if (_character[num]->myStatus->isDeath) {
 			_character[num].reset();
 			_character.erase(_character.begin() + num);
-			AIManager::Instance()->Initialize();
-			// 敵AIの初期化
+			// ユニットリストの初期化
+			ResetCharacterList();
 			for (size_t num = 0; num < _character.size(); ++num) {
-				AIManager::Instance()->CharacterCount(_character[num]);
+				CharacterCount(_character[num]);
 			}
+			AIManager::Instance()->Initialize();
 		}
 		else {
 			// 移動可能なユニットのカウント
@@ -123,7 +143,7 @@ void CharacterManager::DrawCheck(int x, int y)
 		// プレイヤーターン
 		if (playerTurn && _character[num]->myStatus->myTeam == "Player") {
 			// カーソルが合っているユニットのみ表示
-			if (_character[num]->myStatus->PosX == x && _character[num]->myStatus->PosY == y) {
+			if (_character[num]->myStatus->xPos == x && _character[num]->myStatus->yPos == y) {
 				if (_character[num]->myStatus->canMove) {
 					_character[num]->myStatus->isSelect = true;
 					_character[num]->myStatus->AnimHandle = 4.0f;
@@ -135,7 +155,7 @@ void CharacterManager::DrawCheck(int x, int y)
 		// 敵ターン
 		else if (playerTurn == false && _character[num]->myStatus->myTeam == "Enemy") {
 			// カーソルが合っているユニットのみ表示
-			if (_character[num]->myStatus->PosX == x && _character[num]->myStatus->PosY == y) {
+			if (_character[num]->myStatus->xPos == x && _character[num]->myStatus->yPos == y) {
 				if (_character[num]->myStatus->canMove) {
 					_character[num]->myStatus->isSelect = true;
 					_character[num]->myStatus->AnimHandle = 4.0f;
@@ -155,9 +175,9 @@ void CharacterManager::Draw()
 		// 移動順路を記録しつつ移動範囲と攻撃範囲の描画
 		if (_character[num]->myStatus->isSelect) {
 			_character[num]->MoveAreaClear(_character);
-			_character[num]->OldPosX.push_back(_character[num]->myStatus->PosX);
-			_character[num]->OldPosY.push_back(_character[num]->myStatus->PosY);
-			_character[num]->MoveRange(_character[num]->myStatus->PosX, _character[num]->myStatus->PosY, _character[num]->myStatus->myParam.MOVERANGE);
+			_character[num]->OldPosX.push_back(_character[num]->myStatus->xPos);
+			_character[num]->OldPosY.push_back(_character[num]->myStatus->yPos);
+			_character[num]->MoveRange(_character[num]->myStatus->xPos, _character[num]->myStatus->yPos, _character[num]->myStatus->myParam.MOVERANGE);
 			_character[num]->AttackRange();
 			return;
 		}
@@ -205,7 +225,7 @@ void CharacterManager::GetMoveArrow(int x, int y)
 			_character[num]->DrawMoveArrow(x, y, 5);
 
 			// ユニットの位置に戻ったら順路をクリア
-			if (_character[num]->myStatus->PosX == x && _character[num]->myStatus->PosY == y) {
+			if (_character[num]->myStatus->xPos == x && _character[num]->myStatus->yPos == y) {
 				_character[num]->OldPosX.clear();
 				_character[num]->OldPosY.clear();
 				_character[num]->moveCount = 0;
@@ -233,7 +253,7 @@ void CharacterManager::GetAttackArea(int x, int y)
 	// 攻撃可能な位置のユニットとの攻撃した際の詳細情報の表示
 	for (size_t num = 0; num < _character.size(); num++) {
 		if (_myCharacter != nullptr && _myCharacter->myStatus->canAttack) {
-			if (_character[num]->myStatus->PosX == x && _character[num]->myStatus->PosY == y
+			if (_character[num]->myStatus->xPos == x && _character[num]->myStatus->yPos == y
 				&& StageCreate::Instance()->onUnit[y / CHIP_SIZE][x / CHIP_SIZE] == "Enemy") {
 				if (_myCharacter->myStatus->myTeam != _character[num]->myStatus->myTeam) _myCharacter->GetAttackDetail(_character[num]);
 			}
@@ -246,7 +266,7 @@ void CharacterManager::ChoiseAttack(int x, int y)
 {
 	// 選択した位置に敵がいたら攻撃対象のリファレンスを作成
 	for (size_t num = 0; num < _character.size(); num++) {
-		if (_myCharacter != _character[num] && _character[num]->myStatus->PosX == x && _character[num]->myStatus->PosY == y) {
+		if (_myCharacter != _character[num] && _character[num]->myStatus->xPos == x && _character[num]->myStatus->yPos == y) {
 			_eCharacter = _character[num];
 			_myCharacter->myStatus->isAttack = true;
 		}
@@ -304,11 +324,11 @@ void CharacterManager::DrawAttackParam(shared_ptr<Character> const &attackChara,
 	float drawOffset = 150;
 
 	// 攻撃側ユニットの位置に応じて表示位置を変更
-	if (attackChara->myStatus->_PosY >= STAGE1_HEIGHT / 2) {
+	if (attackChara->myStatus->_yPos >= STAGE1_HEIGHT / 2) {
 		drawOffset = -100;
 		DrawRotaGraph(336, 240 + (int)drawOffset, 1.0f, 0.0f, FileManager::Instance()->GetFileHandle(DAMAGE_DETAIL), true);
 	}
-	else if (attackChara->myStatus->_PosY < STAGE1_HEIGHT / 2) {
+	else if (attackChara->myStatus->_yPos < STAGE1_HEIGHT / 2) {
 		DrawRotaGraph(336, 240 + (int)drawOffset, 1.0f, 0.0f, FileManager::Instance()->GetFileHandle(DAMAGE_DETAIL), true);
 	}
 
@@ -346,12 +366,62 @@ void CharacterManager::KeyCheck(int x, int y)
 {
 	for (size_t num = 0; num < _character.size(); num++) {
 		// カーソルが合っていなければ選択状態を解除
-		if (_character[num]->myStatus->PosX != x || _character[num]->myStatus->PosY != y) {
+		if (_character[num]->myStatus->xPos != x || _character[num]->myStatus->yPos != y) {
 			_character[num]->OldPosX.clear();
 			_character[num]->OldPosY.clear();
 			_character[num]->moveCount = 0;
 			isSelect = false;
 		}
+	}
+}
+
+void CharacterManager::CheckDetail(int x, int y)
+{
+	// 現在詳細情報を描画しているなら閉じる
+	if (isDetail) { 
+		isDetail = false; 
+		checkCharacter = nullptr; 
+		return; 
+	}
+
+	// カーソルが合っていれば詳細情報描画
+	for (size_t num = 0; num < _character.size(); num++) {
+		if (_character[num]->myStatus->xPos == x && _character[num]->myStatus->yPos == y) {
+			isDetail = true;
+			checkCharacter = _character[num];
+		}
+	}
+}
+
+// チェックするユニットの変更
+void CharacterManager::ChangeDetailCharacter(shared_ptr<Character> const & character, int _index)
+{
+	// インデックス番号
+	int index = 0;
+	// 最初にチェックしたユニットの陣営側だけをチェック
+	if (character->myStatus->myTeam == "Player") {
+		// インデックス番号の取得
+		for (int num = 0; num < _playerList.size(); ++num) {
+			if (_playerList[num] == character) index = num;
+		}
+		// 次の要素へ
+		index += _index;
+		// 要素数を超えないように調整
+		if (index == _playerList.size()) index = 0;
+		else if (index < 0) index = _playerList.size() - 1;
+		checkCharacter = _playerList[index];
+	}
+	else if (character->myStatus->myTeam == "Enemy") {
+		// インデックス番号の取得
+		for (int num = 0; num < _enemyList.size(); ++num) {
+			if (_enemyList[num] == character) index = num;
+		}
+		// 次の要素へ
+		index += _index;
+		// 要素数を超えないように調整
+		if (index == _enemyList.size()) index = 0;
+		else if (index < 0) index = _enemyList.size() - 1;
+		checkCharacter = _enemyList[index];
 	}
 }
 
