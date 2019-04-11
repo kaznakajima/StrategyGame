@@ -71,7 +71,17 @@ Character::Character()
  {
 	 DrawGraph(0, 0, FileManager::Instance()->GetFileHandle(CHARACTER_DETAIL), true);
 
-	 DrawFormatString(160, 300, GetColor(0, 0, 0), myStatus->NAME.c_str());
+	 DrawFormatString(140, 325, GetColor(0, 0, 0), myStatus->NAME.c_str());
+	 DrawFormatString(48, 380, GetColor(0, 0, 0), "Lv_%d", myStatus->myParam.LEVEL);
+	 DrawFormatString(48, 400, GetColor(0, 0, 0), "HP_%d / %d", myStatus->myParam.HP, myStatus->myParam.MaxHP);
+	 DrawFormatString(400, 48, GetColor(0, 0, 0), "力_%d", myStatus->myParam.POWER);
+	 DrawFormatString(400, 96, GetColor(0, 0, 0), "技_%d", myStatus->myParam.TECHNIQUE);
+	 DrawFormatString(400, 144, GetColor(0, 0, 0), "速さ_%d", myStatus->myParam.SPEED);
+	 DrawFormatString(400, 192, GetColor(0, 0, 0), "幸運_%d", myStatus->myParam.LUCKY);
+	 DrawFormatString(400, 240, GetColor(0, 0, 0), "守備_%d", myStatus->myParam.DEFENCE);
+	 DrawFormatString(400, 288, GetColor(0, 0, 0), "魔防_%d", myStatus->myParam.MAGIC_DEFENCE);
+	 DrawFormatString(500, 48, GetColor(0, 0, 0), "移動_%d", myStatus->myParam.MOVERANGE - 1);
+	 DrawFormatString(500, 96, GetColor(0, 0, 0), "体格_%d", myStatus->myParam.PHYSIQUE);
  }
 
  // ユニットの位置を返す
@@ -307,6 +317,7 @@ void Character::MoveRange(int x, int y, int moveCost)
 // 攻撃範囲表示
 void Character::AttackRange()
 {
+	// 自身の攻撃範囲表示
 	for (int y = 0; y < StageCreate::Instance()->MAP_SIZEY; y++) {
 		for (int x = 0; x < StageCreate::Instance()->MAP_SIZEX; x++) {
 			if (moveToPos[y][x] == 0) SpriteDraw(x * CHIP_SIZE, y * CHIP_SIZE, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
@@ -415,6 +426,7 @@ void Character::AttackCheck()
 	myStatus->canAttack = false;
 
 	int valueX = myStatus->xPos / CHIP_SIZE, valueY = myStatus->yPos / CHIP_SIZE;
+	// 自身の四方に敵がいるなら攻撃可能とする
 	if (valueX + 1 <= 14 && StageCreate::Instance()->onUnit[valueY][valueX + 1] != "NONE" && StageCreate::Instance()->onUnit[valueY][valueX + 1] != myStatus->myTeam) myStatus->canAttack = true;
 	if (valueX - 1 >= 0 && StageCreate::Instance()->onUnit[valueY][valueX - 1] != "NONE" && StageCreate::Instance()->onUnit[valueY][valueX - 1] != myStatus->myTeam) myStatus->canAttack = true;
 	if (valueY + 1 <= 9 && StageCreate::Instance()->onUnit[valueY + 1][valueX] != "NONE" && StageCreate::Instance()->onUnit[valueY + 1][valueX] != myStatus->myTeam) myStatus->canAttack = true;
@@ -427,6 +439,7 @@ void Character::AttackableDraw()
 	if (myStatus->canMove) return;
 
 	int valueX = myStatus->xPos / CHIP_SIZE, valueY = myStatus->yPos / CHIP_SIZE;
+	// 攻撃可能な位置の描画
 	if (valueX + 1 <= 14 && StageCreate::Instance()->onUnit[valueY][valueX + 1] != "NONE" && StageCreate::Instance()->onUnit[valueY][valueX + 1] != myStatus->myTeam) SpriteDraw(myStatus->xPos + CHIP_SIZE, myStatus->yPos, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
 	if (valueX - 1 >= 0 && StageCreate::Instance()->onUnit[valueY][valueX - 1] != "NONE" && StageCreate::Instance()->onUnit[valueY][valueX - 1] != myStatus->myTeam) SpriteDraw(myStatus->xPos - CHIP_SIZE, myStatus->yPos, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
 	if (valueY + 1 <= 9 && StageCreate::Instance()->onUnit[valueY + 1][valueX] != "NONE" && StageCreate::Instance()->onUnit[valueY + 1][valueX] != myStatus->myTeam) SpriteDraw(myStatus->xPos, myStatus->yPos + CHIP_SIZE, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
@@ -443,6 +456,7 @@ void Character::GetAttackDetail(shared_ptr<Character> const &eCharacter)
 	if (eCharacter->Item.empty() == false) eCharacter->myStatus->myParam.ATTACK_STR = eCharacter->myStatus->myParam.POWER + eCharacter->Item[0]->myParam.POWER;
 	else eCharacter->myStatus->myParam.ATTACK_STR = 0;
 
+	// 攻撃力の計算 (威力 - 敵の守備力(地形補正込))
 	int mySTR = myStatus->myParam.ATTACK_STR - (eCharacter->myStatus->myParam.DEFENCE +
 		StageCreate::Instance()->GetTerrainParam(eCharacter->myStatus->xPos / CHIP_SIZE, eCharacter->myStatus->yPos / CHIP_SIZE, "DEF"));
 	if (mySTR < 0) mySTR = 0;
@@ -453,7 +467,7 @@ void Character::GetAttackDetail(shared_ptr<Character> const &eCharacter)
 	// 速さ判定(4以上大きければ2回攻撃)
 	int mySPD = myStatus->myParam.SPEED - eCharacter->myStatus->myParam.SPEED;
 
-	// 命中力 (攻撃側の命中率 - 守備側の回避率)
+	// 命中力 (攻撃側の命中率 - 守備側の回避率(地形補正込み))
 	int myHitness = myStatus->myParam.ATTACK_HIT - (eCharacter->myStatus->myParam.ATTACK_AVO +
 		StageCreate::Instance()->GetTerrainParam(eCharacter->myStatus->xPos / CHIP_SIZE, eCharacter->myStatus->yPos / CHIP_SIZE, "AVO"));
 	if (myHitness > 100) myHitness = 100;
@@ -461,8 +475,10 @@ void Character::GetAttackDetail(shared_ptr<Character> const &eCharacter)
 		StageCreate::Instance()->GetTerrainParam(myStatus->xPos / CHIP_SIZE, myStatus->yPos / CHIP_SIZE, "AVO"));
 	if (eHitness > 100) eHitness = 100;
 
+	// 描画位置の補正用変数
 	int drawOffset = 0;
 
+	// 自身の位置見て、描画位置に補正をかける
 	if (myStatus->xPos > STAGE1_WIDTH / 2) {
 		SpriteDraw(drawOffset, 0, FileManager::Instance()->GetFileHandle(ATTACK_DETAIL));
 	}
@@ -471,6 +487,7 @@ void Character::GetAttackDetail(shared_ptr<Character> const &eCharacter)
 		SpriteDraw(drawOffset, 0, FileManager::Instance()->GetFileHandle(ATTACK_DETAIL));
 	}
 
+	// パラメータ表示
 	DrawFormatString(80 + drawOffset, 100, GetColor(255, 255, 0), "HP");
 	DrawFormatString(80 + drawOffset, 125, GetColor(255, 255, 0), "威力");
 	DrawFormatString(80 + drawOffset, 150, GetColor(255, 255, 0), "命中");
@@ -580,7 +597,7 @@ void Character::CharacterAttack(shared_ptr<Character> const &eCharacter, int cou
 	srand((unsigned)time(NULL));
 	if (GetRand(100) <= probability) {
 		int _damage = eCharacter->myStatus->myParam.HP - damage;
-		CharacterDamage(eCharacter, _damage);
+		ApplyDamage(eCharacter, _damage);
 		AudioManager::Instance()->playSE(SE_DAMAGE);
 		// 敵が倒せたらその時点で戦闘終了
 		if (eCharacter->myStatus->isDeath) {
@@ -612,7 +629,7 @@ void Character::CharacterAttack(shared_ptr<Character> const &eCharacter, int cou
 }
 
 // 攻撃の処理
-void Character::CharacterDamage(shared_ptr<Character> const &eCharacter, int damage)
+void Character::ApplyDamage(shared_ptr<Character> const &eCharacter, int damage)
 {
 	if (eCharacter->myStatus->myParam.HP == damage && damage > 0)  return;
 
@@ -623,7 +640,7 @@ void Character::CharacterDamage(shared_ptr<Character> const &eCharacter, int dam
 		return;
 	}
 
-	CharacterDamage(eCharacter, damage);
+	ApplyDamage(eCharacter, damage);
 }
 
 // 疑似的カメラとのオフセットの計算
@@ -661,7 +678,7 @@ void Character::AddItem(string itemName)
 	if (itemCount == 5) return;
 
 	Item.push_back(make_unique<Weapon>());
-	Item[0]->ParamInitialize(itemName);
+	Item[itemCount]->ParamInitialize(itemName);
 	itemCount++;
 }
 

@@ -89,6 +89,8 @@ void CharacterManager::Update(int x, int y)
 					AIManager::Instance()->Initialize();
 				}
 			}
+			// プレイヤーまたは敵が1体も残っていないならゲーム終了
+			if (_playerList.empty() || _enemyList.empty()) { isGame = false; return; }
 			if (moveableUnit <= 0) { StartTurn(); return; }
 			if (moveableUnit != 0 && playerTurn == false) AIManager::Instance()->Play();
 			return;
@@ -106,24 +108,11 @@ void CharacterManager::StartTurn()
 	for (size_t num = 0; num < _character.size(); num++) {
 		_character[num]->TurnStart();
 
-		// 死亡したユニットを除外する
-		if (_character[num]->myStatus->isDeath) {
-			_character[num].reset();
-			_character.erase(_character.begin() + num);
-			// ユニットリストの初期化
-			ResetCharacterList();
-			for (size_t num = 0; num < _character.size(); ++num) {
-				CharacterCount(_character[num]);
-			}
-			AIManager::Instance()->Initialize();
-		}
-		else {
-			// 移動可能なユニットのカウント
-		    // プレイヤー側ユニットの計算
-			if (playerTurn && _character[num]->myStatus->myTeam == "Player") moveableUnit++;
-			// 敵側ユニットの計算
-			else if (playerTurn == false && _character[num]->myStatus->myTeam == "Enemy") moveableUnit++;
-		}
+		// 移動可能なユニットのカウント
+		// プレイヤー側ユニットの計算
+		if (playerTurn && _character[num]->myStatus->myTeam == "Player") moveableUnit++;
+		// 敵側ユニットの計算
+		else if (playerTurn == false && _character[num]->myStatus->myTeam == "Enemy") moveableUnit++;
 	}
 
 	AudioManager::Instance()->playSE(SE_TURNSTART);
@@ -408,7 +397,7 @@ void CharacterManager::ChangeDetailCharacter(shared_ptr<Character> const & chara
 		index += _index;
 		// 要素数を超えないように調整
 		if (index == _playerList.size()) index = 0;
-		else if (index < 0) index = _playerList.size() - 1;
+		else if (index < 0) index = (int)_playerList.size() - 1;
 		checkCharacter = _playerList[index];
 	}
 	else if (character->myStatus->myTeam == "Enemy") {
@@ -420,7 +409,7 @@ void CharacterManager::ChangeDetailCharacter(shared_ptr<Character> const & chara
 		index += _index;
 		// 要素数を超えないように調整
 		if (index == _enemyList.size()) index = 0;
-		else if (index < 0) index = _enemyList.size() - 1;
+		else if (index < 0) index = (int)_enemyList.size() - 1;
 		checkCharacter = _enemyList[index];
 	}
 }

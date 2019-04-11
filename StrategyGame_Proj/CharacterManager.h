@@ -42,6 +42,8 @@ public:
 	bool isMove;
 	// UŒ‚”»’è
 	bool attack;
+	// ƒQ[ƒ€‚ªI—¹‚µ‚½‚©‚Ç‚¤‚©
+	bool isGame;
 
 	// ‰Šú‰»
 	void Initialize();
