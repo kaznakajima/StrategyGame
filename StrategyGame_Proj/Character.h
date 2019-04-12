@@ -25,7 +25,6 @@ public:
 	typedef struct {
 		int LEVEL;
 		int MaxHP;
-		int HP;
 		int POWER;
 		int TECHNIQUE;
 		int SPEED;
@@ -47,8 +46,8 @@ public:
 	typedef struct {
 		PARAM myParam;               // 自身のパラメータ
 		string NAME;                      // ユニット名
-		string myData;                   // 自身のパラメータデータ
 		string myTeam;                  // 自身の陣営
+		int HP;                              // 現在のHP
 		int xPos, yPos;                   // 現在のx座標, 現在のy座標
 		int _xPos, _yPos;               // 移動前のx座標, 移動前のy座標                           
 		int Image[20];                   // キャラクター用画像
@@ -79,6 +78,9 @@ public:
 
 	// 移動値
 	int moveCount;
+
+	// 自身のパラメータデータ
+	string myData;
 
 	// 初期化
 	void Character_Initialize(string pass, string team, int posX, int posY);

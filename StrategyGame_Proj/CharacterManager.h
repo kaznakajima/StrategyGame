@@ -2,10 +2,10 @@
 #include "Character.h"
 
 // キャラクターのデータ
-#define CHARACTER_DATA_1 "ロード.dat"
-#define CHARACTER_DATA_2 "サポート.dat"
-#define CHARACTER_DATA_3 "敵1.dat"
-#define CHARACTER_DATA_4 "敵2.dat"
+#define CHARACTER_DATA_1 "Load.dat"
+#define CHARACTER_DATA_2 "Support.dat"
+#define CHARACTER_DATA_3 "Enemy1.dat"
+#define CHARACTER_DATA_4 "Enemy2.dat"
 #define DAMAGE_DETAIL "DamageDetail.png"
 #define HP_BAR "HP_Bar.png"
 #define HP_BARBOX "HP_BarBox.png"

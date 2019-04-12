@@ -338,19 +338,19 @@ void CharacterManager::DrawAttackParam(shared_ptr<Character> const &attackChara,
 
 	// UŒ‚‘¤‚Ìî•ñ‚Ì•`‰æ
 	DrawFormatString((int)A_drawPosX, (int)A_drawPosY - 50, GetColor(0, 0, 0), attackChara->myStatus->NAME.c_str());
-	DrawFormatString((int)A_drawPosX - 30, (int)A_drawPosY, GetColor(0, 0, 0), "%d", attackChara->myStatus->myParam.HP);
+	DrawFormatString((int)A_drawPosX - 30, (int)A_drawPosY, GetColor(0, 0, 0), "%d", attackChara->myStatus->HP);
 	DrawExtendGraphF(A_drawPosX, A_drawPosY,
 		A_drawPosX + 100, A_drawPosY + 15, FileManager::Instance()->GetFileHandle(HP_BARBOX), true);
 	DrawExtendGraphF(A_drawPosX, A_drawPosY,
-		A_drawPosX + (100 * ((float)attackChara->myStatus->myParam.HP / (float)attackChara->myStatus->myParam.MaxHP)), A_drawPosY + 15, FileManager::Instance()->GetFileHandle(HP_BAR), true);
+		A_drawPosX + (100 * ((float)attackChara->myStatus->HP / (float)attackChara->myStatus->myParam.MaxHP)), A_drawPosY + 15, FileManager::Instance()->GetFileHandle(HP_BAR), true);
 
 	// –hŒä‘¤‚Ìî•ñ‚Ì•`‰æ
 	DrawFormatString((int)D_drawPosX, (int)D_drawPosY - 50, GetColor(0, 0, 0), defenceChara->myStatus->NAME.c_str());
-	DrawFormatString((int)D_drawPosX - 30, (int)D_drawPosY, GetColor(0, 0, 0), "%d", defenceChara->myStatus->myParam.HP);
+	DrawFormatString((int)D_drawPosX - 30, (int)D_drawPosY, GetColor(0, 0, 0), "%d", defenceChara->myStatus->HP);
 	DrawExtendGraphF(D_drawPosX, D_drawPosY,
 		D_drawPosX + 100, D_drawPosY + 15, FileManager::Instance()->GetFileHandle(HP_BARBOX), true);
 	DrawExtendGraphF(D_drawPosX, D_drawPosY,
-		D_drawPosX + (100 * ((float)defenceChara->myStatus->myParam.HP / (float)defenceChara->myStatus->myParam.MaxHP)), D_drawPosY + 15, FileManager::Instance()->GetFileHandle(HP_BAR), true);
+		D_drawPosX + (100 * ((float)defenceChara->myStatus->HP / (float)defenceChara->myStatus->myParam.MaxHP)), D_drawPosY + 15, FileManager::Instance()->GetFileHandle(HP_BAR), true);
 }
 
 // ƒJƒƒ‰‚Æ‚ÌƒIƒtƒZƒbƒg‚ÌŒvZ
