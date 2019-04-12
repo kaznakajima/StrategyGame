@@ -13,8 +13,8 @@ using namespace std;
 #define CAN_ATTACK_AREA "CanAttack.png"
 #define ATTACK_DETAIL "AttackGraph.png"
 #define CHARACTER_DETAIL "CharacterParam.png"
-#define ARROW "Resources\\image\\Arrow.png"
-#define CHARACTER_IMG "Resources\\image\\_Character_40~40.png"
+#define ARROW "Resources\\Image\\Arrow.png"
+#define CHARACTER_IMG "Resources\\Image\\_Character_40~40.png"
 
 class Character
 {
@@ -119,7 +119,7 @@ public:
 	// UŒ‚‚ÌŒvZ
 	void CharacterAttack(shared_ptr<Character> const &eCharacter, int count);
 	// UŒ‚‚Ìˆ—
-	void CharacterDamage(shared_ptr<Character> const &eCharacter, int damage);
+	void ApplyDamage(shared_ptr<Character> const &eCharacter, int damage);
 
 	// ƒJƒƒ‰‚Æ‚ÌƒIƒtƒZƒbƒgŒvZ
 	void SetCameraOffset(int dir, bool horizontal);

@@ -42,6 +42,8 @@ void KeyInput::InputCalc(CharacterManager* characterMgr)
 	// 押されたキー入力によって処理を実行
 	// 右キーが押されたら
 	if (Key[KEY_INPUT_RIGHT] == 1) {
+		if (characterMgr->isDetail) return;
+		
 
 		// 右に移動
 		xPos += CHIP_SIZE;
@@ -74,6 +76,7 @@ void KeyInput::InputCalc(CharacterManager* characterMgr)
 	}
 	// 左キーが押されたら
 	else if (Key[KEY_INPUT_LEFT] == 1) {
+		if (characterMgr->isDetail) return;
 
 		// 左に移動
 		xPos -= CHIP_SIZE;

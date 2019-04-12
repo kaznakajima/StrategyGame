@@ -94,6 +94,16 @@ void GameScene::Update()
 
 		CharacterManager::Instance()->Update(xPos, yPos);
 
+		// どちらかの陣営がいないのならゲーム終了
+		if (CharacterManager::Instance()->isGame == false &&  CharacterManager::Instance()->_playerList.empty()) {
+			GameEnd(false);
+			return;
+		}
+		else if (CharacterManager::Instance()->isGame == false && CharacterManager::Instance()->_enemyList.empty()) {
+			GameEnd(true);
+			return;
+		}
+
 		// ターン開始演出
 		if (CharacterManager::Instance()->turnAnim) {
 			TurnChange(CharacterManager::Instance()->playerTurn);
@@ -107,6 +117,16 @@ void GameScene::Update()
 		AIManager::Instance()->Update();
 
 		CharacterManager::Instance()->Update(AIManager::Instance()->x, AIManager::Instance()->y);
+
+		// どちらかの陣営がいないのならゲーム終了
+		if (CharacterManager::Instance()->isGame == false && CharacterManager::Instance()->_playerList.empty()) {
+			GameEnd(false);
+			return;
+		}
+		else if (CharacterManager::Instance()->isGame == false && CharacterManager::Instance()->_enemyList.empty()) {
+			GameEnd(true);
+			return;
+		}
 
 		// ターン開始演出
 		if (CharacterManager::Instance()->turnAnim) {
@@ -139,6 +159,22 @@ void GameScene::Draw()
 
 	// カーソル表示
 	DrawGraph(xPos, yPos, FileManager::Instance()->GetFileHandle(CURSOR_IMG), true);
+}
+
+// ゲーム終了
+void GameScene::GameEnd(bool isClear)
+{
+	// 位置変更
+	if(moveY < 240) moveY += 24;
+
+	// クリア表示
+	if (isClear) {
+		DrawGraph(0, moveY, FileManager::Instance()->GetFileHandle(CLEAR_IMG), true);
+	}
+	// ゲームオーバー
+	else {
+		DrawGraph(0, moveY, FileManager::Instance()->GetFileHandle(GAMEOVER_IMG), true);
+	}
 }
 
 void GameScene::Finalize()

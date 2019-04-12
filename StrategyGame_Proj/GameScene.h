@@ -7,6 +7,8 @@
 #define CURSOR_IMG "Cursor.png"
 #define PLAYERTURN_IMG "PlayerTurn.png"
 #define ENEMYTURN_IMG "EnemyTurn.png"
+#define CLEAR_IMG "GameClear.png"
+#define GAMEOVER_IMG "GameOver.png"
 
 class GameScene : public BaseScene
 {
@@ -30,6 +32,9 @@ public:
 	void Draw();
 
 private:
+	// ゲーム終了
+	void GameEnd(bool isClear);
+
 	// ステージ画像
 	int stageImg;
 	// カーソル画像
@@ -38,6 +43,7 @@ private:
 	int turnChangeImg = 0;
 	// アニメーション用変数
 	float moveX = 672;
+	float moveY = -48;
 
 	// 現在の座標
 	int xPos = 480, yPos = 240;
