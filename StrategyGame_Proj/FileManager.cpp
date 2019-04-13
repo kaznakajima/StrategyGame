@@ -38,12 +38,12 @@ int FileManager::LoadFile(string key)
 		directory = GRAPH_DIRECTORY + key;
 		handle = LoadGraph(directory.c_str());
 	}
-	else
-		if (extension == "mp3" || extension == "wave" || extension == "ogg") {
+	else if (extension == "mp3" || extension == "wave" || extension == "ogg") {
 			//オーディオ
 			directory = AUDIO_DIRECTORY + key;
 			handle = LoadSoundMem(directory.c_str());
-		}
+	}
+	else extension = "error";
 
 
 	if (extension == "error") {
@@ -71,6 +71,25 @@ void FileManager::LoadFile(string file, int numAll, int numX, int numY, int size
 	for (int i = 0; i < numAll; i++) {
 		fileHandleMap.emplace(key + to_string(i), graphArr[i]);
 	}
+}
+
+// データネームの取得
+string FileManager::GetDataName(string file)
+{
+	string directory, extension;
+	int handle;
+
+	//拡張子
+	extension = GetExtension(file);
+
+	if (extension == "dat") {
+		directory = CHARADATA_DIRECTORY + file;
+	}
+	else if (extension == "dat_t") {
+		directory = TERRAINDATA_DIRECTORY + file;
+	}
+
+	return directory;
 }
 
 // ロードできたかどうか

@@ -2,10 +2,10 @@
 #include "Character.h"
 
 // キャラクターのデータ
-#define CHARACTER_DATA_1 "Resources\\CharacterData\\Load.dat"
-#define CHARACTER_DATA_2 "Resources\\CharacterData\\Support.dat"
-#define CHARACTER_DATA_3 "Resources\\CharacterData\\Enemy1.dat"
-#define CHARACTER_DATA_4 "Resources\\CharacterData\\Enemy2.dat"
+#define CHARACTER_DATA_1 "Load.dat"
+#define CHARACTER_DATA_2 "Support.dat"
+#define CHARACTER_DATA_3 "Enemy1.dat"
+#define CHARACTER_DATA_4 "Enemy2.dat"
 #define DAMAGE_DETAIL "DamageDetail.png"
 #define HP_BAR "HP_Bar.png"
 #define HP_BARBOX "HP_BarBox.png"
@@ -16,15 +16,19 @@ public:
 	~CharacterManager();
 
 	// 生成するキャラクター
-	vector<Character*> character;
-	// vector<unique_ptr<Character>> _character;
+	vector<shared_ptr<Character>> _character;
+
+	// 敵(AI)キャラクターのリスト
+	vector<shared_ptr<Character>> _enemyList;
+	// プレイヤー側のキャラクターのリスト
+	vector<shared_ptr<Character>> _playerList;
 
 	// 攻撃するユニット
 	int attackUnitNum = 0;
-	Character* myCharacter = nullptr;
+	shared_ptr<Character> _myCharacter = nullptr;
 	// 攻撃されるユニット
 	int blockUnitNum = 0;
-	Character* eCharacter = nullptr;
+	shared_ptr<Character> _eCharacter = nullptr;
 	// 全体の攻撃回数
 	int attackCount = 0;
 
@@ -38,6 +42,8 @@ public:
 	bool isMove;
 	// 攻撃判定
 	bool attack;
+	// ゲームが終了したかどうか
+	bool isGame;
 
 	// 初期化
 	void Initialize();
@@ -53,6 +59,13 @@ public:
 
 	// 入力検知
 	void KeyCheck(int x, int y);
+	// ユニットの詳細情報検索
+	bool isDetail;
+	void CheckDetail(int x, int y);
+	// 現在チェック中のユニット
+	shared_ptr<Character> checkCharacter = nullptr;
+	// チェックするユニットの変更
+	void ChangeDetailCharacter(shared_ptr<Character> const &character, int _index);
 
 	// 移動値の取得
 	void GetMoveCount(int x, int y);
@@ -68,7 +81,7 @@ public:
 	// 攻撃の処理
 	void Attack();
 	// 攻撃中のデータ表示
-	void DrawAttackParam(Character* attackChara, Character* defenceChara);
+	void DrawAttackParam(shared_ptr<Character> const &attackChara, shared_ptr<Character> const &defenceChara);
 
 	// カメラとのオフセット計算
 	void SetCameraOffset(int dir, bool horizontal);
@@ -77,6 +90,11 @@ public:
 	void Finalize();
 
 private:
+	// ユニットリストのリセット
+	void ResetCharacterList();
+	// 現在の敵(AI)、プレイヤーのカウント
+	void CharacterCount(shared_ptr<Character> const &character);
+
 	// HP用画像
 	int HpBar;
 	int HpBarBox;

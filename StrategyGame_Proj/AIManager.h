@@ -26,20 +26,17 @@ public:
 	// 更新
 	void Update();
 
-	// 現在の敵(AI)、プレイヤーのカウント
-	void CharacterCount(Character* character);
-
 	// 初回起動
 	void Play();
 private:
 
 	// 敵(AI)キャラクターのリスト
-	vector<Character*> enemyList;
+	vector<shared_ptr<Character>> _enemyList;
 	// プレイヤー側のキャラクターのリスト
-	vector<Character*> playerList;
+	vector<shared_ptr<Character>> _playerList;
 
 	// 操作するキャラクターのインスタンス
-	Character* myCharacter = nullptr;
+	shared_ptr<Character> _myCharacter = nullptr;
 
 	// 移動判定
 	bool isMove;
@@ -50,19 +47,19 @@ private:
 	int minDistance = 100;
 	
 	// 動かすキャラクターの選択
-	void MoveSelect(Character* character);
+	void MoveSelect(shared_ptr<Character> const &character);
 
 	// 移動先を選択する
 	void ChoiseMovePoint(int _x, int _y);
 
 	// プレイヤー側キャラクターとの距離を取得
-	int GetDistancePlayer(Character* character, vector<Character*> playerList);
+	int GetDistancePlayer(shared_ptr<Character> const &character, vector<shared_ptr<Character>> const &playerList);
 
 	// 移動地点の取得
-	void GetMovePoint(Character* character, int _x, int _y, vector<Character*> playerList);
+	void GetMovePoint(shared_ptr<Character> const &character, int _x, int _y, vector<shared_ptr<Character>> const &playerList);
 
 	// 移動地点がプレイヤーに向かえる最短距離か検索
-	void CheckCanMove(Character* character, int _x, int _y, Character* playerSt);
+	void CheckCanMove(shared_ptr<Character> const &character, int _x, int _y, shared_ptr<Character> const &playerSt);
 
 	// 敵キャラクターのロスト(死亡処理)
 	void CharacterLost(Character* character);

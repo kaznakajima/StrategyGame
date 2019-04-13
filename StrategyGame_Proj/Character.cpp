@@ -7,12 +7,13 @@
 // コンストラクタ
 Character::Character()
 {
+	itemCount = 0;
+
+	AddItem(IRON_SWORD);
+
 	FileManager::Instance()->GetFileHandle(CAN_MOVE_AREA);
 	FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA);
 	FileManager::Instance()->GetFileHandle(ATTACK_DETAIL);
-	//MoveArea = LoadGraph(CAN_MOVE_AREA);
-	//AttackArea = LoadGraph(CAN_ATTACK_AREA);
-	//AttackDetail = LoadGraph(ATTACK_DETAIL);
 	LoadDivGraph(ARROW, 6, 6, 1, CHIP_SIZE, CHIP_SIZE, ArrowImage);
 
 	for (size_t y = 0; y < StageCreate::Instance()->MAP_SIZEY; y++) {
@@ -28,71 +29,68 @@ Character::Character()
 {
 	 //if (status == nullptr) return;
 
-	 GetCharacterParam(pass);
+	 GetCharacterParam(FileManager::Instance()->GetDataName(pass));
 
 	 // ステータス設定
 	 myStatus->myData = pass;
-	 myStatus->PosX = posX;
-	 myStatus->PosY = posY;
-	 myStatus->_PosX = posX;
-	 myStatus->_PosY = posY;
+	 myStatus->NAME = FileManager::Instance()->GetFileName(pass);
+	 myStatus->xPos = posX, myStatus->yPos = posY;
+	 myStatus->_xPos = posX, myStatus->_yPos = posY;
 	 myStatus->AnimHandle = 0;
-	 myStatus->AttackRange = 1;
+	 myStatus->AttackRange = Item[0]->myParam.RANGE;
 	 myStatus->myTeam = team;
 	 LoadDivGraph(CHARACTER_IMG, 20, 4, 5, CHIP_SIZE, CHIP_SIZE, myStatus->Image);
-
-	 //LevelUp();
 }
 
  // パラメータ取得
  void Character::GetCharacterParam(string pass)
  {
-	 int num = 0;
+	 fstream file;
+	 file.open(pass, ios::in | ios::binary);
+	 file.read((char*)&myStatus->myParam, sizeof(myStatus->myParam));
 
-	 ifstream ifs(pass);
-	 string str = "";
-	 // ファイルの中身を一行ずつ読み取る
-	while (getline(ifs, str)) {
-		string tmp = "";
-		istringstream stream(str);
-		while (getline(stream, tmp, ',')) {
-			if (num == 0) myStatus->myParam.NAME = tmp;
-			else _param[num - 1] = atoi(tmp.c_str());
-			num++;
-		}
-	}
+	 file.close();
 
-	SetParam(pass);
+	 // MaxHPの設定
+	 myStatus->myParam.MaxHP = myStatus->myParam.HP;
+
+	 // 攻撃速度
+	 int weight = Item[0]->myParam.WEIGHT - myStatus->myParam.PHYSIQUE;
+	 if (weight < 0) weight = 0;
+	 myStatus->myParam.ATTACK_SPEED = myStatus->myParam.SPEED - weight;
+	 // 必殺率 (技パラメータ / 2)
+	 myStatus->myParam.ATTACK_CLT = myStatus->myParam.TECHNIQUE / 2 + Item[0]->myParam.CLT;
+	 // 回避率 (速さパラメータ * 2 + 幸運パラメータ)
+	 myStatus->myParam.ATTACK_AVO = myStatus->myParam.ATTACK_SPEED * 2 + myStatus->myParam.LUCKY;
+	 // 命中率 (武器命中 + 技パラメータ * 2 + 幸運パラメータ / 2)
+	 myStatus->myParam.ATTACK_HIT = Item[0]->myParam.HIT + (int)(myStatus->myParam.TECHNIQUE * 2) + (int)(myStatus->myParam.LUCKY / 2);
  }
 
- void Character::SetParam(string _name)
+ // ユニットの詳細情報の描画
+ void Character::DrawCharacterDetail()
  {
-	 /*FILE* fp;
-	 fopen_s(&fp, _name.c_str(), "rb");
-	 if (fp == nullptr) return;
+	 DrawGraph(0, 0, FileManager::Instance()->GetFileHandle(CHARACTER_DETAIL), true);
 
-	 fread(&myStatus->myParam, sizeof(myStatus->myParam), 1, fp);
-	 fclose(fp);*/
+	 DrawFormatString(140, 325, GetColor(0, 0, 0), myStatus->NAME.c_str());
+	 DrawFormatString(48, 380, GetColor(0, 0, 0), "Lv_%d", myStatus->myParam.LEVEL);
+	 DrawFormatString(48, 400, GetColor(0, 0, 0), "HP_%d / %d", myStatus->myParam.HP, myStatus->myParam.MaxHP);
+	 DrawFormatString(400, 48, GetColor(0, 0, 0), "力_%d", myStatus->myParam.POWER);
+	 DrawFormatString(400, 96, GetColor(0, 0, 0), "技_%d", myStatus->myParam.TECHNIQUE);
+	 DrawFormatString(400, 144, GetColor(0, 0, 0), "速さ_%d", myStatus->myParam.SPEED);
+	 DrawFormatString(400, 192, GetColor(0, 0, 0), "幸運_%d", myStatus->myParam.LUCKY);
+	 DrawFormatString(400, 240, GetColor(0, 0, 0), "守備_%d", myStatus->myParam.DEFENCE);
+	 DrawFormatString(400, 288, GetColor(0, 0, 0), "魔防_%d", myStatus->myParam.MAGIC_DEFENCE);
+	 DrawFormatString(500, 48, GetColor(0, 0, 0), "移動_%d", myStatus->myParam.MOVERANGE - 1);
+	 DrawFormatString(500, 96, GetColor(0, 0, 0), "体格_%d", myStatus->myParam.PHYSIQUE);
+ }
 
-	 // パラメータ設定
-	 myStatus->myParam.LEVEL = _param[(int)PLAYER_PARAM::LEVEL];
-	 myStatus->myParam.MaxHP = _param[(int)PLAYER_PARAM::HP];
-	 myStatus->myParam.HP = _param[(int)PLAYER_PARAM::HP];
-	 myStatus->myParam.POWER = _param[(int)PLAYER_PARAM::POWER];
-	 myStatus->myParam.TECHNIQUE = _param[(int)PLAYER_PARAM::TECHNIQUE];
-	 myStatus->myParam.SPEED = _param[(int)PLAYER_PARAM::SPEED];
-	 myStatus->myParam.LUCKY = _param[(int)PLAYER_PARAM::LUCKY];
-	 myStatus->myParam.DEFENCE = _param[(int)PLAYER_PARAM::DEFENCE];
-	 myStatus->myParam.MAGIC_DEFENCE = _param[(int)PLAYER_PARAM::MAGIC_DEFENCE];
-	 myStatus->myParam.PHYSIQUE = _param[(int)PLAYER_PARAM::PHYSIQUE];
-	 myStatus->myParam.MOVERANGE = _param[(int)PLAYER_PARAM::MOVERANGE];
-
-	 // 必殺率 (技パラメータ / 2)
-	 myStatus->myParam.ATTACK_CLT = myStatus->myParam.TECHNIQUE / 2;
-	 // 回比率 (速さパラメータ * 2 + 幸運パラメータ)
-	 myStatus->myParam.ATTACK_AVO = myStatus->myParam.SPEED * 2 + myStatus->myParam.LUCKY;
-	 // 命中率 (武器命中 + 技パラメータ * 2.5)
-	 myStatus->myParam.ATTACK_HIT = 85 + (int)(myStatus->myParam.TECHNIQUE * 2.5);
+ // ユニットの位置を返す
+ VECTOR Character::GetCharacterPosition()
+ {
+	 VECTOR vec;
+	 vec.x = (float)myStatus->xPos;
+	 vec.y = (float)myStatus->yPos;
+	 return vec;
  }
 
  // 移動再開(ターン開始時に呼び出す)
@@ -119,18 +117,16 @@ void Character::CharacterAnim()
 		myStatus->AnimHandle += 0.1f;
 		if (myStatus->AnimHandle > 7.0f && myStatus->canMove)
 			myStatus->AnimHandle = 4.0f; 
-		GetAttackDetail(this);
 	}
 	else {
 		if (myStatus->canMove == false && myStatus->canAttack == false) myStatus->AnimHandle = 3.0f; 
 	}
 
-	DrawFormatString(myStatus->PosX, myStatus->PosY, GetColor(0, 0, 0), name.c_str());
 	// xPos, yPosの位置にキャラクターを描画
-	DrawGraph(myStatus->PosX, myStatus->PosY, myStatus->Image[(int)myStatus->AnimHandle], true);
+	DrawGraph(myStatus->xPos, myStatus->yPos, myStatus->Image[(int)myStatus->AnimHandle], true);
 
 	// 選択中でないユニットの位置にチェック
-	if (myStatus->isSelect == false) StageCreate::Instance()->onUnit[myStatus->PosY / CHIP_SIZE][myStatus->PosX / CHIP_SIZE] = myStatus->myTeam;
+	if (myStatus->isSelect == false) StageCreate::Instance()->onUnit[myStatus->yPos / CHIP_SIZE][myStatus->xPos / CHIP_SIZE] = myStatus->myTeam;
 }
 
 // キャラクターの移動
@@ -139,7 +135,7 @@ bool Character::CharacterMove(int moveX, int moveY)
 	if (myStatus == nullptr) return false;
 
 	// 自分の位置を選択したら移動終了
-	if (myStatus->PosX == moveX && myStatus->PosY == moveY) {
+	if (myStatus->xPos == moveX && myStatus->yPos == moveY) {
 		myStatus->isSelect = false;
 		myStatus->canMove = false;
 		myStatus->AnimHandle = 0;
@@ -158,11 +154,11 @@ bool Character::CharacterMove(int moveX, int moveY)
 	myStatus->canMove = false;
 
 	// 現在の地点の二次元配列用データ
-	int valueX = moveX - myStatus->_PosX;
-	int valueY = moveY - myStatus->_PosY;
+	int valueX = moveX - myStatus->_xPos;
+	int valueY = moveY - myStatus->_yPos;
 	// 次目指す地点の二次元配列用データ
-	int nextX = myStatus->_PosX / CHIP_SIZE;
-	int nextY = myStatus->_PosY / CHIP_SIZE;
+	int nextX = myStatus->_xPos / CHIP_SIZE;
+	int nextY = myStatus->_yPos / CHIP_SIZE;
 	
 	// 自分のいる地点はチェック
 	moveArrow[nextY][nextX] = false;
@@ -173,16 +169,16 @@ bool Character::CharacterMove(int moveX, int moveY)
 		if (myStatus->AnimHandle < 8.0f || myStatus->AnimHandle > 11.0f)
 			myStatus->AnimHandle = 8.0f;
 
-		myStatus->PosX += 6;
+		myStatus->xPos += 6;
 
 		// 一マス分の移動
-		if (myStatus->PosX - myStatus->_PosX == CHIP_SIZE) {
-			myStatus->_PosX = myStatus->PosX;
+		if (myStatus->xPos - myStatus->_xPos == CHIP_SIZE) {
+			myStatus->_xPos = myStatus->xPos;
 			moveArrow[nextY][nextX + 1] = false;
 		}
 
 		// 最終地点に到達したら移動終了
-		if (myStatus->PosX == moveX && myStatus->PosY == moveY) {
+		if (myStatus->xPos == moveX && myStatus->yPos == moveY) {
 			myStatus->isSelect = false;
 			AttackCheck();
 			myStatus->AnimHandle = 0.0f;
@@ -198,16 +194,16 @@ bool Character::CharacterMove(int moveX, int moveY)
 		if (myStatus->AnimHandle < 12.0f || myStatus->AnimHandle > 15.0f)
 			myStatus->AnimHandle = 12.0f;
 
-		myStatus->PosX -= 6;
+		myStatus->xPos -= 6;
 
 		// 一マス分の移動
-		if (myStatus->PosX - myStatus->_PosX == -CHIP_SIZE) {
-			myStatus->_PosX = myStatus->PosX;
+		if (myStatus->xPos - myStatus->_xPos == -CHIP_SIZE) {
+			myStatus->_xPos = myStatus->xPos;
 			moveArrow[nextY][nextX - 1] = false;
 		}
 
 		// 最終地点に到達したら移動終了
-		if (myStatus->PosX == moveX && myStatus->PosY == moveY) {
+		if (myStatus->xPos == moveX && myStatus->yPos == moveY) {
 			myStatus->isSelect = false;
 			AttackCheck();
 			myStatus->AnimHandle = 0.0f;
@@ -223,16 +219,16 @@ bool Character::CharacterMove(int moveX, int moveY)
 		if (myStatus->AnimHandle < 4.0f || myStatus->AnimHandle > 7.0f)
 			myStatus->AnimHandle = 4.0f;
 
-		myStatus->PosY += 6;
+		myStatus->yPos += 6;
 
 		// 一マス分の移動
-		if (myStatus->PosY - myStatus->_PosY == CHIP_SIZE) {
-			myStatus->_PosY = myStatus->PosY;
+		if (myStatus->yPos - myStatus->_yPos == CHIP_SIZE) {
+			myStatus->_yPos = myStatus->yPos;
 			moveArrow[nextY + 1][nextX] = false;
 		}
 
 		// 最終地点に到達したら移動終了
-		if (myStatus->PosX == moveX && myStatus ->PosY == moveY) {
+		if (myStatus->xPos == moveX && myStatus ->yPos == moveY) {
 			myStatus->isSelect = false;
 			AttackCheck();
 			myStatus->AnimHandle = 0.0f;
@@ -248,16 +244,16 @@ bool Character::CharacterMove(int moveX, int moveY)
 		if (myStatus->AnimHandle < 16.0f || myStatus->AnimHandle > 19.0f)
 			myStatus->AnimHandle = 16.0f;
 
-		myStatus->PosY -= 6;
+		myStatus->yPos -= 6;
 
 		// 一マス分の移動
-		if (myStatus->PosY - myStatus->_PosY == -CHIP_SIZE) {
-			myStatus->_PosY = myStatus->PosY;
+		if (myStatus->yPos - myStatus->_yPos == -CHIP_SIZE) {
+			myStatus->_yPos = myStatus->yPos;
 			moveArrow[nextY - 1][nextX] = false;
 		}
 
 		// 最終地点に到達したら移動終了
-		if (myStatus->PosX == moveX && myStatus->PosY == moveY) {
+		if (myStatus->xPos == moveX && myStatus->yPos == moveY) {
 			myStatus->isSelect = false;
 			AttackCheck();
 			myStatus->AnimHandle = 0.0f;
@@ -321,6 +317,7 @@ void Character::MoveRange(int x, int y, int moveCost)
 // 攻撃範囲表示
 void Character::AttackRange()
 {
+	// 自身の攻撃範囲表示
 	for (int y = 0; y < StageCreate::Instance()->MAP_SIZEY; y++) {
 		for (int x = 0; x < StageCreate::Instance()->MAP_SIZEX; x++) {
 			if (moveToPos[y][x] == 0) SpriteDraw(x * CHIP_SIZE, y * CHIP_SIZE, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
@@ -351,7 +348,7 @@ void Character::DrawMoveArrow(int x, int y, int moveValue)
 		if (StageCreate::Instance()->checkMove[valueY][valueX] == true) {
 
 			// ユニットの位置でないならここから逆探知
-			if (myStatus->PosX != x || myStatus->PosY != y) {
+			if (myStatus->xPos != x || myStatus->yPos != y) {
 				DrawGraph(x, y, ArrowImage[moveValue], true);
 				moveArrow[valueY][valueX] = true;
 			}
@@ -395,7 +392,7 @@ void Character::DrawMoveArrow(int x, int y, int moveValue)
 		if (StageCreate::Instance()->checkMove[valueY][valueX] == true) {
 
 			// ユニットの位置でないならここから逆探知
-			if (myStatus->PosX != x || myStatus->PosY != y) {
+			if (myStatus->xPos != x || myStatus->yPos != y) {
 				DrawGraph(x, y, ArrowImage[moveValue], true);
 				moveArrow[y / CHIP_SIZE][x / CHIP_SIZE] = true;
 			}
@@ -428,7 +425,8 @@ void Character::AttackCheck()
 
 	myStatus->canAttack = false;
 
-	int valueX = myStatus->PosX / CHIP_SIZE, valueY = myStatus->PosY / CHIP_SIZE;
+	int valueX = myStatus->xPos / CHIP_SIZE, valueY = myStatus->yPos / CHIP_SIZE;
+	// 自身の四方に敵がいるなら攻撃可能とする
 	if (valueX + 1 <= 14 && StageCreate::Instance()->onUnit[valueY][valueX + 1] != "NONE" && StageCreate::Instance()->onUnit[valueY][valueX + 1] != myStatus->myTeam) myStatus->canAttack = true;
 	if (valueX - 1 >= 0 && StageCreate::Instance()->onUnit[valueY][valueX - 1] != "NONE" && StageCreate::Instance()->onUnit[valueY][valueX - 1] != myStatus->myTeam) myStatus->canAttack = true;
 	if (valueY + 1 <= 9 && StageCreate::Instance()->onUnit[valueY + 1][valueX] != "NONE" && StageCreate::Instance()->onUnit[valueY + 1][valueX] != myStatus->myTeam) myStatus->canAttack = true;
@@ -440,69 +438,89 @@ void Character::AttackableDraw()
 {
 	if (myStatus->canMove) return;
 
-	int valueX = myStatus->PosX / CHIP_SIZE, valueY = myStatus->PosY / CHIP_SIZE;
-	if (valueX + 1 <= 14 && StageCreate::Instance()->onUnit[valueY][valueX + 1] != "NONE" && StageCreate::Instance()->onUnit[valueY][valueX + 1] != myStatus->myTeam) SpriteDraw(myStatus->PosX + CHIP_SIZE, myStatus->PosY, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
-	if (valueX - 1 >= 0 && StageCreate::Instance()->onUnit[valueY][valueX - 1] != "NONE" && StageCreate::Instance()->onUnit[valueY][valueX - 1] != myStatus->myTeam) SpriteDraw(myStatus->PosX - CHIP_SIZE, myStatus->PosY, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
-	if (valueY + 1 <= 9 && StageCreate::Instance()->onUnit[valueY + 1][valueX] != "NONE" && StageCreate::Instance()->onUnit[valueY + 1][valueX] != myStatus->myTeam) SpriteDraw(myStatus->PosX, myStatus->PosY + CHIP_SIZE, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
-	if (valueY - 1 >= 0 && StageCreate::Instance()->onUnit[valueY - 1][valueX] != "NONE" && StageCreate::Instance()->onUnit[valueY - 1][valueX] != myStatus->myTeam) SpriteDraw(myStatus->PosX, myStatus->PosY - CHIP_SIZE, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
+	int valueX = myStatus->xPos / CHIP_SIZE, valueY = myStatus->yPos / CHIP_SIZE;
+	// 攻撃可能な位置の描画
+	if (valueX + 1 <= 14 && StageCreate::Instance()->onUnit[valueY][valueX + 1] != "NONE" && StageCreate::Instance()->onUnit[valueY][valueX + 1] != myStatus->myTeam) SpriteDraw(myStatus->xPos + CHIP_SIZE, myStatus->yPos, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
+	if (valueX - 1 >= 0 && StageCreate::Instance()->onUnit[valueY][valueX - 1] != "NONE" && StageCreate::Instance()->onUnit[valueY][valueX - 1] != myStatus->myTeam) SpriteDraw(myStatus->xPos - CHIP_SIZE, myStatus->yPos, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
+	if (valueY + 1 <= 9 && StageCreate::Instance()->onUnit[valueY + 1][valueX] != "NONE" && StageCreate::Instance()->onUnit[valueY + 1][valueX] != myStatus->myTeam) SpriteDraw(myStatus->xPos, myStatus->yPos + CHIP_SIZE, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
+	if (valueY - 1 >= 0 && StageCreate::Instance()->onUnit[valueY - 1][valueX] != "NONE" && StageCreate::Instance()->onUnit[valueY - 1][valueX] != myStatus->myTeam) SpriteDraw(myStatus->xPos, myStatus->yPos - CHIP_SIZE, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
 }
 
 // 攻撃の詳細表示
-void Character::GetAttackDetail(Character* eCharacter)
+void Character::GetAttackDetail(shared_ptr<Character> const &eCharacter)
 {
 	// 威力 (攻撃側の力 - 守備側の守備力)
-	int mySTR = myStatus->myParam.POWER - eCharacter->myStatus->myParam.DEFENCE;
+	if (Item.empty() == false) myStatus->myParam.ATTACK_STR = myStatus->myParam.POWER + Item[0]->myParam.POWER;
+	else myStatus->myParam.ATTACK_STR = 0;
+
+	if (eCharacter->Item.empty() == false) eCharacter->myStatus->myParam.ATTACK_STR = eCharacter->myStatus->myParam.POWER + eCharacter->Item[0]->myParam.POWER;
+	else eCharacter->myStatus->myParam.ATTACK_STR = 0;
+
+	// 攻撃力の計算 (威力 - 敵の守備力(地形補正込))
+	int mySTR = myStatus->myParam.ATTACK_STR - (eCharacter->myStatus->myParam.DEFENCE +
+		StageCreate::Instance()->GetTerrainParam(eCharacter->myStatus->xPos / CHIP_SIZE, eCharacter->myStatus->yPos / CHIP_SIZE, "DEF"));
 	if (mySTR < 0) mySTR = 0;
-	int eSTR = eCharacter->myStatus->myParam.POWER - myStatus->myParam.DEFENCE;
+	int eSTR = eCharacter->myStatus->myParam.ATTACK_STR - (myStatus->myParam.DEFENCE +
+		StageCreate::Instance()->GetTerrainParam(myStatus->xPos / CHIP_SIZE, myStatus->yPos / CHIP_SIZE, "DEF"));;
 	if (eSTR < 0) eSTR = 0;
 
 	// 速さ判定(4以上大きければ2回攻撃)
 	int mySPD = myStatus->myParam.SPEED - eCharacter->myStatus->myParam.SPEED;
 
-	// 命中力 (攻撃側の命中率 - 守備側の回避率)
-	int myHitness = myStatus->myParam.ATTACK_HIT - eCharacter->myStatus->myParam.ATTACK_AVO;
-	int eHitness = eCharacter->myStatus->myParam.ATTACK_HIT - eCharacter->myStatus->myParam.ATTACK_AVO;
+	// 命中力 (攻撃側の命中率 - 守備側の回避率(地形補正込み))
+	int myHitness = myStatus->myParam.ATTACK_HIT - (eCharacter->myStatus->myParam.ATTACK_AVO +
+		StageCreate::Instance()->GetTerrainParam(eCharacter->myStatus->xPos / CHIP_SIZE, eCharacter->myStatus->yPos / CHIP_SIZE, "AVO"));
+	if (myHitness > 100) myHitness = 100;
+	int eHitness = eCharacter->myStatus->myParam.ATTACK_HIT - (myStatus->myParam.ATTACK_AVO +
+		StageCreate::Instance()->GetTerrainParam(myStatus->xPos / CHIP_SIZE, myStatus->yPos / CHIP_SIZE, "AVO"));
+	if (eHitness > 100) eHitness = 100;
 
+	// 描画位置の補正用変数
 	int drawOffset = 0;
 
-	if (myStatus->PosX > STAGE1_WIDTH / 2) { 
+	// 自身の位置見て、描画位置に補正をかける
+	if (myStatus->xPos > STAGE1_WIDTH / 2) {
 		SpriteDraw(drawOffset, 0, FileManager::Instance()->GetFileHandle(ATTACK_DETAIL));
 	}
-	else if (myStatus->PosX < STAGE1_WIDTH / 2) { 
+	else if (myStatus->xPos < STAGE1_WIDTH / 2) {
 		drawOffset = 480;
 		SpriteDraw(drawOffset, 0, FileManager::Instance()->GetFileHandle(ATTACK_DETAIL));
 	}
 
+	// パラメータ表示
 	DrawFormatString(80 + drawOffset, 100, GetColor(255, 255, 0), "HP");
 	DrawFormatString(80 + drawOffset, 125, GetColor(255, 255, 0), "威力");
 	DrawFormatString(80 + drawOffset, 150, GetColor(255, 255, 0), "命中");
 
 	DrawFormatString(120 + drawOffset, 100, GetColor(0, 0, 255), "%d", myStatus->myParam.HP);
+	DrawFormatString(120 + drawOffset, 175, GetColor(0, 0, 255), "%d", myStatus->myParam.MOVERANGE);
+	DrawFormatString(45 + drawOffset, 65, GetColor(0, 0, 0), myStatus->NAME.c_str());
 	DrawFormatString(120 + drawOffset, 125, GetColor(0, 0, 255), "%d", mySTR);
 	if (mySPD >= 4) DrawFormatString(130 + drawOffset, 130, GetColor(255, 255, 255), "×2");
 	DrawFormatString(120 + drawOffset, 150, GetColor(0, 0, 255), "%d", myHitness);
 
 	DrawFormatString(45 + drawOffset, 100, GetColor(0, 0, 255), "%d", eCharacter->myStatus->myParam.HP);
+	DrawFormatString(100 + drawOffset, 330, GetColor(255, 255, 255), eCharacter->myStatus->NAME.c_str());
 	DrawFormatString(45 + drawOffset, 125, GetColor(0, 0, 255), "%d", eSTR);
 	if (mySPD <= -4) DrawFormatString(55 + drawOffset, 130, GetColor(255, 255, 255), "×2");
 	DrawFormatString(45 + drawOffset, 150, GetColor(0, 0, 255), "%d", eHitness);
 }
 
 // 攻撃アニメーション
-bool Character::AttackAnimation(Character* eCharacter, int count)
+bool Character::AttackAnimation(shared_ptr<Character> const &eCharacter, int count)
 {
 
 	// 攻撃方向を取得
-	int moveX = eCharacter->myStatus->PosX - myStatus->_PosX;
-	int moveY = eCharacter->myStatus->PosY - myStatus->_PosY;
+	int moveX = eCharacter->myStatus->xPos - myStatus->_xPos;
+	int moveY = eCharacter->myStatus->yPos - myStatus->_yPos;
 
 	if (moveX > 0) {
 		// 攻撃アニメーション
-		if(myStatus->animReset) myStatus->PosX -= 6;
-		else myStatus->PosX += 6;
-		
-		if (myStatus->PosX - myStatus->_PosX == CHIP_SIZE) myStatus->animReset = true;
-		if (myStatus->PosX == myStatus->_PosX) {
+		if (myStatus->animReset) myStatus->xPos -= 6;
+		else myStatus->xPos += 6;
+
+		if (myStatus->xPos - myStatus->_xPos == CHIP_SIZE) myStatus->animReset = true;
+		if (myStatus->xPos == myStatus->_xPos) {
 			CharacterAttack(eCharacter, count);
 			myStatus->animReset = false;
 			return false;
@@ -510,11 +528,11 @@ bool Character::AttackAnimation(Character* eCharacter, int count)
 	}
 	else if (moveX < 0) {
 		// 攻撃アニメーション
-		if (myStatus->animReset) myStatus->PosX += 6;
-		else myStatus->PosX -= 6;
+		if (myStatus->animReset) myStatus->xPos += 6;
+		else myStatus->xPos -= 6;
 
-		if (myStatus->PosX - myStatus->_PosX == -CHIP_SIZE) myStatus->animReset = true;
-		if (myStatus->PosX == myStatus->_PosX) {
+		if (myStatus->xPos - myStatus->_xPos == -CHIP_SIZE) myStatus->animReset = true;
+		if (myStatus->xPos == myStatus->_xPos) {
 			CharacterAttack(eCharacter, count);
 			myStatus->animReset = false;
 			return false;
@@ -522,11 +540,11 @@ bool Character::AttackAnimation(Character* eCharacter, int count)
 	}
 	if (moveY > 0) {
 		// 攻撃アニメーション
-		if (myStatus->animReset) myStatus->PosY -= 6;
-		else myStatus->PosY += 6;
+		if (myStatus->animReset) myStatus->yPos -= 6;
+		else myStatus->yPos += 6;
 
-		if (myStatus->PosY - myStatus->_PosY == CHIP_SIZE) myStatus->animReset = true;
-		if (myStatus->PosY == myStatus->_PosY) {
+		if (myStatus->yPos - myStatus->_yPos == CHIP_SIZE) myStatus->animReset = true;
+		if (myStatus->yPos == myStatus->_yPos) {
 			CharacterAttack(eCharacter, count);
 			myStatus->animReset = false;
 			return false;
@@ -534,11 +552,11 @@ bool Character::AttackAnimation(Character* eCharacter, int count)
 	}
 	else if (moveY < 0) {
 		// 攻撃アニメーション
-		if (myStatus->animReset) myStatus->PosY += 6;
-		else myStatus->PosY -= 6;
+		if (myStatus->animReset) myStatus->yPos += 6;
+		else myStatus->yPos -= 6;
 
-		if (myStatus->PosY - myStatus->_PosY == -CHIP_SIZE) myStatus->animReset = true;
-		if (myStatus->PosY == myStatus->_PosY) {
+		if (myStatus->yPos - myStatus->_yPos == -CHIP_SIZE) myStatus->animReset = true;
+		if (myStatus->yPos == myStatus->_yPos) {
 			CharacterAttack(eCharacter, count);
 			myStatus->animReset = false;
 			return false;
@@ -549,10 +567,18 @@ bool Character::AttackAnimation(Character* eCharacter, int count)
 }
 
 // キャラクターの攻撃
-void Character::CharacterAttack(Character* eCharacter, int count)
+void Character::CharacterAttack(shared_ptr<Character> const &eCharacter, int count)
 {
+	// 威力 (攻撃側の力 - 守備側の守備力)
+	if (Item.empty() == false) myStatus->myParam.ATTACK_STR = myStatus->myParam.POWER + Item[0]->myParam.POWER;
+	else myStatus->myParam.ATTACK_STR = myStatus->myParam.POWER;
+
+	if (eCharacter->Item.empty() == false) eCharacter->myStatus->myParam.ATTACK_STR = eCharacter->myStatus->myParam.POWER + eCharacter->Item[0]->myParam.POWER;
+	else eCharacter->myStatus->myParam.ATTACK_STR = eCharacter->myStatus->myParam.POWER;
+
 	// ダメージ計算
-	int damage = myStatus->myParam.POWER - eCharacter->myStatus->myParam.DEFENCE;
+	int damage = myStatus->myParam.ATTACK_STR - (eCharacter->myStatus->myParam.DEFENCE + 
+		StageCreate::Instance()->GetTerrainParam(eCharacter->myStatus->xPos / CHIP_SIZE, eCharacter->myStatus->yPos / CHIP_SIZE, "DEF"));
 	// マイナスは0
 	if (damage < 0) damage = 0;
 
@@ -560,16 +586,19 @@ void Character::CharacterAttack(Character* eCharacter, int count)
 	myStatus->myParam.ATTACK_SPEED = myStatus->myParam.SPEED - eCharacter->myStatus->myParam.SPEED;
 
 	// 命中力 (攻撃側の命中率 - 守備側の回避率)
-	int myHitness = myStatus->myParam.ATTACK_HIT - eCharacter->myStatus->myParam.ATTACK_AVO;
+	int myHitness = myStatus->myParam.ATTACK_HIT - (eCharacter->myStatus->myParam.ATTACK_AVO + 
+		StageCreate::Instance()->GetTerrainParam(eCharacter->myStatus->xPos / CHIP_SIZE, eCharacter->myStatus->yPos / CHIP_SIZE, "AVO"));
+	if (myHitness > 100) myHitness = 100;
 
 	// 確率（命中力）
-	double probability = myHitness;
+	int probability = myHitness;
 
 	// 乱数の初期化
 	srand((unsigned)time(NULL));
 	if (GetRand(100) <= probability) {
 		int _damage = eCharacter->myStatus->myParam.HP - damage;
-		CharacterDamage(eCharacter, _damage);
+		ApplyDamage(eCharacter, _damage);
+		AudioManager::Instance()->playSE(SE_DAMAGE);
 		// 敵が倒せたらその時点で戦闘終了
 		if (eCharacter->myStatus->isDeath) {
 			myStatus->isAttack = false;
@@ -578,7 +607,7 @@ void Character::CharacterAttack(Character* eCharacter, int count)
 	}
 
 	// 攻撃終了
-	myStatus->isAttack = false; 
+	myStatus->isAttack = false;
 
 	// 敵の反撃
 	if (count < 2 && myStatus->AttackRange == eCharacter->myStatus->AttackRange) {
@@ -600,7 +629,7 @@ void Character::CharacterAttack(Character* eCharacter, int count)
 }
 
 // 攻撃の処理
-void Character::CharacterDamage(Character* eCharacter, int damage)
+void Character::ApplyDamage(shared_ptr<Character> const &eCharacter, int damage)
 {
 	if (eCharacter->myStatus->myParam.HP == damage && damage > 0)  return;
 
@@ -608,11 +637,10 @@ void Character::CharacterDamage(Character* eCharacter, int damage)
 
 	if (eCharacter->myStatus->myParam.HP <= 0) {
 		eCharacter->myStatus->isDeath = true;
-		LevelUp();
 		return;
 	}
 
-	CharacterDamage(eCharacter, damage);
+	ApplyDamage(eCharacter, damage);
 }
 
 // 疑似的カメラとのオフセットの計算
@@ -620,55 +648,53 @@ void Character::SetCameraOffset(int dir, bool horizontal)
 {
 	// 左右計算
 	if (horizontal) {
-		myStatus->PosX += CHIP_SIZE * dir;
-		myStatus->_PosX = myStatus->PosX;
+		myStatus->xPos += CHIP_SIZE * dir;
+		myStatus->_xPos = myStatus->xPos;
 	}
 	// 上下計算
 	else {
-		myStatus->PosY += CHIP_SIZE * dir;
-		myStatus->_PosY = myStatus->PosY;
+		myStatus->yPos += CHIP_SIZE * dir;
+		myStatus->_yPos = myStatus->yPos;
 	}
 }
 
-void Character::MoveAreaClear(vector<Character*> _character)
+void Character::MoveAreaClear(vector<shared_ptr<Character>> const &_character)
 {
 	for (int y = 0; y < StageCreate::Instance()->MAP_SIZEY; y++) {
 		for (int x = 0; x < StageCreate::Instance()->MAP_SIZEX; x++) {
 			moveToPos[y][x] = -1;
-			moveArrow[y][x] = false; 
+			moveArrow[y][x] = false;
 			StageCreate::Instance()->StageUpdate(x, y);
-			for (Character* character : _character) {
-				if (character->myStatus->PosX == x * CHIP_SIZE && character->myStatus->PosY == y * CHIP_SIZE) StageCreate::Instance()->CheckOnUnit(x, y, character->myStatus->myTeam);
+			for (size_t num = 0; num < _character.size();++num) {
+				if (_character[num]->myStatus->xPos == x * CHIP_SIZE && _character[num]->myStatus->yPos == y * CHIP_SIZE) StageCreate::Instance()->CheckOnUnit(x, y, _character[num]->myStatus->myTeam);
 			}
 		}
 	}
+}
+
+// アイテムの追加
+void Character::AddItem(string itemName)
+{
+	if (itemCount == 5) return;
+
+	Item.push_back(make_unique<Weapon>());
+	Item[itemCount]->ParamInitialize(itemName);
+	itemCount++;
 }
 
 // ユニットのレベルアップ
 void Character::LevelUp()
 {
 	// ファイルを開く
-	FILE* fp;
-	fopen_s(&fp, myStatus->myData.c_str(), "w");
-	if (fp == nullptr) return;
+	fstream file;
+	file.open(FileManager::Instance()->GetDataName(myStatus->myData), ios::binary | ios::out);
+	file.write((char*)&myStatus->myParam, sizeof(myStatus->myParam));
 
-	fprintf(fp, myStatus->myParam.NAME.c_str() + ',');
-	fprintf(fp, "%d", myStatus->myParam.LEVEL + ',');
-	fprintf(fp, "%d", myStatus->myParam.HP + ',');
-	fprintf(fp, "%d", myStatus->myParam.POWER + ',');
-	fprintf(fp, "%d", myStatus->myParam.TECHNIQUE + ',');
-	fprintf(fp, "%d", myStatus->myParam.SPEED + ',');
-	fprintf(fp, "%d", myStatus->myParam.LUCKY + ',');
-	fprintf(fp, "%d", myStatus->myParam.DEFENCE + ',');
-	fprintf(fp, "%d", myStatus->myParam.MAGIC_DEFENCE + ',');
-	fprintf(fp, "%d", myStatus->myParam.PHYSIQUE + ',');
-	fprintf(fp, "%d", myStatus->myParam.MOVERANGE + ',');
-
-	fclose(fp);
+	file.close();
 }
 
 // 終了処理
 void Character::Finalize()
 {
-	//delete stage;
+
 }

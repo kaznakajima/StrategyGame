@@ -42,6 +42,8 @@ void KeyInput::InputCalc(CharacterManager* characterMgr)
 	// 押されたキー入力によって処理を実行
 	// 右キーが押されたら
 	if (Key[KEY_INPUT_RIGHT] == 1) {
+		if (characterMgr->isDetail) return;
+		
 
 		// 右に移動
 		xPos += CHIP_SIZE;
@@ -58,6 +60,12 @@ void KeyInput::InputCalc(CharacterManager* characterMgr)
 	}
 	// 下キーが押されたら
 	else if (Key[KEY_INPUT_DOWN] == 1) {
+		if (characterMgr->isDetail) {
+			characterMgr->ChangeDetailCharacter(CharacterManager::Instance()->checkCharacter, 1);
+			xPos = CharacterManager::Instance()->checkCharacter->myStatus->xPos;
+			yPos = CharacterManager::Instance()->checkCharacter->myStatus->yPos;
+			return;
+		}
 
 		// 下に移動
 		yPos += CHIP_SIZE;
@@ -68,6 +76,7 @@ void KeyInput::InputCalc(CharacterManager* characterMgr)
 	}
 	// 左キーが押されたら
 	else if (Key[KEY_INPUT_LEFT] == 1) {
+		if (characterMgr->isDetail) return;
 
 		// 左に移動
 		xPos -= CHIP_SIZE;
@@ -83,6 +92,12 @@ void KeyInput::InputCalc(CharacterManager* characterMgr)
 	}
 	// 上キーが押されたら
 	else if (Key[KEY_INPUT_UP] == 1) {
+		if (characterMgr->isDetail) { 
+			characterMgr->ChangeDetailCharacter(CharacterManager::Instance()->checkCharacter, -1); 
+			xPos = CharacterManager::Instance()->checkCharacter->myStatus->xPos;
+			yPos = CharacterManager::Instance()->checkCharacter->myStatus->yPos;
+			return;
+		}
 
 		// 上に移動
 		yPos -= CHIP_SIZE;
@@ -92,11 +107,21 @@ void KeyInput::InputCalc(CharacterManager* characterMgr)
 		if (isSelect) characterMgr->GetMoveCount(xPos, yPos);
 	}
 
-	if (KeyInput::Instance()->Key[KEY_INPUT_SPACE] == 1) {
+	// 決定ボタン
+	if (Key[KEY_INPUT_SPACE] == 1) {
+		// 詳細表示中はリターン
+		if (characterMgr->isDetail) return;
+
+		// 入力検知
 		characterMgr->KeyCheck(xPos, yPos);
 
 		if (isSelect == false) characterMgr->DrawCheck(xPos, yPos);
 
 		isSelect = characterMgr->isSelect;
+	}
+
+	// 詳細表示ボタン
+	if (Key[KEY_INPUT_TAB] == 1) {
+		characterMgr->CheckDetail(xPos, yPos);
 	}
 }
