@@ -32,7 +32,7 @@ Character::Character()
 	 GetCharacterParam(FileManager::Instance()->GetDataName(pass));
 
 	 // ステータス設定
-	 myStatus->myData = pass;
+	 myData = pass;
 	 myStatus->NAME = FileManager::Instance()->GetFileName(pass);
 	 myStatus->xPos = posX, myStatus->yPos = posY;
 	 myStatus->_xPos = posX, myStatus->_yPos = posY;
@@ -52,7 +52,7 @@ Character::Character()
 	 file.close();
 
 	 // MaxHPの設定
-	 myStatus->myParam.MaxHP = myStatus->myParam.HP;
+	 myStatus->HP = myStatus->myParam.MaxHP;
 
 	 // 攻撃速度
 	 int weight = Item[0]->myParam.WEIGHT - myStatus->myParam.PHYSIQUE;
@@ -73,7 +73,7 @@ Character::Character()
 
 	 DrawFormatString(140, 325, GetColor(0, 0, 0), myStatus->NAME.c_str());
 	 DrawFormatString(48, 380, GetColor(0, 0, 0), "Lv_%d", myStatus->myParam.LEVEL);
-	 DrawFormatString(48, 400, GetColor(0, 0, 0), "HP_%d / %d", myStatus->myParam.HP, myStatus->myParam.MaxHP);
+	 DrawFormatString(48, 400, GetColor(0, 0, 0), "HP_%d / %d", myStatus->HP, myStatus->myParam.MaxHP);
 	 DrawFormatString(400, 48, GetColor(0, 0, 0), "力_%d", myStatus->myParam.POWER);
 	 DrawFormatString(400, 96, GetColor(0, 0, 0), "技_%d", myStatus->myParam.TECHNIQUE);
 	 DrawFormatString(400, 144, GetColor(0, 0, 0), "速さ_%d", myStatus->myParam.SPEED);
@@ -492,14 +492,14 @@ void Character::GetAttackDetail(shared_ptr<Character> const &eCharacter)
 	DrawFormatString(80 + drawOffset, 125, GetColor(255, 255, 0), "威力");
 	DrawFormatString(80 + drawOffset, 150, GetColor(255, 255, 0), "命中");
 
-	DrawFormatString(120 + drawOffset, 100, GetColor(0, 0, 255), "%d", myStatus->myParam.HP);
+	DrawFormatString(120 + drawOffset, 100, GetColor(0, 0, 255), "%d", myStatus->HP);
 	DrawFormatString(120 + drawOffset, 175, GetColor(0, 0, 255), "%d", myStatus->myParam.MOVERANGE);
 	DrawFormatString(45 + drawOffset, 65, GetColor(0, 0, 0), myStatus->NAME.c_str());
 	DrawFormatString(120 + drawOffset, 125, GetColor(0, 0, 255), "%d", mySTR);
 	if (mySPD >= 4) DrawFormatString(130 + drawOffset, 130, GetColor(255, 255, 255), "×2");
 	DrawFormatString(120 + drawOffset, 150, GetColor(0, 0, 255), "%d", myHitness);
 
-	DrawFormatString(45 + drawOffset, 100, GetColor(0, 0, 255), "%d", eCharacter->myStatus->myParam.HP);
+	DrawFormatString(45 + drawOffset, 100, GetColor(0, 0, 255), "%d", eCharacter->myStatus->HP);
 	DrawFormatString(100 + drawOffset, 330, GetColor(255, 255, 255), eCharacter->myStatus->NAME.c_str());
 	DrawFormatString(45 + drawOffset, 125, GetColor(0, 0, 255), "%d", eSTR);
 	if (mySPD <= -4) DrawFormatString(55 + drawOffset, 130, GetColor(255, 255, 255), "×2");
@@ -596,7 +596,7 @@ void Character::CharacterAttack(shared_ptr<Character> const &eCharacter, int cou
 	// 乱数の初期化
 	srand((unsigned)time(NULL));
 	if (GetRand(100) <= probability) {
-		int _damage = eCharacter->myStatus->myParam.HP - damage;
+		int _damage = eCharacter->myStatus->HP - damage;
 		ApplyDamage(eCharacter, _damage);
 		AudioManager::Instance()->playSE(SE_DAMAGE);
 		// 敵が倒せたらその時点で戦闘終了
@@ -631,11 +631,11 @@ void Character::CharacterAttack(shared_ptr<Character> const &eCharacter, int cou
 // 攻撃の処理
 void Character::ApplyDamage(shared_ptr<Character> const &eCharacter, int damage)
 {
-	if (eCharacter->myStatus->myParam.HP == damage && damage > 0)  return;
+	if (eCharacter->myStatus->HP == damage && damage > 0)  return;
 
-	eCharacter->myStatus->myParam.HP--;
+	eCharacter->myStatus->HP--;
 
-	if (eCharacter->myStatus->myParam.HP <= 0) {
+	if (eCharacter->myStatus->HP <= 0) {
 		eCharacter->myStatus->isDeath = true;
 		return;
 	}
@@ -687,7 +687,7 @@ void Character::LevelUp()
 {
 	// ファイルを開く
 	fstream file;
-	file.open(FileManager::Instance()->GetDataName(myStatus->myData), ios::binary | ios::out);
+	file.open(FileManager::Instance()->GetDataName(myData), ios::binary | ios::out);
 	file.write((char*)&myStatus->myParam, sizeof(myStatus->myParam));
 
 	file.close();
