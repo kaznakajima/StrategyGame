@@ -14,7 +14,7 @@ using namespace std;
 #define ATTACK_DETAIL "AttackGraph.png"
 #define CHARACTER_DETAIL "CharacterParam.png"
 #define ARROW "Resources\\Image\\Arrow.png"
-#define CHARACTER_IMG "Resources\\Image\\_Character_40Å~40.png"
+#define CHARACTER_IMG "Resources\\Image\\Character_48Å~48.png"
 
 class Character
 {
