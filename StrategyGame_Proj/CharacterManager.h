@@ -2,10 +2,10 @@
 #include "Character.h"
 
 // キャラクターのデータ
-#define CHARACTER_DATA_1 "Load.dat"
-#define CHARACTER_DATA_2 "Support.dat"
-#define CHARACTER_DATA_3 "Enemy1.dat"
-#define CHARACTER_DATA_4 "Enemy2.dat"
+#define UNIT_LOAD "Load.dat"
+#define UNIT_SUPPORT "Support.dat"
+#define UNIT_ENEMY1 "Enemy1.dat"
+#define UNIT_ENEMY2 "Enemy2.dat"
 #define DAMAGE_DETAIL "DamageDetail.png"
 #define HP_BAR "HP_Bar.png"
 #define HP_BARBOX "HP_BarBox.png"
@@ -90,6 +90,12 @@ public:
 	void Finalize();
 
 private:
+	// プレイヤーデータのパス
+	vector<string> playerDataPass;
+	// 敵データのパス
+	vector<string> enemyDataPass;
+	// プレイヤーと敵のデータのパスを格納
+	void SetCharacterData();
 	// ユニットリストのリセット
 	void ResetCharacterList();
 	// 現在の敵(AI)、プレイヤーのカウント

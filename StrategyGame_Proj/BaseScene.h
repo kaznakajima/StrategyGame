@@ -1,6 +1,9 @@
 #pragma once
+#include "AudioManager.h"
+#include "KeyInput.h"
+#include "FileManager.h"
 
-#define FADE_IMAGE "Resources\\image\\Fade.png"
+#define FADE_IMAGE "Fade.png"
 
 // シーンのもととなるクラス(継承させる)
 class BaseScene
@@ -30,19 +33,17 @@ public:
 	// シーンタイプ
 	enum SCENE {
 		TITLE,
-		SELECT,
 		GAME
 	};
 
 	// シーン変更
-	void ChangeScene(SCENE scene);
+	static void ChangeScene(SCENE scene);
 	// シーンフェード
-	void SceneFade(SCENE nextScene,int stageNum = 0);
+	static void SceneFade(SCENE nextScene);
 	// 更新
 	void Update();
 	// 描画
-	void Draw();
+	static void Draw();
 	// 終了
 	void Finalize();
-private:
 };

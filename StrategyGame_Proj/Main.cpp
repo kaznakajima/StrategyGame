@@ -29,6 +29,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	while (ProcessMessage() == 0 && ClearDrawScreen() == 0 && KeyInput::Instance()->UpdateInput() == 0)
 	{
+		c_Scene->Draw();
+
 		c_Scene->Update(); 
 		
 		ScreenFlip();

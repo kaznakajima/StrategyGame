@@ -1,9 +1,6 @@
 #include "CharacterManager.h"
 #include "AIManager.h"
 
-// 生成するキャラクター数
-const int PlayerNum = 5;
-
 CharacterManager::~CharacterManager() {
 	//Finalize();
 }
@@ -11,20 +8,24 @@ CharacterManager::~CharacterManager() {
 // 初期化
 void CharacterManager::Initialize()
 {
+	SetCharacterData();
+
 	FileManager::Instance()->GetFileHandle(HP_BAR);
 	FileManager::Instance()->GetFileHandle(HP_BARBOX);
 	FileManager::Instance()->GetFileHandle(DAMAGE_DETAIL);
 
+	int allCharacter = StageCreate::Instance()->playerCount + StageCreate::Instance()->enemyCount;
 	// キャラクターの追加
-	for (size_t num = 0; num < PlayerNum; num++) {
+	for (size_t num = 0; num < allCharacter; num++) {
 		_character.push_back(make_shared<Character>());
 	}
 
-	// キャラクターの初期化
-	_character[0]->Character_Initialize(CHARACTER_DATA_1, "Player", 240, 240);
-	_character[1]->Character_Initialize(CHARACTER_DATA_3, "Enemy", 144, 240);
-	_character[2]->Character_Initialize(CHARACTER_DATA_2, "Player", 96, 384);
-	_character[3]->Character_Initialize(CHARACTER_DATA_4, "Enemy", 336, 96);
+	for (size_t num = 0; num < StageCreate::Instance()->playerCount; num++) {
+		_character[num]->Character_Initialize(playerDataPass[num], "Player", 144 + (CHIP_SIZE * num), 240 + (CHIP_SIZE * num));
+	}
+	for (size_t num = 0; num < StageCreate::Instance()->enemyCount; num++) {
+		_character[StageCreate::Instance()->playerCount + num]->Character_Initialize(enemyDataPass[num], "Enemy", 96 + (CHIP_SIZE * num), 96 + (CHIP_SIZE * num));
+	}
 
 	// 敵AIの初期化
 	for (size_t num = 0; num < _character.size(); ++num) {
@@ -33,6 +34,39 @@ void CharacterManager::Initialize()
 	AIManager::Instance()->Initialize();
 
 	StartTurn();
+}
+
+// データパスの設定
+void CharacterManager::SetCharacterData()
+{
+	// プレイヤーパスの設定
+	playerDataPass = vector<string>(StageCreate::Instance()->playerCount, "");
+	for (int pass = 0; pass < playerDataPass.size(); ++pass) {
+		switch (pass) {
+		case 0:
+			playerDataPass[pass] = UNIT_LOAD;
+			break;
+		case 1:
+			playerDataPass[pass] = UNIT_SUPPORT;
+			break;
+		}
+	}
+
+	// 敵のパスの設定
+	enemyDataPass = vector<string>(StageCreate::Instance()->enemyCount, "");
+	for (int pass = 0; pass < enemyDataPass.size(); ++pass) {
+		switch (pass) {
+		case 0:
+			enemyDataPass[pass] = UNIT_ENEMY1;
+			break;
+		case 1:
+			enemyDataPass[pass] = UNIT_ENEMY2;
+			break;
+		default:
+			enemyDataPass[pass] = UNIT_ENEMY1;
+			break;
+		}
+	}
 }
 
 // ユニットリストのリセット
@@ -115,7 +149,6 @@ void CharacterManager::StartTurn()
 		else if (playerTurn == false && _character[num]->myStatus->myTeam == "Enemy") moveableUnit++;
 	}
 
-	AudioManager::Instance()->playSE(SE_TURNSTART);
 	turnAnim = true;
 }
 
@@ -265,6 +298,7 @@ void CharacterManager::ChoiseAttack(int x, int y)
 	}
 	// 選択した位置に敵がいないなら終了
 	if (_eCharacter == nullptr) {
+		_myCharacter->myStatus->canAttack = false;
 		attack = false;
 		moveableUnit--;
 		if (moveableUnit != 0 && playerTurn == false) AIManager::Instance()->Play();
@@ -278,12 +312,12 @@ void CharacterManager::Attack()
 	if (_myCharacter == nullptr || _eCharacter == nullptr) return;
 
 	// 1回目の攻撃
-	if (_myCharacter != nullptr && _eCharacter != nullptr && attackCount < 1) {
+	if (_myCharacter != nullptr && _eCharacter != nullptr && attackCount < 2) {
 		if (_myCharacter->myStatus->isAttack) attack = _myCharacter->AttackAnimation(_eCharacter, 1);
 		if (_eCharacter->myStatus->isAttack && _myCharacter->myStatus->isAttack == false) attack = _eCharacter->AttackAnimation(_myCharacter, 2);
 
 		// アニメーションが終わっていないならリターン
-		if (attack) return;
+		if (attack) { attackCount = 1; return; }
 	}
 
 	// アニメーションが終わっているなら攻撃の回数を記録

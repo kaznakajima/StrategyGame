@@ -1,6 +1,4 @@
 #include "GameScene.h"
-#include "FileManager.h"
-#include "KeyInput.h"
 #include "CharacterManager.h"
 #include "AIManager.h"
 
@@ -15,18 +13,15 @@ GameScene::GameScene()
 // 初期化
 void GameScene::Initialize()
 {
-	// 画像の読み込み
-	FileManager::Instance()->GetFileHandle(FIELD_IMG);
-	FileManager::Instance()->GetFileHandle(CURSOR_IMG);
-	turnChangeImg = FileManager::Instance()->GetFileHandle(PLAYERTURN_IMG);
-	/*stageImg = LoadGraph(FIELD_IMG);
-	cursorImg = LoadGraph(CURSOR_IMG);
-	turnChangeImg = LoadGraph(PLAYERTURN_IMG);*/
+	LoadFile();
 }
 
 void GameScene::LoadFile()
 {
-
+	// 画像の読み込み
+	FileManager::Instance()->GetFileHandle(FIELD_IMG);
+	FileManager::Instance()->GetFileHandle(CURSOR_IMG);
+	turnChangeImg = FileManager::Instance()->GetFileHandle(PLAYERTURN_IMG);
 }
 
 void GameScene::UnLoadFile()
@@ -52,6 +47,8 @@ void GameScene::TurnChange(bool playerTurn)
 
 	// 移動完了したら
 	if (moveX < 336) {
+
+		AudioManager::Instance()->playSE(SE_TURNSTART);
 
 		for (int volume = 0; volume < 256; volume += 3) {
 			AudioManager::Instance()->VolumeFade(volume);
@@ -88,9 +85,7 @@ void GameScene::Update()
 	// 自分のターン
 	if (CharacterManager::Instance()->playerTurn) {
 		// 入力待機
-		KeyInput::Instance()->InputCalc(CharacterManager::Instance());
-
-		Draw();
+		KeyEvent();
 
 		CharacterManager::Instance()->Update(xPos, yPos);
 
@@ -111,8 +106,6 @@ void GameScene::Update()
 	}
 	// 敵のターン
 	else {
-		Draw();
-
 		// AIの更新
 		AIManager::Instance()->Update();
 
@@ -140,8 +133,8 @@ void GameScene::Draw()
 {
 	// 座標更新
 	if (CharacterManager::Instance()->playerTurn) {
-		xPos = KeyInput::Instance()->xPos;
-		yPos = KeyInput::Instance()->yPos;
+		/*xPos = KeyInput::Instance()->xPos;
+		yPos = KeyInput::Instance()->yPos;*/
 	}
 	else {
 		xPos = AIManager::Instance()->x;
@@ -161,19 +154,110 @@ void GameScene::Draw()
 	DrawGraph(xPos, yPos, FileManager::Instance()->GetFileHandle(CURSOR_IMG), true);
 }
 
+// キー入力処理
+void GameScene::KeyEvent()
+{
+	if (CharacterManager::Instance()->isMove || CharacterManager::Instance()->playerTurn == false || CharacterManager::Instance()->turnAnim) return;
+
+	// 押されたキー入力によって処理を実行
+	// 右キーが押されたら
+	if (KeyInput::Instance()->Keyboard_Get(KEY_INPUT_RIGHT) == 1) {
+		if (CharacterManager::Instance()->isDetail) return;
+
+		// 右に移動
+		xPos += CHIP_SIZE;
+
+		// 画面端から出ないように制限
+		if (xPos >= SCREEN_WIDTH - CHIP_SIZE) xPos = SCREEN_WIDTH - CHIP_SIZE;
+
+		if (xPos > CHIP_SIZE * 10 && KeyInput::Instance()->cameraPos.x + SCREEN_WIDTH < STAGE1_WIDTH) {
+			KeyInput::Instance()->cameraPos.x += CHIP_SIZE;
+			CharacterManager::Instance()->SetCameraOffset(-1, true);
+		}
+
+		if (KeyInput::Instance()->isSelect) CharacterManager::Instance()->GetMoveCount(xPos, yPos);
+	}
+	// 下キーが押されたら
+	else if (KeyInput::Instance()->Keyboard_Get(KEY_INPUT_DOWN) == 1) {
+		if (CharacterManager::Instance()->isDetail) {
+			CharacterManager::Instance()->ChangeDetailCharacter(CharacterManager::Instance()->checkCharacter, 1);
+			xPos = CharacterManager::Instance()->checkCharacter->myStatus->xPos;
+			yPos = CharacterManager::Instance()->checkCharacter->myStatus->yPos;
+			return;
+		}
+
+		// 下に移動
+		yPos += CHIP_SIZE;
+
+		if (yPos >= SCREEN_HEIGHT - CHIP_SIZE) yPos = SCREEN_HEIGHT - CHIP_SIZE;
+
+		if (KeyInput::Instance()->isSelect) CharacterManager::Instance()->GetMoveCount(xPos, yPos);
+	}
+	// 左キーが押されたら
+	else if (KeyInput::Instance()->Keyboard_Get(KEY_INPUT_LEFT) == 1) {
+		if (CharacterManager::Instance()->isDetail) return;
+
+		// 左に移動
+		xPos -= CHIP_SIZE;
+
+		if (xPos <= 0) xPos = 0;
+
+		if (xPos < CHIP_SIZE * 3 && KeyInput::Instance()->cameraPos.x > 0) {
+			KeyInput::Instance()->cameraPos.x -= CHIP_SIZE;
+			CharacterManager::Instance()->SetCameraOffset(1, true);
+		}
+
+		if (KeyInput::Instance()->isSelect) CharacterManager::Instance()->GetMoveCount(xPos, yPos);
+	}
+	// 上キーが押されたら
+	else if (KeyInput::Instance()->Keyboard_Get(KEY_INPUT_UP) == 1) {
+		if (CharacterManager::Instance()->isDetail) {
+			CharacterManager::Instance()->ChangeDetailCharacter(CharacterManager::Instance()->checkCharacter, -1);
+			xPos = CharacterManager::Instance()->checkCharacter->myStatus->xPos;
+			yPos = CharacterManager::Instance()->checkCharacter->myStatus->yPos;
+			return;
+		}
+
+		// 上に移動
+		yPos -= CHIP_SIZE;
+
+		if (yPos <= 0) yPos = 0;
+
+		if (KeyInput::Instance()->isSelect) CharacterManager::Instance()->GetMoveCount(xPos, yPos);
+	}
+
+	// 決定ボタン
+	if (KeyInput::Instance()->Keyboard_Get(KEY_INPUT_SPACE) == 1) {
+		// 詳細表示中はリターン
+		if (CharacterManager::Instance()->isDetail) return;
+
+		// 入力検知
+		CharacterManager::Instance()->KeyCheck(xPos, yPos);
+
+		if (KeyInput::Instance()->isSelect == false) CharacterManager::Instance()->DrawCheck(xPos, yPos);
+
+		KeyInput::Instance()->isSelect = CharacterManager::Instance()->isSelect;
+	}
+
+	// 詳細表示ボタン
+	if (KeyInput::Instance()->Keyboard_Get(KEY_INPUT_TAB) == 1) {
+		CharacterManager::Instance()->CheckDetail(xPos, yPos);
+	}
+}
+
 // ゲーム終了
 void GameScene::GameEnd(bool isClear)
 {
 	// 位置変更
-	if(moveY < 240) moveY += 24;
+	if(moveY < 180) moveY += 24;
 
 	// クリア表示
 	if (isClear) {
-		DrawGraph(0, moveY, FileManager::Instance()->GetFileHandle(CLEAR_IMG), true);
+		DrawGraph(0, (int)moveY, FileManager::Instance()->GetFileHandle(CLEAR_IMG), true);
 	}
 	// ゲームオーバー
 	else {
-		DrawGraph(0, moveY, FileManager::Instance()->GetFileHandle(GAMEOVER_IMG), true);
+		DrawGraph(0, (int)moveY, FileManager::Instance()->GetFileHandle(GAMEOVER_IMG), true);
 	}
 }
 

@@ -1,9 +1,8 @@
 #pragma once
 #include "BaseScene.h"
-#include "AudioManager.h"
 
 // ステージ画像とカーソル画像
-#define FIELD_IMG "Field.png"
+#define FIELD_IMG "StageMap.png"
 #define CURSOR_IMG "Cursor.png"
 #define PLAYERTURN_IMG "PlayerTurn.png"
 #define ENEMYTURN_IMG "EnemyTurn.png"
@@ -32,6 +31,8 @@ public:
 	void Draw();
 
 private:
+	// キー入力処理
+	void KeyEvent();
 	// ゲーム終了
 	void GameEnd(bool isClear);
 

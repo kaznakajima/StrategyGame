@@ -1,6 +1,7 @@
 #include "DxLib.h"
 #include "BaseScene.h"
 #include "GameScene.h"
+#include "TitleScene.h"
 #include <memory>
 using namespace std;
 
@@ -9,7 +10,7 @@ unique_ptr<BaseScene> c_Scene;
 
 Scene::Scene()
 {
-	ChangeScene(Scene::GAME);
+	ChangeScene(Scene::TITLE);
 }
 
 Scene::~Scene()
@@ -20,15 +21,9 @@ Scene::~Scene()
 // シーン変更 (引数　変更先のシーン)
 void Scene::ChangeScene(SCENE scene)
 {
-	// 古いシーンの削除
-	/*if (c_Scene != NULL) {
-		delete c_Scene;
-	}*/
-
 	switch (scene) {
 	case SCENE::TITLE:
-		break;
-	case SCENE::SELECT:
+		c_Scene = make_unique<TitleScene>();
 		break;
 	case SCENE::GAME:
 		c_Scene = make_unique<GameScene>();
@@ -49,10 +44,10 @@ void Scene::Draw() {
 }
 
 // シーンフェード (引数　変更先のシーン)
-void Scene::SceneFade(SCENE nextScene, int stageNum)
+void Scene::SceneFade(SCENE nextScene)
 {
 	// フェード用変数(透明度,フェード用画像)
-	int alpha, fadeImg = LoadGraph(FADE_IMAGE);
+	int alpha, fadeImg = FileManager::Instance()->GetFileHandle(FADE_IMAGE);
 
 	SetDrawScreen(DX_SCREEN_BACK);
 
@@ -61,7 +56,6 @@ void Scene::SceneFade(SCENE nextScene, int stageNum)
 	{
 		ClearDrawScreen();
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-		Draw();
 
 		// フェードイン開始
 		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
@@ -79,7 +73,6 @@ void Scene::SceneFade(SCENE nextScene, int stageNum)
 	{
 		ClearDrawScreen();
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-		Draw();
 
 		// フェードアウト開始
 		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);

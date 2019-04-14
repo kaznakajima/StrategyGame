@@ -9,7 +9,6 @@
 using namespace std;
 
 #define STAGE_FILE_1 "Resources\\StageData\\StageData.csv"
-#define BACKGROUND "Resources\\image\\Field.png"
 
 #define TERRAIN_FOREST "森.dat_t"
 #define TERRAIN_HOUSE "家.dat_t"
@@ -50,6 +49,9 @@ public:
 	// ステージサイズ
 	int MAP_SIZEX = 15;
 	int MAP_SIZEY = 10;
+
+	// 生成するべきプレイヤーの数
+	int playerCount = 2, enemyCount = 2;
 
 	// ステージのデータ
 	vector<vector<int>> stageList;

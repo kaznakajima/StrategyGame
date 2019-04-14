@@ -40,7 +40,6 @@ private:
 
 	// 移動判定
 	bool isMove;
-	int moveToX = 0, moveToY = 0;
 	// 移動最大値格納
 	int moveCost;
 	// プレイヤーとの最短距離

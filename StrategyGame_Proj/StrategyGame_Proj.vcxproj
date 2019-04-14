@@ -142,6 +142,7 @@
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="StageCreate.cpp" />
     <ClCompile Include="TimeCount.cpp" />
+    <ClCompile Include="TitleScene.cpp" />
     <ClCompile Include="Weapon.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -158,6 +159,7 @@
     <ClInclude Include="Singleton.h" />
     <ClInclude Include="StageCreate.h" />
     <ClInclude Include="TimeCount.h" />
+    <ClInclude Include="TitleScene.h" />
     <ClInclude Include="Weapon.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

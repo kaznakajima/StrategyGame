@@ -19,6 +19,10 @@ public:
 
 	// キー入力の更新
 	int UpdateInput();
+
+	// 引数のキーコードのキーの入力状態を返す
+	int Keyboard_Get(int KeyCode);
+
 	// 移動量計算
 	void InputCalc(CharacterManager* characterMgr);
 };

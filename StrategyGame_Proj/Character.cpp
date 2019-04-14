@@ -1,6 +1,5 @@
 #include "Character.h"
 #include "KeyInput.h"
-#include <time.h>
 
 #define PI 3.141592654
 
@@ -124,9 +123,6 @@ void Character::CharacterAnim()
 
 	// xPos, yPosの位置にキャラクターを描画
 	DrawGraph(myStatus->xPos, myStatus->yPos, myStatus->Image[(int)myStatus->AnimHandle], true);
-
-	// 選択中でないユニットの位置にチェック
-	if (myStatus->isSelect == false) StageCreate::Instance()->onUnit[myStatus->yPos / CHIP_SIZE][myStatus->xPos / CHIP_SIZE] = myStatus->myTeam;
 }
 
 // キャラクターの移動
@@ -290,8 +286,10 @@ void Character::MoveRange(int x, int y, int moveCost)
 	// 移動先情報を格納
 	if (moveToPos[valueY][valueX] < moveCost) moveToPos[valueY][valueX] = moveCost;
 
-	// もう動けないもしくは進めない場所の場合はリターン
-	if (StageCreate::Instance()->stageList[_valueY][_valueX] > 0 && moveCost >= 0) {
+	// もう動けないもしくは進めない場所の場合、敵陣営がいる場合はリターン
+	if (StageCreate::Instance()->stageList[_valueY][_valueX] > 0 && moveCost >= 0 || 
+		StageCreate::Instance()->onUnit[_valueY][_valueX] != "NONE" && StageCreate::Instance()->onUnit[_valueY][_valueX] != myStatus->myTeam) 
+	{
 		SpriteDraw(x, y, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
 		moveToPos[valueY][valueX] = 0;
 		return;
@@ -516,8 +514,8 @@ bool Character::AttackAnimation(shared_ptr<Character> const &eCharacter, int cou
 
 	if (moveX > 0) {
 		// 攻撃アニメーション
-		if (myStatus->animReset) myStatus->xPos -= 6;
-		else myStatus->xPos += 6;
+		if (myStatus->animReset) myStatus->xPos -= 4;
+		else myStatus->xPos += 4;
 
 		if (myStatus->xPos - myStatus->_xPos == CHIP_SIZE) myStatus->animReset = true;
 		if (myStatus->xPos == myStatus->_xPos) {
@@ -528,8 +526,8 @@ bool Character::AttackAnimation(shared_ptr<Character> const &eCharacter, int cou
 	}
 	else if (moveX < 0) {
 		// 攻撃アニメーション
-		if (myStatus->animReset) myStatus->xPos += 6;
-		else myStatus->xPos -= 6;
+		if (myStatus->animReset) myStatus->xPos += 4;
+		else myStatus->xPos -= 4;
 
 		if (myStatus->xPos - myStatus->_xPos == -CHIP_SIZE) myStatus->animReset = true;
 		if (myStatus->xPos == myStatus->_xPos) {
@@ -540,8 +538,8 @@ bool Character::AttackAnimation(shared_ptr<Character> const &eCharacter, int cou
 	}
 	if (moveY > 0) {
 		// 攻撃アニメーション
-		if (myStatus->animReset) myStatus->yPos -= 6;
-		else myStatus->yPos += 6;
+		if (myStatus->animReset) myStatus->yPos -= 4;
+		else myStatus->yPos += 4;
 
 		if (myStatus->yPos - myStatus->_yPos == CHIP_SIZE) myStatus->animReset = true;
 		if (myStatus->yPos == myStatus->_yPos) {
@@ -552,8 +550,8 @@ bool Character::AttackAnimation(shared_ptr<Character> const &eCharacter, int cou
 	}
 	else if (moveY < 0) {
 		// 攻撃アニメーション
-		if (myStatus->animReset) myStatus->yPos += 6;
-		else myStatus->yPos -= 6;
+		if (myStatus->animReset) myStatus->yPos += 4;
+		else myStatus->yPos -= 4;
 
 		if (myStatus->yPos - myStatus->_yPos == -CHIP_SIZE) myStatus->animReset = true;
 		if (myStatus->yPos == myStatus->_yPos) {
@@ -595,16 +593,19 @@ void Character::CharacterAttack(shared_ptr<Character> const &eCharacter, int cou
 
 	// 乱数の初期化
 	srand((unsigned)time(NULL));
+	// 攻撃処理
 	if (GetRand(100) <= probability) {
 		int _damage = eCharacter->myStatus->HP - damage;
 		ApplyDamage(eCharacter, _damage);
-		AudioManager::Instance()->playSE(SE_DAMAGE);
+		if (damage > 0) AudioManager::Instance()->playSE(SE_DAMAGE);
+		else AudioManager::Instance()->playSE(SE_NODAMAGE);
 		// 敵が倒せたらその時点で戦闘終了
 		if (eCharacter->myStatus->isDeath) {
 			myStatus->isAttack = false;
 			return;
 		}
 	}
+	else AudioManager::Instance()->playSE(SE_MISS);
 
 	// 攻撃終了
 	myStatus->isAttack = false;

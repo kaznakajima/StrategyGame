@@ -34,6 +34,12 @@ int KeyInput::UpdateInput()
 	return 0;
 }
 
+// 入力しているキーを返す
+int KeyInput::Keyboard_Get(int KeyCode)
+{
+	return Key[KeyCode];
+}
+
 // 移動量計算
 void KeyInput::InputCalc(CharacterManager* characterMgr)
 {
@@ -43,7 +49,6 @@ void KeyInput::InputCalc(CharacterManager* characterMgr)
 	// 右キーが押されたら
 	if (Key[KEY_INPUT_RIGHT] == 1) {
 		if (characterMgr->isDetail) return;
-		
 
 		// 右に移動
 		xPos += CHIP_SIZE;
