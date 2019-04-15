@@ -1,6 +1,11 @@
 #pragma once
 #include "Singleton.h"
 
+// fps
+#define FPS (60)
+// ïbêî
+#define SECOND(_sec) ((_sec) * FPS)
+
 class TimeCount : public Singleton<TimeCount> 
 {
 public:

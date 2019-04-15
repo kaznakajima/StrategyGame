@@ -288,7 +288,7 @@ void Character::MoveRange(int x, int y, int moveCost)
 
 	// ‚à‚¤“®‚¯‚È‚¢‚à‚µ‚­‚Íi‚ß‚È‚¢êŠ‚Ìê‡A“Gw‰c‚ª‚¢‚éê‡‚ÍƒŠƒ^[ƒ“
 	if (StageCreate::Instance()->stageList[_valueY][_valueX] > 0 && moveCost >= 0 || 
-		StageCreate::Instance()->onUnit[_valueY][_valueX] != "NONE" && StageCreate::Instance()->onUnit[_valueY][_valueX] != myStatus->myTeam) 
+		StageCreate::Instance()->onUnit[valueY][valueX] != "NONE" && StageCreate::Instance()->onUnit[valueY][valueX] != myStatus->myTeam) 
 	{
 		SpriteDraw(x, y, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
 		moveToPos[valueY][valueX] = 0;
@@ -667,7 +667,8 @@ void Character::MoveAreaClear(vector<shared_ptr<Character>> const &_character)
 			moveArrow[y][x] = false;
 			StageCreate::Instance()->StageUpdate(x, y);
 			for (size_t num = 0; num < _character.size();++num) {
-				if (_character[num]->myStatus->xPos == x * CHIP_SIZE && _character[num]->myStatus->yPos == y * CHIP_SIZE) StageCreate::Instance()->CheckOnUnit(x, y, _character[num]->myStatus->myTeam);
+				if (_character[num]->myStatus->xPos == x * CHIP_SIZE
+					&& _character[num]->myStatus->yPos == y * CHIP_SIZE) StageCreate::Instance()->CheckOnUnit(x, y, _character[num]->myStatus->myTeam);
 			}
 		}
 	}

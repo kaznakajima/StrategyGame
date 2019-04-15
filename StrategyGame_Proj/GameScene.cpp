@@ -8,6 +8,7 @@ GameScene::GameScene()
 	Initialize();
 
 	CharacterManager::Instance()->Initialize();
+	CharacterManager::Instance()->SetCameraOffset(-1, true);
 }
 
 // ‰Šú‰»
@@ -173,6 +174,7 @@ void GameScene::KeyEvent()
 		if (xPos > CHIP_SIZE * 10 && KeyInput::Instance()->cameraPos.x + SCREEN_WIDTH < STAGE1_WIDTH) {
 			KeyInput::Instance()->cameraPos.x += CHIP_SIZE;
 			CharacterManager::Instance()->SetCameraOffset(-1, true);
+			xPos -= CHIP_SIZE;
 		}
 
 		if (KeyInput::Instance()->isSelect) CharacterManager::Instance()->GetMoveCount(xPos, yPos);
@@ -205,6 +207,7 @@ void GameScene::KeyEvent()
 		if (xPos < CHIP_SIZE * 3 && KeyInput::Instance()->cameraPos.x > 0) {
 			KeyInput::Instance()->cameraPos.x -= CHIP_SIZE;
 			CharacterManager::Instance()->SetCameraOffset(1, true);
+			xPos += CHIP_SIZE;
 		}
 
 		if (KeyInput::Instance()->isSelect) CharacterManager::Instance()->GetMoveCount(xPos, yPos);

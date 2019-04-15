@@ -1,5 +1,4 @@
 #pragma once
-#include "CharacterManager.h"
 #include "StageCreate.h"
 
 // キー入力クラス
@@ -22,7 +21,4 @@ public:
 
 	// 引数のキーコードのキーの入力状態を返す
 	int Keyboard_Get(int KeyCode);
-
-	// 移動量計算
-	void InputCalc(CharacterManager* characterMgr);
 };

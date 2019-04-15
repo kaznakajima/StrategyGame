@@ -31,7 +31,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	{
 		c_Scene->Draw();
 
-		c_Scene->Update(); 
+		c_Scene->Update();
 		
 		ScreenFlip();
 	}

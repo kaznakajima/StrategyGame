@@ -58,7 +58,7 @@ void TitleScene::Update()
 
 	// ゲームスタート
 	if (KeyInput::Instance()->Keyboard_Get(KEY_INPUT_SPACE) == 1) {
-		Scene::SceneFade(Scene::GAME);
+		Scene::Instance()->SceneFade(Scene::GAME);
 	}
 }
 

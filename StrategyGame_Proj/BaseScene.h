@@ -2,6 +2,7 @@
 #include "AudioManager.h"
 #include "KeyInput.h"
 #include "FileManager.h"
+#include "TimeCount.h"
 
 #define FADE_IMAGE "Fade.png"
 
@@ -24,7 +25,7 @@ public:
 };
 
 // シーンを管理するクラス
-class Scene
+class Scene : public Singleton<Scene>
 {
 public:
 	Scene();
@@ -37,13 +38,13 @@ public:
 	};
 
 	// シーン変更
-	static void ChangeScene(SCENE scene);
+	void ChangeScene(SCENE scene);
 	// シーンフェード
-	static void SceneFade(SCENE nextScene);
+	void SceneFade(SCENE nextScene);
 	// 更新
 	void Update();
 	// 描画
-	static void Draw();
+	void Draw();
 	// 終了
 	void Finalize();
 };

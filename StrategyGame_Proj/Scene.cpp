@@ -47,13 +47,11 @@ void Scene::Draw() {
 void Scene::SceneFade(SCENE nextScene)
 {
 	// フェード用変数(透明度,フェード用画像)
-	int alpha, fadeImg = FileManager::Instance()->GetFileHandle(FADE_IMAGE);
+	int fadeImg = FileManager::Instance()->GetFileHandle(FADE_IMAGE);
 
 	SetDrawScreen(DX_SCREEN_BACK);
 
-	// フェードアウト
-	for (alpha = 0; alpha < 255; alpha += 3)
-	{
+	for (int alpha = 0; alpha < 256; alpha += 3) {
 		ClearDrawScreen();
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
@@ -61,24 +59,22 @@ void Scene::SceneFade(SCENE nextScene)
 		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
 		DrawGraph(0, 0, fadeImg, TRUE);
 		// 同時に音量もフェード
-		//AudioManager::Instance()->VolumeFade(alpha);
+		AudioManager::Instance()->VolumeFade(alpha);
 		ScreenFlip();
 	}
 
 	// 次のシーンの初期化
 	ChangeScene(nextScene);
 
-	// フェードイン
-	for (alpha = 255; alpha > 0; alpha -= 3)
-	{
+	for (int alpha = 255; alpha > -1; alpha -= 3) {
 		ClearDrawScreen();
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
-		// フェードアウト開始
+		// フェードイン開始
 		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
 		DrawGraph(0, 0, fadeImg, TRUE);
 		// 同時に音量もフェード
-		//AudioManager::Instance()->VolumeFade(alpha);
+		AudioManager::Instance()->VolumeFade(alpha);
 		ScreenFlip();
 	}
 
