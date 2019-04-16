@@ -266,6 +266,8 @@ void GameScene::GameEnd(bool isClear)
 	else {
 		DrawGraph(0, (int)moveY, FileManager::Instance()->GetFileHandle(GAMEOVER_IMG), true);
 	}
+
+	if (moveY >= 180 && KeyInput::Instance()->Keyboard_Get(KEY_INPUT_SPACE) == 1) Scene::Instance()->ChangeFadeState(Scene::Instance()->FADEOUT, Scene::Instance()->TITLE);
 }
 
 void GameScene::Finalize()

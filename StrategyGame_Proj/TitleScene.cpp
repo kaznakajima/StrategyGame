@@ -57,16 +57,14 @@ void TitleScene::Update()
 	}
 
 	// ゲームスタート
-	if (KeyInput::Instance()->Keyboard_Get(KEY_INPUT_SPACE) == 1) {
-		Scene::Instance()->ChangeFadeState(Scene::Instance()->FADEOUT, Scene::Instance()->GAME);
-	}
+	if (KeyInput::Instance()->Keyboard_Get(KEY_INPUT_SPACE) == 1) Scene::Instance()->ChangeFadeState(Scene::Instance()->FADEOUT, Scene::Instance()->GAME);
 }
 
 // 描画
 void TitleScene::Draw()
 {
 	DrawGraph(0, 0, FileManager::Instance()->GetFileHandle(FIELD_IMG), true);
-	DrawFormatString(200, 300, GetColor(255, 255, 255), "スタート");
+	DrawFormatString(200, 300, GetColor(0, 0, 0), "スタート");
 }
 
 // 終了処理

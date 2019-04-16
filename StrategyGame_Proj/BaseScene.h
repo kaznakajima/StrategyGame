@@ -10,7 +10,6 @@
 class BaseScene
 {
 public:
-
 	// 読み込み
 	virtual void LoadFile() = 0;
 	// 読み込んだファイルの破棄
@@ -55,8 +54,7 @@ public:
 	void ChangeScene(CURRENT_SCENE scene);
 	// フェードステートの変更
 	void ChangeFadeState(FADE_STATE state, CURRENT_SCENE scene);
-	// シーンフェード
-	void SceneFade(CURRENT_SCENE nextScene);
+	// シーンフェード(現在のアルファ値, 目標のアルファ値)
 	void SceneFade(int _alpha, int fadeValue);
 	// 更新
 	void Update();

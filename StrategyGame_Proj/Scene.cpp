@@ -51,46 +51,7 @@ void Scene::Draw() {
 	c_Scene->Draw();
 }
 
-// シーンフェード (引数　変更先のシーン)
-void Scene::SceneFade(CURRENT_SCENE nextScene)
-{
-	// フェード用変数(透明度,フェード用画像)
-	int fadeImg = FileManager::Instance()->GetFileHandle(FADE_IMAGE);
-
-	SetDrawScreen(DX_SCREEN_BACK);
-
-	for (int alpha = 0; alpha < 256; alpha += 3) {
-		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-		ClearDrawScreen();
-
-		// フェードイン開始
-		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 122);
-		DrawGraph(0, 0, fadeImg, true);
-		// 同時に音量もフェード
-		AudioManager::Instance()->VolumeFade(alpha);
-		ScreenFlip();
-	}
-
-	// 次のシーンの初期化
-	ChangeScene(nextScene);
-
-	for (int alpha = 255; alpha > -1; alpha -= 3) {
-		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-		ClearDrawScreen();
-
-		// フェードイン開始
-		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 122);
-		DrawGraph(0, 0, fadeImg, true);
-		// 同時に音量もフェード
-		AudioManager::Instance()->VolumeFade(alpha);
-		ScreenFlip();
-	}
-
-	// 描画のブレンドを切る
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-	ScreenFlip();
-}
-
+// シーンフェード
 void Scene::SceneFade(int _alpha, int fadeValue)
 {
 	ClearDrawScreen();
