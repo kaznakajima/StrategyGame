@@ -14,6 +14,7 @@ GameScene::GameScene()
 // 初期化
 void GameScene::Initialize()
 {
+	type = GAMESTATE::TITLE;
 	LoadFile();
 }
 
@@ -251,18 +252,49 @@ void GameScene::KeyEvent()
 void GameScene::GameEnd(bool isClear)
 {
 	// 位置変更
-	if(moveY < 180) moveY += 24;
+	if (moveY < 180) { moveY += 24; moveX = 60; }
 
 	// クリア表示
 	if (isClear) {
 		DrawGraph(0, (int)moveY, FileManager::Instance()->GetFileHandle(CLEAR_IMG), true);
+		DrawGraph(100, 520 - (int)moveY, FileManager::Instance()->GetFileHandle(TITLE_TEXT), true);
+		DrawGraph(400, 520 - (int)moveY, FileManager::Instance()->GetFileHandle(CLOSE_TEXT), true);
+		DrawGraph((int)moveX, 520 - (int)moveY, FileManager::Instance()->GetFileHandle(CHOISE_IMG), true);
 	}
 	// ゲームオーバー
 	else {
 		DrawGraph(0, (int)moveY, FileManager::Instance()->GetFileHandle(GAMEOVER_IMG), true);
+		DrawGraph(100, 520 - (int)moveY, FileManager::Instance()->GetFileHandle(TITLE_TEXT), true);
+		DrawGraph(400, 520 - (int)moveY, FileManager::Instance()->GetFileHandle(CLOSE_TEXT), true);
+		DrawGraph((int)moveX, 520 - (int)moveY, FileManager::Instance()->GetFileHandle(CHOISE_IMG), true);
 	}
 
-	if (moveY >= 180 && KeyInput::Instance()->Keyboard_Get(KEY_INPUT_SPACE) == 1) Scene::Instance()->ChangeFadeState(Scene::Instance()->FADEOUT, Scene::Instance()->TITLE);
+	if (moveY >= 180)
+	{
+		// ステート切り替え
+		if (KeyInput::Instance()->Keyboard_Get(KEY_INPUT_RIGHT) == 1) {
+			moveX += 300;
+			if (moveX > 360) moveX = 360;
+			type = GAMESTATE::END;
+		}
+		if (KeyInput::Instance()->Keyboard_Get(KEY_INPUT_LEFT) == 1) {
+			moveX -= 300;
+			if (moveX < 60) moveX = 60;
+			type = GAMESTATE::TITLE;
+		}
+
+		// タイトルに戻るかゲーム終了
+		if (KeyInput::Instance()->Keyboard_Get(KEY_INPUT_SPACE) == 1) {
+			switch (type) {
+			case GAMESTATE::TITLE:
+				Scene::Instance()->ChangeFadeState(Scene::Instance()->FADEOUT, Scene::Instance()->TITLE);
+				break;
+			case GAMESTATE::END:
+				DxLib_End();
+				break;
+			}
+		}
+	}
 }
 
 void GameScene::Finalize()

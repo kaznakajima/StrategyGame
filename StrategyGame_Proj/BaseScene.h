@@ -5,6 +5,9 @@
 #include "TimeCount.h"
 
 #define FADE_IMAGE "Fade.png"
+#define CLOSE_TEXT "GameClose.png"
+#define CHOISE_IMG "Choise.png"
+#define TITLE_TEXT "ToTitle.png"
 
 // シーンのもととなるクラス(継承させる)
 class BaseScene

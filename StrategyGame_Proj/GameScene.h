@@ -1,7 +1,6 @@
 #pragma once
 #include "BaseScene.h"
 
-// ステージ画像とカーソル画像
 #define FIELD_IMG "StageMap.png"
 #define CURSOR_IMG "Cursor.png"
 #define PLAYERTURN_IMG "PlayerTurn.png"
@@ -15,14 +14,18 @@ public:
 	// コンストラクタ
 	GameScene();
 
+	enum GAMESTATE {
+		TITLE,
+		END
+	};
+	GAMESTATE type;
+
 	// 初期化
 	void Initialize();
 	// 終了
 	void Finalize();
 	// ファイル読み込み
 	void LoadFile();
-	// 読み込んだファイルの破棄
-	void UnLoadFile();
 	// ターン変更
 	void TurnChange(bool playerTurn);
 	//更新
