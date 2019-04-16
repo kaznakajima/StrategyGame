@@ -19,14 +19,18 @@ void TitleScene::Update()
 {
 	// プレイヤータイプの変更
 	if (KeyInput::Instance()->Keyboard_Get(KEY_INPUT_RIGHT) == 1) {
-		_type++;
+		/*_type++;
 		if (_type > (int)ENEMY) _type = (int)ENEMY;
-		type = (PLAYERTYPE)_type;
+		type = (PLAYERTYPE)_type;*/
+		xPos += 240;
+		if (xPos > 480) xPos = 480;
 	}
 	if (KeyInput::Instance()->Keyboard_Get(KEY_INPUT_LEFT) == 1) {
-		_type--;
+		/*_type--;
 		if (_type > (int)PLAYER) _type = (int)PLAYER;
-		type = (PLAYERTYPE)_type;
+		type = (PLAYERTYPE)_type; */
+		xPos -= 240;
+		if (xPos < 240) xPos = 240;
 	}
 
 	// ユニット数の変更
@@ -64,7 +68,9 @@ void TitleScene::Update()
 void TitleScene::Draw()
 {
 	DrawGraph(0, 0, FileManager::Instance()->GetFileHandle(FIELD_IMG), true);
-	DrawFormatString(200, 300, GetColor(0, 0, 0), "スタート");
+	DrawGraph(240, 240, FileManager::Instance()->GetFileHandle(START_TEXT), true);
+	DrawGraph(480, 240, FileManager::Instance()->GetFileHandle(CLOSE_TEXT), true);
+	DrawGraph(xPos, 240, FileManager::Instance()->GetFileHandle(CHOISE_IMG), true);
 }
 
 // 終了処理

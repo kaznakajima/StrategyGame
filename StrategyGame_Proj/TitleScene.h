@@ -1,6 +1,9 @@
 #pragma once
 #include "BaseScene.h"
 #define FIELD_IMG "StageMap.png"
+#define START_TEXT "GameStart.png"
+#define CLOSE_TEXT "GameClose.png"
+#define CHOISE_IMG "Choise.png"
 
 class TitleScene : public BaseScene
 {
