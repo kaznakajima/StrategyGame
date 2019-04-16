@@ -32,6 +32,8 @@ void GameScene::UnLoadFile()
 
 void GameScene::TurnChange(bool playerTurn)
 {
+	if (Scene::Instance()->fadeState != Scene::Instance()->NONE) return;
+
 	// 位置変更
 	moveX -= 24;
 
@@ -83,6 +85,7 @@ void GameScene::TurnChange(bool playerTurn)
 // シーン全体の更新
 void GameScene::Update()
 {
+
 	// 自分のターン
 	if (CharacterManager::Instance()->playerTurn) {
 		// 入力待機
@@ -158,6 +161,7 @@ void GameScene::Draw()
 // キー入力処理
 void GameScene::KeyEvent()
 {
+	if (Scene::Instance()->fadeState != Scene::Instance()->NONE) return;
 	if (CharacterManager::Instance()->isMove || CharacterManager::Instance()->playerTurn == false || CharacterManager::Instance()->turnAnim) return;
 
 	// 押されたキー入力によって処理を実行

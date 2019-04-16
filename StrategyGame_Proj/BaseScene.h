@@ -10,6 +10,7 @@
 class BaseScene
 {
 public:
+
 	// 読み込み
 	virtual void LoadFile() = 0;
 	// 読み込んだファイルの破棄
@@ -32,15 +33,31 @@ public:
 	~Scene();
 
 	// シーンタイプ
-	enum SCENE {
+	enum CURRENT_SCENE {
 		TITLE,
 		GAME
 	};
+	// フェード状態のステート
+	enum FADE_STATE {
+		FADEIN,
+		FADEOUT,
+		NONE
+	};
+	FADE_STATE fadeState;
 
+	// 現在のシーン
+	unique_ptr<BaseScene> c_Scene;
+	// 次のシーン
+	CURRENT_SCENE nextScene;
+	// フェード用変数(透明度,フェード用画像)
+	int fadeImg;
 	// シーン変更
-	void ChangeScene(SCENE scene);
+	void ChangeScene(CURRENT_SCENE scene);
+	// フェードステートの変更
+	void ChangeFadeState(FADE_STATE state, CURRENT_SCENE scene);
 	// シーンフェード
-	void SceneFade(SCENE nextScene);
+	void SceneFade(CURRENT_SCENE nextScene);
+	void SceneFade(int _alpha, int fadeValue);
 	// 更新
 	void Update();
 	// 描画
