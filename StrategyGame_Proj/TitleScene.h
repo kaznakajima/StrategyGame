@@ -22,16 +22,13 @@ public:
 	void Draw();
 private:
 	// プレイヤータイプ
-	enum PLAYERTYPE {
-		PLAYER = 0,
-		ENEMY
+	enum TITLESTATE {
+		START,
+		END
 	};
-	PLAYERTYPE type;
+	TITLESTATE type;
 	int _type = 0;
 
 	// 座標
-	int xPos;
-
-	// プレイヤー数と敵の数
-	int playerCount = 2, enemyCount = 2;
+	int xPos = 90;
 };

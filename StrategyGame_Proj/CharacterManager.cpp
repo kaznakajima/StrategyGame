@@ -1,9 +1,7 @@
 #include "CharacterManager.h"
 #include "AIManager.h"
 
-CharacterManager::~CharacterManager() {
-	//Finalize();
-}
+CharacterManager::~CharacterManager() {}
 
 // ‰Šú‰»
 void CharacterManager::Initialize()
@@ -449,8 +447,10 @@ void CharacterManager::ChangeDetailCharacter(shared_ptr<Character> const & chara
 	}
 }
 
+// I—¹ˆ—
 void CharacterManager::Finalize() {
 	if (_character.empty() == false) _character.clear();
 	if (_myCharacter != nullptr) _myCharacter.reset();
 	if (_eCharacter != nullptr) _eCharacter.reset();
+	if (checkCharacter != nullptr) checkCharacter.reset();
 }

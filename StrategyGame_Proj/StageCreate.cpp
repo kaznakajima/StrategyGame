@@ -148,12 +148,15 @@ void StageCreate::SetTerrainParam(int x, int y, int paramData)
 int StageCreate::GetTerrainParam(int x, int y, string _param)
 {
 	int returnParam = 0;
+	// 守備の地形効果をセット
 	if (_param == "DEF") {
 		returnParam = terrain[y][x].DEF;
 	}
+	// 回避の地形効果をセット
 	else if (_param == "AVO") {
 		returnParam = terrain[y][x].AVO;
 	}
 
+	// 地形効果の値を返す
 	return returnParam;
 }

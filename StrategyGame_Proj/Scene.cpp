@@ -31,6 +31,7 @@ void Scene::ChangeScene(CURRENT_SCENE scene)
 		c_Scene = make_unique<GameScene>();
 		break;
 	}
+	c_Scene->Initialize();
 }
 
 void Scene::ChangeFadeState(FADE_STATE state, CURRENT_SCENE scene)

@@ -12,8 +12,6 @@ class BaseScene
 public:
 	// 読み込み
 	virtual void LoadFile() = 0;
-	// 読み込んだファイルの破棄
-	virtual void UnLoadFile() = 0;
 	// 初期化
 	virtual void Initialize() = 0; 
 	// 更新

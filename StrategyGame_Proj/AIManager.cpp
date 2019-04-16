@@ -199,8 +199,10 @@ void AIManager::CharacterLost(Character* character)
 
 }
 
+// I—¹ˆ—
 void AIManager::Finalize()
 {
 	if (_playerList.empty() == false) _playerList.clear();
 	if (_enemyList.empty() == false) _enemyList.clear();
+	if (_myCharacter != nullptr) _myCharacter.reset();
 }

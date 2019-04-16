@@ -25,11 +25,6 @@ void GameScene::LoadFile()
 	turnChangeImg = FileManager::Instance()->GetFileHandle(PLAYERTURN_IMG);
 }
 
-void GameScene::UnLoadFile()
-{
-
-}
-
 void GameScene::TurnChange(bool playerTurn)
 {
 	if (Scene::Instance()->fadeState != Scene::Instance()->NONE) return;
