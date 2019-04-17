@@ -30,9 +30,6 @@
     <ClCompile Include="KeyInput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CameraSystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -40,9 +37,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GameScene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AttackPhase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TimeCount.cpp">
@@ -87,9 +81,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GameScene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AttackPhase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TimeCount.h">

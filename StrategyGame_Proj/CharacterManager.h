@@ -39,7 +39,7 @@ public:
 	// ‘I‘ğ”»’è
 	bool isSelect;
 	// ˆÚ“®”»’è
-	bool isMove;
+	bool isMove = false;
 	// UŒ‚”»’è
 	bool attack;
 	// ƒQ[ƒ€‚ªI—¹‚µ‚½‚©‚Ç‚¤‚©

@@ -43,6 +43,9 @@ public:
 
 	// マップの状態を保存
 	vector<vector<Cell>> cell;
+	// ユニットの初期位置
+	vector<int> p_InitPos;
+	vector<int> e_InitPos;
 	// 地形効果を保存
 	vector<vector<TERRAIN_PARAM>> terrain;
 

@@ -19,10 +19,10 @@ void CharacterManager::Initialize()
 	}
 
 	for (int num = 0; num < StageCreate::Instance()->playerCount; num++) {
-		_character[num]->Character_Initialize(playerDataPass[num], "Player", 144 + (CHIP_SIZE * num), 240 + (CHIP_SIZE * num));
+		_character[num]->Character_Initialize(playerDataPass[num], "Player", StageCreate::Instance()->p_InitPos[num * 2], StageCreate::Instance()->p_InitPos[num * 2 + 1]);
 	}
 	for (int num = 0; num < StageCreate::Instance()->enemyCount; num++) {
-		_character[StageCreate::Instance()->playerCount + num]->Character_Initialize(enemyDataPass[num], "Enemy", 96 + (CHIP_SIZE * num), 96 + (CHIP_SIZE * num));
+		_character[StageCreate::Instance()->playerCount + num]->Character_Initialize(enemyDataPass[num], "Enemy", StageCreate::Instance()->e_InitPos[num * 2], StageCreate::Instance()->e_InitPos[num * 2 + 1]);
 	}
 
 	// 敵AIの初期化
@@ -56,9 +56,11 @@ void CharacterManager::SetCharacterData()
 	playerDataPass = vector<string>(StageCreate::Instance()->playerCount, "");
 	for (int pass = 0; pass < playerDataPass.size(); ++pass) {
 		switch (pass) {
+		// ロード
 		case 0:
 			playerDataPass[pass] = UNIT_LOAD;
 			break;
+		// サポート
 		case 1:
 			playerDataPass[pass] = UNIT_SUPPORT;
 			break;
@@ -175,16 +177,18 @@ void CharacterManager::DrawCheck(int x, int y)
 	}
 
 	for (size_t num = 0; num < _character.size(); num++) {
-		// プレイヤーターン
-		if (playerTurn && _character[num]->myStatus->myTeam == "Player") {
-			// ユニットが選択可能かチェック
-			CanSelectCharacter(_character[num], x, y);
-		}
-		// 敵ターン
-		else if (playerTurn == false && _character[num]->myStatus->myTeam == "Enemy") {
-			// ユニットが選択可能かチェック
-			CanSelectCharacter(_character[num], x, y);
-		}
+		// ユニットが選択可能かチェック
+		CanSelectCharacter(_character[num], x, y);
+		//// プレイヤーターン
+		//if (playerTurn && _character[num]->myStatus->myTeam == "Player") {
+		//	// ユニットが選択可能かチェック
+		//	CanSelectCharacter(_character[num], x, y);
+		//}
+		//// 敵ターン
+		//else if (playerTurn == false && _character[num]->myStatus->myTeam == "Enemy") {
+		//	// ユニットが選択可能かチェック
+		//	CanSelectCharacter(_character[num], x, y);
+		//}
 		
 	}
 }
@@ -213,6 +217,12 @@ void CharacterManager::CharacterMove(int x, int y)
 	// キャラクターの移動
 	for (size_t num = 0; num < _character.size(); num++) {
 		if (_character[num]->myStatus->isSelect) {
+			if (playerTurn && _character[num]->myStatus->myTeam == "Enemy") {
+				_character[num]->myStatus->isSelect = false;
+				_character[num]->myStatus->AnimHandle = 0.0f;
+				return;
+			}
+
 			isMove = _character[num]->CharacterMove(x, y);
 
 			// 移動が完了し、攻撃しないなら行動終了

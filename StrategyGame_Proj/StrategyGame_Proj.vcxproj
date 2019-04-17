@@ -130,9 +130,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AIManager.cpp" />
-    <ClCompile Include="AttackPhase.cpp" />
     <ClCompile Include="AudioManager.cpp" />
-    <ClCompile Include="CameraSystem.cpp" />
     <ClCompile Include="Character.cpp" />
     <ClCompile Include="CharacterManager.cpp" />
     <ClCompile Include="FileManager.cpp" />
@@ -147,7 +145,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AIManager.h" />
-    <ClInclude Include="AttackPhase.h" />
     <ClInclude Include="AudioManager.h" />
     <ClInclude Include="BaseScene.h" />
     <ClInclude Include="CameraSystem.h" />

@@ -14,6 +14,8 @@ void StageCreate::Stage_Initialize()
 	onUnit = vector<vector<string>>(MAP_SIZEY, vector<string>(MAP_SIZEX, "NONE"));
 	checkMove = vector<vector<bool>>(MAP_SIZEY, vector<bool>(MAP_SIZEX, false));
 	cell = vector<vector<Cell>>(MAP_SIZEY, vector<Cell>(MAP_SIZEX));
+	p_InitPos.clear();
+	e_InitPos.clear();
 	terrain = vector<vector<TERRAIN_PARAM>>(MAP_SIZEY, vector<TERRAIN_PARAM>(MAP_SIZEX));
 }
 
@@ -87,12 +89,26 @@ void StageCreate::SetTerrainParam(int x, int y, int paramData)
 	fstream file;
 	switch (paramData)
 	{
-	// 門
+	// プレイヤーの初期値に追加
 	case 0:
+		p_InitPos.push_back(x * CHIP_SIZE);
+		p_InitPos.push_back(y * CHIP_SIZE);
+		break;
+	// 敵の初期値に追加
+	case -10:
+		e_InitPos.push_back(x * CHIP_SIZE);
+		e_InitPos.push_back(y * CHIP_SIZE);
+		break;
+	// 門
+	case -2:
 		file.open(FileManager::Instance()->GetDataName(TERRAIN_GATE), ios::in | ios::binary);
 		file.read((char*)&_param, sizeof(_param));
 		terrain[y][x].DEF = _param.DEF;
 		terrain[y][x].AVO = _param.AVO;
+
+		// 門の前には必ず敵がいる
+		e_InitPos.push_back(x * CHIP_SIZE);
+		e_InitPos.push_back(y * CHIP_SIZE);
 
 		// 名前を保存
 		cell[y][x].map_str = FileManager::Instance()->GetFileName(TERRAIN_GATE);
@@ -100,7 +116,7 @@ void StageCreate::SetTerrainParam(int x, int y, int paramData)
 		file.close();
 		break;
 	// 森
-	case -2:
+	case -3:
 		file.open(FileManager::Instance()->GetDataName(TERRAIN_FOREST), ios::in | ios::binary);
 		file.read((char*)&_param, sizeof(_param));
 		terrain[y][x].DEF = _param.DEF;
@@ -112,7 +128,7 @@ void StageCreate::SetTerrainParam(int x, int y, int paramData)
 		file.close();
 		break;
 	// 家
-	case -3:
+	case -4:
 		file.open(FileManager::Instance()->GetDataName(TERRAIN_HOUSE), ios::in | ios::binary);
 		file.read((char*)&_param, sizeof(_param));
 		terrain[y][x].DEF = _param.DEF;
@@ -124,7 +140,7 @@ void StageCreate::SetTerrainParam(int x, int y, int paramData)
 		file.close();
 		break;
 	// 砦
-	case -4:
+	case -5:
 		file.open(FileManager::Instance()->GetDataName(TERRAIN_FORT), ios::in | ios::binary);
 		file.read((char*)&_param, sizeof(_param));
 		terrain[y][x].DEF = _param.DEF;
