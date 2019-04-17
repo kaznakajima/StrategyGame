@@ -31,7 +31,22 @@ void CharacterManager::Initialize()
 	}
 	AIManager::Instance()->Initialize();
 
+	playerTurn = false;
 	StartTurn();
+}
+
+// ユニットを選択状態にする
+void CharacterManager::CanSelectCharacter(shared_ptr<Character> const & character, int x, int y)
+{
+	// カーソル位置と同じユニットを選択状態にする
+	if (character->myStatus->xPos == x && character->myStatus->yPos == y) {
+		if (character->myStatus->canMove) {
+			character->myStatus->isSelect = true;
+			character->myStatus->AnimHandle = 4.0f;
+			isSelect = true;
+			attack = false;
+		}
+	}
 }
 
 // データパスの設定
@@ -162,27 +177,13 @@ void CharacterManager::DrawCheck(int x, int y)
 	for (size_t num = 0; num < _character.size(); num++) {
 		// プレイヤーターン
 		if (playerTurn && _character[num]->myStatus->myTeam == "Player") {
-			// カーソルが合っているユニットのみ表示
-			if (_character[num]->myStatus->xPos == x && _character[num]->myStatus->yPos == y) {
-				if (_character[num]->myStatus->canMove) {
-					_character[num]->myStatus->isSelect = true;
-					_character[num]->myStatus->AnimHandle = 4.0f;
-					isSelect = true;
-					attack = false;
-				}
-			}
+			// ユニットが選択可能かチェック
+			CanSelectCharacter(_character[num], x, y);
 		}
 		// 敵ターン
 		else if (playerTurn == false && _character[num]->myStatus->myTeam == "Enemy") {
-			// カーソルが合っているユニットのみ表示
-			if (_character[num]->myStatus->xPos == x && _character[num]->myStatus->yPos == y) {
-				if (_character[num]->myStatus->canMove) {
-					_character[num]->myStatus->isSelect = true;
-					_character[num]->myStatus->AnimHandle = 4.0f;
-					isSelect = true;
-					attack = false;
-				}
-			}
+			// ユニットが選択可能かチェック
+			CanSelectCharacter(_character[num], x, y);
 		}
 		
 	}
@@ -288,8 +289,10 @@ void CharacterManager::ChoiseAttack(int x, int y)
 	// 選択した位置に敵がいたら攻撃対象のリファレンスを作成
 	for (size_t num = 0; num < _character.size(); num++) {
 		if (_myCharacter != _character[num] && _character[num]->myStatus->xPos == x && _character[num]->myStatus->yPos == y) {
-			_eCharacter = _character[num];
-			_myCharacter->myStatus->isAttack = true;
+			if (_myCharacter->myStatus->myTeam != _character[num]->myStatus->myTeam) {
+				_eCharacter = _character[num];
+				_myCharacter->myStatus->isAttack = true;
+			}
 		}
 
 		// 攻撃可能なユニットがいなかったら終了

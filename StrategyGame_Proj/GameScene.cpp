@@ -6,14 +6,13 @@
 GameScene::GameScene()
 {
 	Initialize();
-
-	CharacterManager::Instance()->Initialize();
-	CharacterManager::Instance()->SetCameraOffset(-1, true);
 }
 
 // 初期化
 void GameScene::Initialize()
 {
+	CharacterManager::Instance()->Initialize();
+	CharacterManager::Instance()->SetCameraOffset(-1, true);
 	type = GAMESTATE::TITLE;
 	LoadFile();
 }
@@ -81,6 +80,8 @@ void GameScene::TurnChange(bool playerTurn)
 // シーン全体の更新
 void GameScene::Update()
 {
+
+	DrawFormatString(AIManager::Instance()->xPos, AIManager::Instance()->yPos, GetColor(0, 0, 0), "ここ");
 
 	// 自分のターン
 	if (CharacterManager::Instance()->playerTurn) {
@@ -288,6 +289,7 @@ void GameScene::GameEnd(bool isClear)
 			switch (type) {
 			case GAMESTATE::TITLE:
 				Scene::Instance()->ChangeFadeState(Scene::Instance()->FADEOUT, Scene::Instance()->TITLE);
+				Finalize();
 				break;
 			case GAMESTATE::END:
 				DxLib_End();

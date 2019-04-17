@@ -61,38 +61,26 @@ void AIManager::MoveSelect(shared_ptr<Character> const &character)
 		// ユニットの周囲が移動可能な場合なら移動先に登録
 		// 下
 		if (moveY / CHIP_SIZE < 9 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE + character->myStatus->AttackRange][moveX / CHIP_SIZE] == true) {
-			ChoiseMovePoint(moveX, moveY + CHIP_SIZE);
-			if (isMove) {
-				xPos = moveX, yPos = moveY;
-				break;
-			}
+			isMove = ChoiseMovePoint(moveX, moveY + CHIP_SIZE);
+			if (isMove) { xPos = moveX, yPos = moveY; break;}
 		}
 		// ユニットの周囲が移動可能な場合なら移動先に登録
 		// 上
 		if (moveY / CHIP_SIZE > 0 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE - character->myStatus->AttackRange][moveX / CHIP_SIZE] == true) {
-			ChoiseMovePoint(moveX, moveY - CHIP_SIZE);
-			if (isMove) {
-				xPos = moveX, yPos = moveY;
-				break;
-			}
+			isMove = ChoiseMovePoint(moveX, moveY - CHIP_SIZE);
+			if (isMove) { xPos = moveX, yPos = moveY; break; }
 		}
 		// ユニットの周囲が移動可能な場合なら移動先に登録
 		// 右
 		if (moveX / CHIP_SIZE < 14 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE][moveX / CHIP_SIZE + character->myStatus->AttackRange] == true) {
-			ChoiseMovePoint(moveX + CHIP_SIZE, moveY);
-			if (isMove) {
-				xPos = moveX, yPos = moveY;
-				break;
-			}
+			isMove = ChoiseMovePoint(moveX + CHIP_SIZE, moveY);
+			if (isMove) { xPos = moveX, yPos = moveY; break; }
 		}
 		// ユニットの周囲が移動可能な場合なら移動先に登録
 		// 左
 		if (moveX / CHIP_SIZE > 0 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE][moveX / CHIP_SIZE - character->myStatus->AttackRange] == true) {
-			ChoiseMovePoint(moveX - CHIP_SIZE, moveY);
-			if (isMove) {
-				xPos = moveX, yPos = moveY;
-				break;
-			}
+			isMove = ChoiseMovePoint(moveX - CHIP_SIZE, moveY);
+			if (isMove) { xPos = moveX, yPos = moveY; break; }
 		}
 	}
 
@@ -112,17 +100,15 @@ void AIManager::MoveSelect(shared_ptr<Character> const &character)
 }
 
 // 移動先の選択
-void AIManager::ChoiseMovePoint(int _x, int _y)
+bool AIManager::ChoiseMovePoint(int _x, int _y)
 {
-	if (StageCreate::Instance()->onUnit[_y / CHIP_SIZE][_x / CHIP_SIZE] != "NONE" 
-		&& _x != _myCharacter->myStatus->xPos || _y != _myCharacter->myStatus->yPos) {
-		isMove = false; 
-		return;
+	if (StageCreate::Instance()->onUnit[_y / CHIP_SIZE][_x / CHIP_SIZE] != "NONE") {
+		return false;
 	}
 
 	x = _x, y = _y;
 
-	isMove = true;
+	return true;
 }
 
 // プレイヤー側のキャラクターの取得

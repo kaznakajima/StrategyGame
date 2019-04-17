@@ -49,7 +49,7 @@ private:
 	void MoveSelect(shared_ptr<Character> const &character);
 
 	// 移動先を選択する
-	void ChoiseMovePoint(int _x, int _y);
+	bool ChoiseMovePoint(int _x, int _y);
 
 	// プレイヤー側キャラクターとの距離を取得
 	int GetDistancePlayer(shared_ptr<Character> const &character, vector<shared_ptr<Character>> const &playerList);

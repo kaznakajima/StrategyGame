@@ -94,6 +94,8 @@ private:
 	vector<string> playerDataPass;
 	// 敵データのパス
 	vector<string> enemyDataPass;
+	// ユニットを選択状態にする
+	void CanSelectCharacter(shared_ptr<Character> const &character, int x, int y);
 	// プレイヤーと敵のデータのパスを格納
 	void SetCharacterData();
 	// ユニットリストのリセット
