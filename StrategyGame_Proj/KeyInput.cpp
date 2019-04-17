@@ -3,8 +3,13 @@
 
 KeyInput::KeyInput()
 {
-	// 疑似的カメラの初期化
+	Initialize();
+}
+
+void KeyInput::Initialize()
+{
 	xPos = 480; yPos = 240;
+	// 疑似的カメラの初期化
 	cameraPos.x = 48; cameraPos.y = 0; cameraPos.z = -10.0f;
 }
 

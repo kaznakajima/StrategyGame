@@ -7,6 +7,9 @@ class KeyInput : public Singleton<KeyInput>
 public:
 	KeyInput();
 
+	// 初期化(シーン読み込み時に呼ばれる)
+	void Initialize();
+
 	// キーが押されているフレーム数を取得
 	int Key[256];
 	// x座標, y座標

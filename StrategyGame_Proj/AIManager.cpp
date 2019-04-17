@@ -62,25 +62,29 @@ void AIManager::MoveSelect(shared_ptr<Character> const &character)
 		// 下
 		if (moveY / CHIP_SIZE < 9 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE + character->myStatus->AttackRange][moveX / CHIP_SIZE] == true) {
 			isMove = ChoiseMovePoint(moveX, moveY + CHIP_SIZE);
-			if (isMove) { xPos = moveX, yPos = moveY; break;}
+			if (isMove) { xPos = moveX, yPos = moveY; break;} // 攻撃先の座標を取得
+			else if(moveX == x && moveY + CHIP_SIZE == y) { xPos = moveX, yPos = moveY; break; } // その場で攻撃できるなら攻撃先を取得
 		}
 		// ユニットの周囲が移動可能な場合なら移動先に登録
 		// 上
 		if (moveY / CHIP_SIZE > 0 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE - character->myStatus->AttackRange][moveX / CHIP_SIZE] == true) {
 			isMove = ChoiseMovePoint(moveX, moveY - CHIP_SIZE);
-			if (isMove) { xPos = moveX, yPos = moveY; break; }
+			if (isMove) { xPos = moveX, yPos = moveY; break; } // 攻撃先の座標を取得
+			else if (moveX == x && moveY - CHIP_SIZE == y) { xPos = moveX, yPos = moveY; break; } // その場で攻撃できるなら攻撃先を取得
 		}
 		// ユニットの周囲が移動可能な場合なら移動先に登録
 		// 右
 		if (moveX / CHIP_SIZE < 14 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE][moveX / CHIP_SIZE + character->myStatus->AttackRange] == true) {
 			isMove = ChoiseMovePoint(moveX + CHIP_SIZE, moveY);
-			if (isMove) { xPos = moveX, yPos = moveY; break; }
+			if (isMove) { xPos = moveX, yPos = moveY; break; } // 攻撃先の座標を取得
+			else if (moveX + CHIP_SIZE == x && moveY == y) { xPos = moveX, yPos = moveY; break; } // その場で攻撃できるなら攻撃先を取得
 		}
 		// ユニットの周囲が移動可能な場合なら移動先に登録
 		// 左
 		if (moveX / CHIP_SIZE > 0 && StageCreate::Instance()->checkMove[moveY / CHIP_SIZE][moveX / CHIP_SIZE - character->myStatus->AttackRange] == true) {
 			isMove = ChoiseMovePoint(moveX - CHIP_SIZE, moveY);
-			if (isMove) { xPos = moveX, yPos = moveY; break; }
+			if (isMove) { xPos = moveX, yPos = moveY; break; } // 攻撃先の座標を取得
+			else if (moveX - CHIP_SIZE == x && moveY == y) { xPos = moveX, yPos = moveY; break; } // その場で攻撃できるなら攻撃先を取得
 		}
 	}
 

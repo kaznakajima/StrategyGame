@@ -11,6 +11,7 @@ GameScene::GameScene()
 // 初期化
 void GameScene::Initialize()
 {
+	KeyInput::Instance()->Initialize();
 	CharacterManager::Instance()->Initialize();
 	CharacterManager::Instance()->SetCameraOffset(-1, true);
 	type = GAMESTATE::TITLE;
@@ -80,8 +81,6 @@ void GameScene::TurnChange(bool playerTurn)
 // シーン全体の更新
 void GameScene::Update()
 {
-
-	DrawFormatString(AIManager::Instance()->xPos, AIManager::Instance()->yPos, GetColor(0, 0, 0), "ここ");
 
 	// 自分のターン
 	if (CharacterManager::Instance()->playerTurn) {
