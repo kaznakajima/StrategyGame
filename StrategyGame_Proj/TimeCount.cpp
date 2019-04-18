@@ -6,7 +6,7 @@ void TimeCount::SetCount()
 {
 	isCount = true;
 	// Œ»İ‚ÌŠÔ‚ğæ“¾
-	time = GetNowCount();
+	time = (float)GetNowCount();
 }
 
 // Œo‰ßŠÔ‚Ìæ“¾

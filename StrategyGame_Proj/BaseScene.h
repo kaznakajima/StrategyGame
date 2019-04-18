@@ -49,8 +49,11 @@ public:
 	unique_ptr<BaseScene> c_Scene;
 	// 次のシーン
 	CURRENT_SCENE nextScene;
+	// ゲーム中かどうか
+	bool isGame = true;
 	// フェード用変数(透明度,フェード用画像)
 	int fadeImg;
+
 	// シーン変更
 	void ChangeScene(CURRENT_SCENE scene);
 	// フェードステートの変更

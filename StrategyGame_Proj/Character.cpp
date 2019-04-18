@@ -8,8 +8,6 @@ Character::Character()
 {
 	itemCount = 0;
 
-	AddItem(IRON_SWORD);
-
 	FileManager::Instance()->GetFileHandle(CAN_MOVE_AREA);
 	FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA);
 	FileManager::Instance()->GetFileHandle(ATTACK_DETAIL);
@@ -26,7 +24,9 @@ Character::Character()
 
  void Character::Character_Initialize(string pass, string team, int posX, int posY)
 {
-	 //if (status == nullptr) return;
+	 // 装備品追加
+	 if (team == "Player") AddItem(IRON_SWORD); // プレイヤーは剣
+	 else if (team == "Enemy") AddItem(IRON_AX); // 敵は斧
 
 	 GetCharacterParam(FileManager::Instance()->GetDataName(pass));
 

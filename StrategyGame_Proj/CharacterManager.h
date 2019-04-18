@@ -43,7 +43,7 @@ public:
 	// UŒ‚”»’è
 	bool attack;
 	// ƒQ[ƒ€‚ªI—¹‚µ‚½‚©‚Ç‚¤‚©
-	bool isGame;
+	bool isGame = true;
 
 	// ‰Šú‰»
 	void Initialize();

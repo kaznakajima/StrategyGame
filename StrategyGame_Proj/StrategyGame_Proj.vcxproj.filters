@@ -71,9 +71,6 @@
     <ClInclude Include="KeyInput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CameraSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="BaseScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>

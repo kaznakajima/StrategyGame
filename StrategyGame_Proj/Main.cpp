@@ -12,12 +12,15 @@ void Init()
 // アルファ値を返す
 int FadeAlpha(int _alpha)
 {
+	// ステートに応じてアルファ値を変動
 	switch (Scene::Instance()->fadeState) {
+	// フェードイン
 	case Scene::FADEIN:
 		_alpha += 3;
 		if (_alpha > 255) _alpha = 255;
 		Scene::Instance()->SceneFade(_alpha, 255);
 		break;
+	// フェードアウト
 	case Scene::FADEOUT:
 		_alpha -= 3;
 		if (_alpha < 0) _alpha = 0;
@@ -53,12 +56,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		// フェード後のアルファ値の取得
 		if(Scene::Instance()->fadeState != Scene::NONE) alpha = FadeAlpha(alpha);
 
-		// 重なり防止
+		// フェードとの重なり防止
 		if (alpha != 0) {
 			Scene::Instance()->Draw();
 
 			Scene::Instance()->Update();
 		}
+
+		// ゲームが終了ならブレイク
+		if (Scene::Instance()->isGame == false) break;
+
 		ScreenFlip();
 	}
 

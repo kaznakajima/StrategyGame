@@ -32,12 +32,16 @@ void CharacterManager::Initialize()
 	AIManager::Instance()->Initialize();
 
 	playerTurn = false;
+	isGame = true;
 	StartTurn();
 }
 
 // ユニットを選択状態にする
 void CharacterManager::CanSelectCharacter(shared_ptr<Character> const & character, int x, int y)
 {
+	// 敵ターンは除外
+	if (playerTurn == false && character->myStatus->myTeam == "Player") return;
+
 	// カーソル位置と同じユニットを選択状態にする
 	if (character->myStatus->xPos == x && character->myStatus->yPos == y) {
 		if (character->myStatus->canMove) {
@@ -118,34 +122,44 @@ void CharacterManager::Update(int x, int y)
 	// 攻撃
 	if (attack) Attack();
 
-	// 攻撃中のデータ表示
-	if (_myCharacter != nullptr && _eCharacter != nullptr) {
-		// 攻撃から約0.5秒たったら攻撃終了
-		if (TimeCount::Instance()->GetTimer(500.0f) >= 500.0f) {
-			_myCharacter.reset();
-			_eCharacter.reset();
-			moveableUnit--;
-			for (size_t num = 0; num < _character.size(); num++) {
-				// 死亡したユニットを除外する
-				if (_character[num]->myStatus->isDeath) {
+	// 攻撃中でないならリターン
+	if (_myCharacter == nullptr || _eCharacter == nullptr) return;
+
+	// 攻撃中なら以下の処理が実行される
+
+	// 攻撃から約0.5秒たったら攻撃終了
+	if (TimeCount::Instance()->GetTimer(500.0f) >= 500.0f) {
+		_myCharacter.reset();
+		_eCharacter.reset();
+		moveableUnit--;
+		for (size_t num = 0; num < _character.size(); num++) {
+			// 死亡したユニットを除外する
+			if (_character[num]->myStatus->isDeath) {
+				// プレイヤー指揮官がやられたらゲーム終了
+				if (_character[num]->myStatus->NAME == "Load") {
 					_character[num].reset();
 					_character.erase(_character.begin() + num);
-					// ユニットリストの初期化
-					ResetCharacterList();
-					for (size_t num = 0; num < _character.size(); ++num) {
-						CharacterCount(_character[num]);
-					}
-					AIManager::Instance()->Initialize();
+					_playerList.clear(); 
+					isGame = false;
+					return;
 				}
+				_character[num].reset();
+				_character.erase(_character.begin() + num);
+				// ユニットリストの初期化
+				ResetCharacterList();
+				for (size_t num = 0; num < _character.size(); ++num) {
+					CharacterCount(_character[num]);
+				}
+				AIManager::Instance()->Initialize();
 			}
-			// プレイヤーまたは敵が1体も残っていないならゲーム終了
-			if (_playerList.empty() || _enemyList.empty()) { isGame = false; return; }
-			if (moveableUnit <= 0) { StartTurn(); return; }
-			if (moveableUnit != 0 && playerTurn == false) AIManager::Instance()->Play();
-			return;
 		}
-		DrawAttackParam(_myCharacter, _eCharacter);
+		// プレイヤーまたは敵が1体も残っていないならゲーム終了
+		if (_playerList.empty() || _enemyList.empty()) { isGame = false; return; }
+		if (moveableUnit <= 0) { StartTurn(); return; }
+		if (moveableUnit != 0 && playerTurn == false) AIManager::Instance()->Play();
+		return;
 	}
+	DrawAttackParam(_myCharacter, _eCharacter);
 }
 
 // ターン開始
@@ -179,17 +193,6 @@ void CharacterManager::DrawCheck(int x, int y)
 	for (size_t num = 0; num < _character.size(); num++) {
 		// ユニットが選択可能かチェック
 		CanSelectCharacter(_character[num], x, y);
-		//// プレイヤーターン
-		//if (playerTurn && _character[num]->myStatus->myTeam == "Player") {
-		//	// ユニットが選択可能かチェック
-		//	CanSelectCharacter(_character[num], x, y);
-		//}
-		//// 敵ターン
-		//else if (playerTurn == false && _character[num]->myStatus->myTeam == "Enemy") {
-		//	// ユニットが選択可能かチェック
-		//	CanSelectCharacter(_character[num], x, y);
-		//}
-		
 	}
 }
 
@@ -253,6 +256,8 @@ void CharacterManager::GetMoveArrow(int x, int y)
 	// 移動順路を描画
 	for (size_t num = 0; num < _character.size(); num++) {
 		if (_character[num]->myStatus->isSelect) {
+			if (playerTurn && _character[num]->myStatus->myTeam == "Enemy") return;
+
 			_character[num]->DrawMoveArrow(x, y, 5);
 
 			// ユニットの位置に戻ったら順路をクリア

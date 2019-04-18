@@ -147,7 +147,6 @@
     <ClInclude Include="AIManager.h" />
     <ClInclude Include="AudioManager.h" />
     <ClInclude Include="BaseScene.h" />
-    <ClInclude Include="CameraSystem.h" />
     <ClInclude Include="Character.h" />
     <ClInclude Include="CharacterManager.h" />
     <ClInclude Include="FileManager.h" />

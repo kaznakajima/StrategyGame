@@ -59,7 +59,7 @@ int FileManager::LoadFile(string key)
 // ファイルのロード(分割)
 void FileManager::LoadFile(string file, int numAll, int numX, int numY, int sizeX, int sizeY)
 {
-	const int NUM_ALL_MAX = 64;	//分割数の最大
+	const int NUM_ALL_MAX = 48;	//分割数の最大
 	string directory = GRAPH_DIRECTORY + file;
 	int graphArr[NUM_ALL_MAX];
 
@@ -77,7 +77,6 @@ void FileManager::LoadFile(string file, int numAll, int numX, int numY, int size
 string FileManager::GetDataName(string file)
 {
 	string directory, extension;
-	int handle;
 
 	//拡張子
 	extension = GetExtension(file);
