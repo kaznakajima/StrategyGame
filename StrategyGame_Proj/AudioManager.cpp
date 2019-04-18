@@ -1,11 +1,11 @@
 #include "AudioManager.h"
 #include "FileManager.h"
 
-AudioManager::AudioManager(void)
+AudioManager::AudioManager()
 {
-	bgm = BGM_ENEMY;
+	bgm = BGM_PLAYER;
 }
-AudioManager::~AudioManager(void)
+AudioManager::~AudioManager()
 {
 
 }
@@ -48,5 +48,5 @@ void AudioManager::playBGM(string pass)
 void AudioManager::VolumeFade(int volume)
 {
 	// ˆø”‚É‚æ‚Á‚Ä‰¹—Ê’²ß
-	ChangeVolumeSoundMem(255 - volume, FileManager::Instance()->GetFileHandle(bgm));
+	ChangeVolumeSoundMem(volume, FileManager::Instance()->GetFileHandle(bgm));
 }

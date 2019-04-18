@@ -11,7 +11,7 @@ AIManager::~AIManager() { }
 // 初期化
 void AIManager::Initialize()
 {
-	_myCharacter = nullptr;
+	if(_myCharacter != nullptr) _myCharacter.reset();
 	// リストの初期化
 	_playerList.clear(); _playerList = CharacterManager::Instance()->_playerList;
 	_enemyList.clear(); _enemyList = CharacterManager::Instance()->_enemyList;
@@ -47,12 +47,10 @@ void AIManager::Play()
 // 移動先の選択
 void AIManager::MoveSelect(shared_ptr<Character> const &character)
 {
+	// 敵の移動先の候補を検出
 	x = character->myStatus->xPos, y = character->myStatus->yPos;
-
 	CharacterManager::Instance()->DrawCheck(x, y);
-
 	character->MoveAreaClear(CharacterManager::Instance()->_character);
-
 	character->MoveRange(character->myStatus->xPos, character->myStatus->yPos, character->myStatus->myParam.MOVERANGE);
 
 	// プレイヤーユニットの周囲を検索
@@ -99,6 +97,8 @@ void AIManager::MoveSelect(shared_ptr<Character> const &character)
 			}
 		}
 	}
+
+	// 実際に移動させる
 	CharacterManager::Instance()->GetMoveArrow(x, y);
 	CharacterManager::Instance()->KeyCheck(x, y);
 }
@@ -106,16 +106,16 @@ void AIManager::MoveSelect(shared_ptr<Character> const &character)
 // 移動先の選択
 bool AIManager::ChoiseMovePoint(int _x, int _y)
 {
-	if (StageCreate::Instance()->onUnit[_y / CHIP_SIZE][_x / CHIP_SIZE] != "NONE") {
-		return false;
-	}
+	// 他のユニットがその場にいるならリターン
+	if (StageCreate::Instance()->onUnit[_y / CHIP_SIZE][_x / CHIP_SIZE] != "NONE") return false;
 
+	// 移動先の代入
 	x = _x, y = _y;
 
 	return true;
 }
 
-// プレイヤー側のキャラクターの取得
+// プレイヤー側のユニットを取得
 int AIManager::GetDistancePlayer(shared_ptr<Character> const &character, vector<shared_ptr<Character>> const &playerList)
 {
 	// プレイヤー側のキャラクターとの距離
@@ -136,12 +136,14 @@ int AIManager::GetDistancePlayer(shared_ptr<Character> const &character, vector<
 		}
 	}
 
+	// 最短距離を返す
 	return _minDistance;
 }
 
 // 移動地点を検索
 void AIManager::GetMovePoint(shared_ptr<Character> const &character, int _x, int _y, vector<shared_ptr<Character>> const &playerList)
 {
+	// 自身の移動範囲外、他のユニットがいる位置ならリターン
 	if (StageCreate::Instance()->checkMove[_y][_x] == false || StageCreate::Instance()->onUnit[_y][_x] != "NONE") return;
 
 	// プレイヤー側のキャラクターとの距離
@@ -149,6 +151,7 @@ void AIManager::GetMovePoint(shared_ptr<Character> const &character, int _x, int
 	// プレイヤー側のキャラクターとの距離
 	int _offsetX = 0, _offsetY = 0, _offsetTotal = 0;
 
+	// 移動先候補までの最も遠い位置なら実行
 	if (character->moveToPos[_y][_x] > 0 && moveCost >= character->moveToPos[_y][_x]) {
 		moveCost = character->moveToPos[_y][_x];
 		// プレイヤーからの距離の計算
@@ -181,12 +184,6 @@ void AIManager::CheckCanMove(shared_ptr<Character> const &character, int _x, int
 	isMove = true;
 	x = _x * CHIP_SIZE;
 	y = _y * CHIP_SIZE;
-}
-
-// 敵キャラクターのロスト(死亡処理)
-void AIManager::CharacterLost(Character* character)
-{
-
 }
 
 // 終了処理

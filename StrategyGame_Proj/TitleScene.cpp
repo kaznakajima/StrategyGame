@@ -3,6 +3,7 @@
 // ‰Šú‰»
 void TitleScene::Initialize()
 {
+	AudioManager::Instance()->playBGM(BGM_TITLE);
 	type = TITLESTATE::START;
 	LoadFile();
 }
@@ -11,9 +12,10 @@ void TitleScene::Initialize()
 void TitleScene::LoadFile()
 {
 	FileManager::Instance()->GetFileHandle(FIELD_IMG);
-	FileManager::Instance()->GetFileHandle(START_TEXT);
-	FileManager::Instance()->GetFileHandle(CLOSE_TEXT);
+	FileManager::Instance()->GetFileHandle(START_IMG);
+	FileManager::Instance()->GetFileHandle(CLOSE_IMG);
 	FileManager::Instance()->GetFileHandle(CHOISE_IMG);
+	FileManager::Instance()->GetFileHandle(TITLE_LOGO);
 }
 
 // XV
@@ -54,8 +56,9 @@ void TitleScene::Update()
 void TitleScene::Draw()
 {
 	DrawGraph(0, 0, FileManager::Instance()->GetFileHandle(FIELD_IMG), true);
-	DrawGraph(100, 370, FileManager::Instance()->GetFileHandle(START_TEXT), true);
-	DrawGraph(450, 370, FileManager::Instance()->GetFileHandle(CLOSE_TEXT), true);
+	DrawGraph(120, 200, FileManager::Instance()->GetFileHandle(TITLE_LOGO), true);
+	DrawGraph(100, 370, FileManager::Instance()->GetFileHandle(START_IMG), true);
+	DrawGraph(450, 370, FileManager::Instance()->GetFileHandle(CLOSE_IMG), true);
 	DrawGraph(xPos, 370, FileManager::Instance()->GetFileHandle(CHOISE_IMG), true);
 }
 

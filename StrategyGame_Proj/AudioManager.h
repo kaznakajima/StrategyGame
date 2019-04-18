@@ -5,6 +5,7 @@
 #include <vector>
 using namespace std;
 
+#define BGM_TITLE "BGM\\Title.mp3"
 #define BGM_PLAYER "BGM\\PlayerBGM.mp3"
 #define BGM_ENEMY "BGM\\EnemyBGM.mp3"
 #define SE_TURNSTART "SE\\TurnStart.mp3"

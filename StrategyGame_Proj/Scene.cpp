@@ -10,7 +10,7 @@ Scene::Scene()
 	fadeState = Scene::FADEIN;
 	nextScene = CURRENT_SCENE::TITLE;
 	ChangeScene(nextScene);
-	fadeImg = FileManager::Instance()->GetFileHandle(FADE_IMAGE);
+	fadeImg = FileManager::Instance()->GetFileHandle(FADE_IMAGE); 
 }
 
 Scene::~Scene()

@@ -2,7 +2,8 @@
 #include "BaseScene.h"
 
 #define FIELD_IMG "StageMap.png"
-#define START_TEXT "GameStart.png"
+#define START_IMG "GameStart.png"
+#define TITLE_LOGO "TitleLogo.png"
 
 class TitleScene : public BaseScene
 {

@@ -11,24 +11,21 @@ public:
 
 	// 移動先の座標
 	int x = 0, y = 0; 
-	int xPos = 0, yPos = 0;
 
 	// AIを動かすかどうか
 	bool AIMove;
-
-	bool isDebug = false;
 
 	// 初期化
 	void Initialize();
 	// 終了
 	void Finalize();
-
 	// 更新
 	void Update();
-
 	// 初回起動
 	void Play();
 private:
+	// 攻撃先の座標
+	int xPos = 0, yPos = 0;
 
 	// 敵(AI)キャラクターのリスト
 	vector<shared_ptr<Character>> _enemyList;
@@ -40,7 +37,7 @@ private:
 
 	// 移動判定
 	bool isMove;
-	// 移動最大値格納
+	// 移動値(少ないほど距離が遠い)
 	int moveCost;
 	// プレイヤーとの最短距離
 	int minDistance = 100;
@@ -59,7 +56,4 @@ private:
 
 	// 移動地点がプレイヤーに向かえる最短距離か検索
 	void CheckCanMove(shared_ptr<Character> const &character, int _x, int _y, shared_ptr<Character> const &playerSt);
-
-	// 敵キャラクターのロスト(死亡処理)
-	void CharacterLost(Character* character);
 };

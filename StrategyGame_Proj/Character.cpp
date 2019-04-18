@@ -38,7 +38,8 @@ Character::Character()
 	 myStatus->AnimHandle = 0;
 	 myStatus->AttackRange = Item[0]->myParam.RANGE;
 	 myStatus->myTeam = team;
-	 LoadDivGraph(CHARACTER_IMG, 20, 4, 5, CHIP_SIZE, CHIP_SIZE, myStatus->Image);
+	 if(myStatus->myTeam == "Player") LoadDivGraph(P_CHARACTER_IMG, 20, 4, 5, CHIP_SIZE, CHIP_SIZE, myStatus->Image);
+	 else LoadDivGraph(E_CHARACTER_IMG, 20, 4, 5, CHIP_SIZE, CHIP_SIZE, myStatus->Image);
 }
 
  // ƒpƒ‰ƒ[ƒ^æ“¾

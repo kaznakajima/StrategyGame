@@ -14,6 +14,7 @@ void GameScene::Initialize()
 	KeyInput::Instance()->Initialize();
 	CharacterManager::Instance()->Initialize();
 	CharacterManager::Instance()->SetCameraOffset(-1, true);
+	AudioManager::Instance()->playBGM(BGM_PLAYER);
 	type = GAMESTATE::TITLE;
 	LoadFile();
 }
@@ -26,6 +27,7 @@ void GameScene::LoadFile()
 	turnChangeImg = FileManager::Instance()->GetFileHandle(PLAYERTURN_IMG);
 }
 
+// ターン開始
 void GameScene::TurnChange(bool playerTurn)
 {
 	if (Scene::Instance()->fadeState != Scene::Instance()->NONE) return;
@@ -35,12 +37,10 @@ void GameScene::TurnChange(bool playerTurn)
 
 	// プレイヤーターン
 	if (playerTurn) {
-		//DrawGraph((int)moveX, 0, turnChangeImg, true);
 		DrawRotaGraph((int)moveX, 240, 1.0f, 0.0f, turnChangeImg, true);
 	}
 	// エネミーターン
 	else {
-		//DrawGraph((int)moveX, 0, turnChangeImg, true);
 		DrawRotaGraph((int)moveX, 240, 1.0f, 0.0f, turnChangeImg, true);
 	}
 
@@ -49,10 +49,6 @@ void GameScene::TurnChange(bool playerTurn)
 
 		AudioManager::Instance()->playSE(SE_TURNSTART);
 
-		for (int volume = 0; volume < 256; volume += 3) {
-			AudioManager::Instance()->VolumeFade(volume);
-		}
-
 		WaitTimer(1000);
 		moveX = 672;
 		CharacterManager::Instance()->turnAnim = false;
@@ -60,20 +56,12 @@ void GameScene::TurnChange(bool playerTurn)
 		if (playerTurn) { 
 			turnChangeImg = FileManager::Instance()->GetFileHandle(ENEMYTURN_IMG);
 			AudioManager::Instance()->playBGM(BGM_PLAYER);
-
-			for (int volume = 256; volume >= 0; volume -= 3) {
-				AudioManager::Instance()->VolumeFade(volume);
-			}
 		}
-		// エネミーターン
+		// 敵ターン
 		else {
 			AIManager::Instance()->Play();
 			turnChangeImg = FileManager::Instance()->GetFileHandle(PLAYERTURN_IMG);
 			AudioManager::Instance()->playBGM(BGM_ENEMY);
-
-			for (int volume = 256; volume >= 0; volume -= 3) {
-				AudioManager::Instance()->VolumeFade(volume);
-			}
 		}
 	}
 }
@@ -147,6 +135,7 @@ void GameScene::Draw()
 // キー入力処理
 void GameScene::KeyEvent()
 {
+	// フェード中入力させない
 	if (Scene::Instance()->fadeState != Scene::Instance()->NONE) return;
 	if (CharacterManager::Instance()->isMove || CharacterManager::Instance()->turnAnim || CharacterManager::Instance()->isGame == false) return;
 
@@ -171,8 +160,10 @@ void GameScene::KeyEvent()
 	}
 	// 下キーが押されたら
 	else if (KeyInput::Instance()->Keyboard_Get(KEY_INPUT_DOWN) == 1) {
+		// ユニットの詳細を表示
 		if (CharacterManager::Instance()->isDetail) {
 			CharacterManager::Instance()->ChangeDetailCharacter(CharacterManager::Instance()->checkCharacter, 1);
+			// カーソル位置をユニットに合わせる
 			xPos = CharacterManager::Instance()->checkCharacter->myStatus->xPos;
 			yPos = CharacterManager::Instance()->checkCharacter->myStatus->yPos;
 			return;
@@ -204,8 +195,10 @@ void GameScene::KeyEvent()
 	}
 	// 上キーが押されたら
 	else if (KeyInput::Instance()->Keyboard_Get(KEY_INPUT_UP) == 1) {
+		// ユニットの詳細を表示
 		if (CharacterManager::Instance()->isDetail) {
 			CharacterManager::Instance()->ChangeDetailCharacter(CharacterManager::Instance()->checkCharacter, -1);
+			// カーソル位置をユニットに合わせる
 			xPos = CharacterManager::Instance()->checkCharacter->myStatus->xPos;
 			yPos = CharacterManager::Instance()->checkCharacter->myStatus->yPos;
 			return;
@@ -247,18 +240,19 @@ void GameScene::GameEnd(bool isClear)
 	// クリア表示
 	if (isClear) {
 		DrawGraph(0, (int)moveY, FileManager::Instance()->GetFileHandle(CLEAR_IMG), true);
-		DrawGraph(100, 550 - (int)moveY, FileManager::Instance()->GetFileHandle(TITLE_TEXT), true);
-		DrawGraph(450, 550 - (int)moveY, FileManager::Instance()->GetFileHandle(CLOSE_TEXT), true);
+		DrawGraph(100, 550 - (int)moveY, FileManager::Instance()->GetFileHandle(TOTITLE_IMG), true);
+		DrawGraph(450, 550 - (int)moveY, FileManager::Instance()->GetFileHandle(CLOSE_IMG), true);
 		DrawGraph((int)moveX, 550 - (int)moveY, FileManager::Instance()->GetFileHandle(CHOISE_IMG), true);
 	}
 	// ゲームオーバー
 	else {
 		DrawGraph(0, (int)moveY, FileManager::Instance()->GetFileHandle(GAMEOVER_IMG), true);
-		DrawGraph(100, 550 - (int)moveY, FileManager::Instance()->GetFileHandle(TITLE_TEXT), true);
-		DrawGraph(450, 550 - (int)moveY, FileManager::Instance()->GetFileHandle(CLOSE_TEXT), true);
+		DrawGraph(100, 550 - (int)moveY, FileManager::Instance()->GetFileHandle(TOTITLE_IMG), true);
+		DrawGraph(450, 550 - (int)moveY, FileManager::Instance()->GetFileHandle(CLOSE_IMG), true);
 		DrawGraph((int)moveX, 550 - (int)moveY, FileManager::Instance()->GetFileHandle(CHOISE_IMG), true);
 	}
 
+	// 移動が完了したら
 	if (moveY >= 180)
 	{
 		// フェード中は入力を受け付けない
@@ -291,6 +285,7 @@ void GameScene::GameEnd(bool isClear)
 	}
 }
 
+// 終了処理
 void GameScene::Finalize()
 {
 	AIManager::Instance()->Finalize();
