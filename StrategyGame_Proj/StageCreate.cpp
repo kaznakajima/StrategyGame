@@ -82,6 +82,30 @@ void StageCreate::CheckOnUnit(int x, int y, string str)
 	onUnit[y][x] = str;
 }
 
+// 地形の詳細データ表示
+void StageCreate::DrawTerrainDetail(int x, int y)
+{	
+	// 描画位置の補正用変数
+	int drawOffset = 0;
+
+	// 自身の位置を見て、描画位置に補正をかける
+	if (x > STAGE1_WIDTH / 2) {
+		DrawGraph(drawOffset, 405, FileManager::Instance()->GetFileHandle(TERRAIN_DETAIL), true);
+	}
+	else if (x < STAGE1_WIDTH / 2) {
+		drawOffset = 572;
+		DrawGraph(drawOffset, 405, FileManager::Instance()->GetFileHandle(TERRAIN_DETAIL), true);
+	}
+
+	// 地形データ表示
+	DrawFormatString(drawOffset + 30, 410, GetColor(0, 0, 0), cell[y / CHIP_SIZE][x / CHIP_SIZE].map_str.c_str());
+	DrawFormatString(drawOffset + 10, 435, GetColor(0, 0, 0), "DEF");
+	DrawFormatString(drawOffset + 10, 460, GetColor(0, 0, 0), "AVO");
+	DrawFormatString(drawOffset + 75, 435, GetColor(0, 0, 0), "%d", terrain[y / CHIP_SIZE][x / CHIP_SIZE].DEF);
+	DrawFormatString(drawOffset + 75, 460, GetColor(0, 0, 0), "%d", terrain[y / CHIP_SIZE][x / CHIP_SIZE].AVO);
+
+}
+
 // 地形効果をセットする
 void StageCreate::SetTerrainParam(int x, int y, int paramData)
 {

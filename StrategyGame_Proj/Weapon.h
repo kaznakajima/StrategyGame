@@ -4,9 +4,9 @@
 #include <memory>
 using namespace std;
 
-#define IRON_SWORD "Resources\\WeaponData\\“S‚ÌŒ•.dat"
-#define IRON_SPEAR "Resources\\WeaponData\\“S‚Ì‘„.dat"
-#define IRON_AX "Resources\\WeaponData\\“S‚Ì•€.dat"
+#define IRON_SWORD "Resources\\WeaponData\\ironSword.dat"
+#define IRON_SPEAR "Resources\\WeaponData\\ironSpear.dat"
+#define IRON_AX "Resources\\WeaponData\\ironAx.dat"
 
 class Weapon
 {

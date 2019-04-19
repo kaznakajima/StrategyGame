@@ -71,17 +71,6 @@ public:
 	void GetMoveCount(int x, int y);
 	// 移動方向取得
 	void GetMoveArrow(int x, int y);
-	// ユニットの移動
-	void CharacterMove(int x, int y);
-
-	// 攻撃範囲表示
-	void GetAttackArea(int x, int y);
-	// 攻撃の対象を選択
-	void ChoiseAttack(int x, int y);
-	// 攻撃の処理
-	void Attack();
-	// 攻撃中のデータ表示
-	void DrawAttackParam(shared_ptr<Character> const &attackChara, shared_ptr<Character> const &defenceChara);
 
 	// カメラとのオフセット計算
 	void SetCameraOffset(int dir, bool horizontal);
@@ -90,6 +79,7 @@ public:
 	void Finalize();
 
 private:
+
 	// プレイヤーデータのパス
 	vector<string> playerDataPass;
 	// 敵データのパス
@@ -102,6 +92,20 @@ private:
 	void ResetCharacterList();
 	// 現在の敵(AI)、プレイヤーのカウント
 	void CharacterCount(shared_ptr<Character> const &character);
+
+	// ユニットの移動
+	void CharacterMove(int x, int y);
+
+	// 攻撃範囲表示
+	void GetAttackArea(int x, int y);
+	// 攻撃詳細情報表示
+	void DrawAttackDetail(shared_ptr<Character> const &character, int x, int y);
+	// 攻撃の対象を選択
+	void ChoiseAttack(int x, int y);
+	// 攻撃の処理
+	void Attack();
+	// 攻撃中のデータ表示
+	void DrawDamageDetail(shared_ptr<Character> const &attackChara, shared_ptr<Character> const &defenceChara);
 
 	// HP用画像
 	int HpBar;

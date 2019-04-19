@@ -77,6 +77,8 @@ void GameScene::Update()
 
 		CharacterManager::Instance()->Update(xPos, yPos);
 
+		StageCreate::Instance()->DrawTerrainDetail(xPos + KeyInput::Instance()->cameraPos.x, yPos);
+
 		// ‚Ç‚¿‚ç‚©‚Ìw‰c‚ª‚¢‚È‚¢‚Ì‚È‚çƒQ[ƒ€I—¹
 		if (CharacterManager::Instance()->isGame == false &&  CharacterManager::Instance()->_playerList.empty()) {
 			GameEnd(false);

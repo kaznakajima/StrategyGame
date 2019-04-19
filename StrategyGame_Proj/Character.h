@@ -63,6 +63,8 @@ public:
 		bool isDeath = false;        // 死亡判定
 	}STATUS ;
 
+	// 移動値
+	int moveCount;
 	// 道筋
 	vector<int> OldPosX;
 	vector<int> OldPosY;
@@ -75,24 +77,12 @@ public:
 	// 移動できるエリア
 	vector<vector<int>> moveToPos = vector<vector<int>>(StageCreate::Instance()->MAP_SIZEY, vector<int>(StageCreate::Instance()->MAP_SIZEX, -1));
 
-	// 移動先の道筋かどうか
-	vector<vector<bool>> moveArrow = vector<vector<bool>>(StageCreate::Instance()->MAP_SIZEY, vector<bool>(StageCreate::Instance()->MAP_SIZEX, 0));
-
-	// 移動値
-	int moveCount;
-
-	// 自身のパラメータデータ
-	string myData;
-
 	// 初期化
 	void Character_Initialize(string pass, string team, int posX, int posY);
 	// パラメータ取得
 	void GetCharacterParam(string pass);
 	// ユニットの詳細情報表示
 	void DrawCharacterDetail();
-
-	// ユニットの位置を取得
-	VECTOR GetCharacterPosition();
 
 	// 描画
 	void SpriteDraw(int x, int y, int img);
@@ -129,22 +119,25 @@ public:
 	// 移動エリアのリセット
 	void MoveAreaClear(vector<shared_ptr<Character>> const &_character);
 
-	// 終了処理
-	void Finalize();
-
 private:
+	// 自身のパラメータデータ名
+	string myData;
+
 	// 移動経路
 	int ArrowImage[6];
+
+	// アイテムの所持数
+	int itemCount = 0;
+
+	// パラメータ一時格納用
+	int _param[10];
+
+	// 移動先の道筋かどうか
+	vector<vector<bool>> moveArrow = vector<vector<bool>>(StageCreate::Instance()->MAP_SIZEY, vector<bool>(StageCreate::Instance()->MAP_SIZEX, 0));
 
 	// アイテム追加
 	void AddItem(string itemName);
 
 	// レベルアップ
 	void LevelUp();
-
-	// アイテムの所持数
-	int itemCount = 0;
-
-	// パラメータ
-	int _param[10];
 };

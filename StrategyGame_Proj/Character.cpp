@@ -84,15 +84,6 @@ Character::Character()
 	 DrawFormatString(500, 96, GetColor(0, 0, 0), "体格_%d", myStatus->myParam.PHYSIQUE);
  }
 
- // ユニットの位置を返す
- VECTOR Character::GetCharacterPosition()
- {
-	 VECTOR vec;
-	 vec.x = (float)myStatus->xPos;
-	 vec.y = (float)myStatus->yPos;
-	 return vec;
- }
-
  // 移動再開(ターン開始時に呼び出す)
  void Character::TurnStart()
  {
@@ -303,13 +294,13 @@ void Character::MoveRange(int x, int y, int moveCost)
 		SpriteDraw(x, y, FileManager::Instance()->GetFileHandle(CAN_MOVE_AREA));
 	}
 
-	// 上へ行けるならチェック
+	// 上へ行けるかチェック
 	if (valueY - 1 >= 0 && moveToPos[valueY - 1][valueX] < moveCost) MoveRange(x, y - CHIP_SIZE, moveCost - 1);
-	// 右へ行けるならチェック
+	// 右へ行けるかチェック
 	if (valueX + 1 <= 14 && moveToPos[valueY][valueX + 1] < moveCost) MoveRange(x + CHIP_SIZE, y, moveCost - 1);
-	// 左へ行けるならチェック
+	// 左へ行けるかチェック
 	if (valueX - 1 >= 0 && moveToPos[valueY][valueX - 1] < moveCost)MoveRange(x - CHIP_SIZE, y, moveCost - 1);
-	// 下へ行けるならチェック
+	// 下へ行けるかチェック
 	if (valueY + 1 <= 9 && moveToPos[valueY + 1][valueX] < moveCost) MoveRange(x, y + CHIP_SIZE, moveCost - 1);
 }
 
@@ -332,17 +323,16 @@ void Character::DrawMoveArrow(int x, int y, int moveValue)
 
 	// 移動範囲でないなら表示しない
 	if (StageCreate::Instance()->checkMove[valueY][valueX] == false) {
-		OldPosX.clear();
+		// 入力座標のリセット
+		OldPosX.clear(); 
 		OldPosY.clear();
+		// 移動値はカウント
 		moveCount++;
 		moveArrow[valueY][valueX] = false;
 	}
 
 	// 敵の行動
 	if (myStatus->myTeam == "Enemy") {
-		// これまでの入力情報をクリア
-		OldPosX.clear();
-		OldPosY.clear();
 
 		if (StageCreate::Instance()->checkMove[valueY][valueX] == true) {
 
@@ -353,24 +343,33 @@ void Character::DrawMoveArrow(int x, int y, int moveValue)
 			}
 
 			// ユニットに向かってルートを逆探知していく
+			// 下
 			if (valueY + 1 < 9 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY + 1][valueX] && StageCreate::Instance()->checkMove[valueY + 1][valueX] == true) {
 				DrawMoveArrow(x, y + CHIP_SIZE, 5);
 				return;
 			}
+			// ユニットに向かってルートを逆探知していく
+			// 上
 			if (valueY - 1 > 0 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY - 1][valueX] && StageCreate::Instance()->checkMove[valueY - 1][valueX] == true) {
 				DrawMoveArrow(x, y - CHIP_SIZE, 5);
 				return;
 			}
+			// ユニットに向かってルートを逆探知していく
+			// 右
 			if (valueX + 1 < 14 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY][valueX + 1] && StageCreate::Instance()->checkMove[valueY][valueX + 1] == true) {
 				DrawMoveArrow(x + CHIP_SIZE, y, 5);
 				return;
 			}
+			// ユニットに向かってルートを逆探知していく
+			// 左
 			if (valueX - 1 > 0 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY][valueX - 1] && StageCreate::Instance()->checkMove[valueY][valueX - 1] == true) {
 				DrawMoveArrow(x - CHIP_SIZE, y, 5);
 				return;
 			}
 		}
 	}
+
+	// 以下からはプレイヤーターンのみ実行
 
 	// 入力順にガイドライン表示
 	if (myStatus->myParam.MOVERANGE - moveToPos[valueY][valueX] >= moveCount || OldPosX.size() == moveCount) {
@@ -397,18 +396,25 @@ void Character::DrawMoveArrow(int x, int y, int moveValue)
 			}
 
 			// ユニットに向かってルートを逆探知していく
+			// 下
 			if (valueY + 1 < 9 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY + 1][valueX] && StageCreate::Instance()->checkMove[valueY + 1][valueX] == true) {
 				DrawMoveArrow(x, y + CHIP_SIZE, 5);
 				return;
 			}
+			// ユニットに向かってルートを逆探知していく
+			// 上
 			if (valueY - 1 > 0 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY - 1][valueX] && StageCreate::Instance()->checkMove[valueY - 1][valueX] == true) {
 				DrawMoveArrow(x, y - CHIP_SIZE, 5);
 				return;
 			}
+			// ユニットに向かってルートを逆探知していく
+			// 右
 			if (valueX + 1 < 14 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY][valueX + 1] && StageCreate::Instance()->checkMove[valueY][valueX + 1] == true) {
 				DrawMoveArrow(x + CHIP_SIZE, y, 5);
 				return;
 			}
+			// ユニットに向かってルートを逆探知していく
+			// 左
 			if (valueX - 1 > 0 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY][valueX - 1] && StageCreate::Instance()->checkMove[valueY][valueX - 1] == true) {
 				DrawMoveArrow(x - CHIP_SIZE, y, 5);
 				return;
@@ -492,14 +498,13 @@ void Character::GetAttackDetail(shared_ptr<Character> const &eCharacter)
 	DrawFormatString(80 + drawOffset, 150, GetColor(255, 255, 0), "命中");
 
 	DrawFormatString(120 + drawOffset, 100, GetColor(0, 0, 255), "%d", myStatus->HP);
-	DrawFormatString(120 + drawOffset, 175, GetColor(0, 0, 255), "%d", myStatus->myParam.MOVERANGE);
-	DrawFormatString(45 + drawOffset, 65, GetColor(0, 0, 0), myStatus->NAME.c_str());
+	DrawFormatString(45 + drawOffset, 30, GetColor(0, 0, 0), myStatus->NAME.c_str());
 	DrawFormatString(120 + drawOffset, 125, GetColor(0, 0, 255), "%d", mySTR);
 	if (mySPD >= 4) DrawFormatString(130 + drawOffset, 130, GetColor(255, 255, 255), "×2");
 	DrawFormatString(120 + drawOffset, 150, GetColor(0, 0, 255), "%d", myHitness);
 
 	DrawFormatString(45 + drawOffset, 100, GetColor(0, 0, 255), "%d", eCharacter->myStatus->HP);
-	DrawFormatString(100 + drawOffset, 330, GetColor(255, 255, 255), eCharacter->myStatus->NAME.c_str());
+	DrawFormatString(100 + drawOffset, 300, GetColor(255, 255, 255), eCharacter->myStatus->NAME.c_str());
 	DrawFormatString(45 + drawOffset, 125, GetColor(0, 0, 255), "%d", eSTR);
 	if (mySPD <= -4) DrawFormatString(55 + drawOffset, 130, GetColor(255, 255, 255), "×2");
 	DrawFormatString(45 + drawOffset, 150, GetColor(0, 0, 255), "%d", eHitness);
@@ -694,10 +699,4 @@ void Character::LevelUp()
 	file.write((char*)&myStatus->myParam, sizeof(myStatus->myParam));
 
 	file.close();
-}
-
-// 終了処理
-void Character::Finalize()
-{
-
 }

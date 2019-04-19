@@ -75,9 +75,11 @@ void CharacterManager::SetCharacterData()
 	enemyDataPass = vector<string>(StageCreate::Instance()->enemyCount, "");
 	for (int pass = 0; pass < enemyDataPass.size(); ++pass) {
 		switch (pass) {
+		// 敵1
 		case 0:
 			enemyDataPass[pass] = UNIT_ENEMY1;
 			break;
+		// 敵2
 		case 1:
 			enemyDataPass[pass] = UNIT_ENEMY2;
 			break;
@@ -105,12 +107,14 @@ void CharacterManager::CharacterCount(shared_ptr<Character> const & character)
 // キャラクター更新
 void CharacterManager::Update(int x, int y)
 {
-	// 攻撃範囲検索
+	// 攻撃可能かチェック
 	GetAttackArea(x, y);
 
 	for (size_t num = 0; num < _character.size(); ++num) {
 		// アニメーション
 		_character[num]->CharacterAnim();
+
+		DrawAttackDetail(_character[num], x, y);
 	}
 
 	// 詳細情報描画
@@ -159,7 +163,7 @@ void CharacterManager::Update(int x, int y)
 		if (moveableUnit != 0 && playerTurn == false) AIManager::Instance()->Play();
 		return;
 	}
-	DrawAttackParam(_myCharacter, _eCharacter);
+	DrawDamageDetail(_myCharacter, _eCharacter);
 }
 
 // ターン開始
@@ -270,11 +274,9 @@ void CharacterManager::GetMoveArrow(int x, int y)
 	}
 }
 
-// 攻撃範囲表示
+// 攻撃可能エリア取得
 void CharacterManager::GetAttackArea(int x, int y)
 {
-	if (attackCount != 0) return;
-
 	// 攻撃可能なユニットの取得
 	for (size_t num = 0; num < _character.size(); num++) {
 		if (_character[num]->myStatus->canAttack) {
@@ -284,16 +286,19 @@ void CharacterManager::GetAttackArea(int x, int y)
 			attack = true;
 		}
 	}
+}
 
-	if (playerTurn == false) return;
+// 攻撃の詳細情報表示
+void CharacterManager::DrawAttackDetail(shared_ptr<Character> const &character, int x, int y)
+{
+	// 攻撃できるユニットがいない、敵ターン、攻撃中はリターン、
+	if (_myCharacter == nullptr || playerTurn == false || attackCount != 0) return;
 
 	// 攻撃可能な位置のユニットとの攻撃した際の詳細情報の表示
-	for (size_t num = 0; num < _character.size(); num++) {
-		if (_myCharacter != nullptr && _myCharacter->myStatus->canAttack) {
-			if (_character[num]->myStatus->xPos == x && _character[num]->myStatus->yPos == y
-				&& StageCreate::Instance()->onUnit[y / CHIP_SIZE][x / CHIP_SIZE] == "Enemy") {
-				if (_myCharacter->myStatus->myTeam != _character[num]->myStatus->myTeam) _myCharacter->GetAttackDetail(_character[num]);
-			}
+	if (_myCharacter->myStatus->canAttack) {
+		if (character->myStatus->xPos == x && character->myStatus->yPos == y
+			&& StageCreate::Instance()->onUnit[y / CHIP_SIZE][x / CHIP_SIZE] == "Enemy") {
+			if (_myCharacter->myStatus->myTeam != character->myStatus->myTeam) _myCharacter->GetAttackDetail(character);
 		}
 	}
 }
@@ -359,7 +364,7 @@ void CharacterManager::Attack()
 }
 
 // 攻撃中のデータ表示
-void CharacterManager::DrawAttackParam(shared_ptr<Character> const &attackChara, shared_ptr<Character> const &defenceChara)
+void CharacterManager::DrawDamageDetail(shared_ptr<Character> const &attackChara, shared_ptr<Character> const &defenceChara)
 {
 	float drawOffset = 150;
 
