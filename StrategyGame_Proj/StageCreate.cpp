@@ -14,9 +14,9 @@ void StageCreate::Stage_Initialize()
 	onUnit = vector<vector<string>>(MAP_SIZEY, vector<string>(MAP_SIZEX, "NONE"));
 	checkMove = vector<vector<bool>>(MAP_SIZEY, vector<bool>(MAP_SIZEX, false));
 	cell = vector<vector<Cell>>(MAP_SIZEY, vector<Cell>(MAP_SIZEX));
+	terrain = vector<vector<TERRAIN_PARAM>>(MAP_SIZEY, vector<TERRAIN_PARAM>(MAP_SIZEX));
 	p_InitPos.clear();
 	e_InitPos.clear();
-	terrain = vector<vector<TERRAIN_PARAM>>(MAP_SIZEY, vector<TERRAIN_PARAM>(MAP_SIZEX));
 }
 
 void StageCreate::Open(string pass)
@@ -34,7 +34,9 @@ void StageCreate::Open(string pass)
 		string tmp = "";
 		istringstream stream(str);
 
+		// カンマ区切りで文字列取得
 		while (getline(stream, tmp, ',')) {
+			// マップサイズ取得
 			if (height == -1) {
 				if (width == 0) MAP_SIZEX = atoi(tmp.c_str());
 				else { 
@@ -43,6 +45,7 @@ void StageCreate::Open(string pass)
 				}
 				width++;
 			}
+			// ステージデータ取得
 			else {
 				// 文字列をint型に変更
 				int num = atoi(tmp.c_str());
@@ -114,12 +117,16 @@ void StageCreate::SetTerrainParam(int x, int y, int paramData)
 	switch (paramData)
 	{
 	// プレイヤーの初期値に追加
+	// 地形効果なし
 	case 0:
+		cell[y][x].map_str = "--";
 		p_InitPos.push_back(x * CHIP_SIZE);
 		p_InitPos.push_back(y * CHIP_SIZE);
 		break;
 	// 敵の初期値に追加
+	// 地形効果なし
 	case -10:
+		cell[y][x].map_str = "--";
 		e_InitPos.push_back(x * CHIP_SIZE);
 		e_InitPos.push_back(y * CHIP_SIZE);
 		break;
@@ -177,8 +184,6 @@ void StageCreate::SetTerrainParam(int x, int y, int paramData)
 		break;
 	// 地形効果なし
 	default:
-		terrain[y][x].DEF = 0;
-		terrain[y][x].AVO = 0;
 		cell[y][x].map_str = "--";
 		break;
 	}
