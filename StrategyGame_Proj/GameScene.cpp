@@ -11,6 +11,7 @@ GameScene::GameScene()
 // 初期化
 void GameScene::Initialize()
 {
+	drawMgr = make_unique<DrawManager>();
 	KeyInput::Instance()->Initialize();
 	CharacterManager::Instance()->Initialize();
 	CharacterManager::Instance()->SetCameraOffset(-1, true);
@@ -22,9 +23,9 @@ void GameScene::Initialize()
 void GameScene::LoadFile()
 {
 	// 画像の読み込み
-	FileManager::Instance()->GetFileHandle(FIELD_IMG);
+	/*FileManager::Instance()->GetFileHandle(FIELD_IMG);
 	FileManager::Instance()->GetFileHandle(CURSOR_IMG);
-	turnChangeImg = FileManager::Instance()->GetFileHandle(PLAYERTURN_IMG);
+	turnChangeImg = FileManager::Instance()->GetFileHandle(PLAYERTURN_IMG);*/
 }
 
 // ターン開始

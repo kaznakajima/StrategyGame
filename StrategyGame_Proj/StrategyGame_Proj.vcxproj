@@ -133,6 +133,8 @@
     <ClCompile Include="AudioManager.cpp" />
     <ClCompile Include="Character.cpp" />
     <ClCompile Include="CharacterManager.cpp" />
+    <ClCompile Include="DrawManager.cpp" />
+    <ClCompile Include="DrawParts.cpp" />
     <ClCompile Include="FileManager.cpp" />
     <ClCompile Include="GameScene.cpp" />
     <ClCompile Include="KeyInput.cpp" />
@@ -149,6 +151,8 @@
     <ClInclude Include="BaseScene.h" />
     <ClInclude Include="Character.h" />
     <ClInclude Include="CharacterManager.h" />
+    <ClInclude Include="DrawManager.h" />
+    <ClInclude Include="DrawParts.h" />
     <ClInclude Include="FileManager.h" />
     <ClInclude Include="GameScene.h" />
     <ClInclude Include="KeyInput.h" />

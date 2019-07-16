@@ -1,5 +1,6 @@
 #pragma once
 #include "BaseScene.h"
+#include "DrawParts.h"
 
 #define FIELD_IMG "StageMap.png"
 #define CURSOR_IMG "Cursor.png"
@@ -33,12 +34,14 @@ public:
 	//描画
 	void Draw();
 
+
 private:
 	// キー入力処理
 	void KeyEvent();
 	// ゲーム終了
 	void GameEnd(bool isClear);
 
+	unique_ptr<DrawManager> drawMgr;
 	// ステージ画像
 	int stageImg;
 	// カーソル画像
