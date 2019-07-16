@@ -2,6 +2,7 @@
 #include "DxLib.h"
 #include "StageCreate.h"
 #include "AudioManager.h"
+#include "DrawParts.h"
 #include "Weapon.h"
 #include "TimeCount.h"
 #include <vector>

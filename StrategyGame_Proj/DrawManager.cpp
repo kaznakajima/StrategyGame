@@ -1,5 +1,4 @@
 #include "DrawManager.h"
-#include <algorithm>
 
 void DrawManager::AddDrawList(shared_ptr<DrawManager>& _drawItem)
 {
@@ -8,22 +7,41 @@ void DrawManager::AddDrawList(shared_ptr<DrawManager>& _drawItem)
 	std::sort(drawList.begin(), drawList.end(), [](const shared_ptr<DrawManager> &a, const shared_ptr<DrawManager> &b) {
 		return a->layer < b->layer;
 	});
+	drawData.emplace(_drawItem->fileName, _drawItem);
 }
 
 // •`‰æƒp[ƒc‚ğæ‚èœ‚­
 void DrawManager::RemoveDrawList()
 {
 	// æ‚èœ‚­‚à‚Ì‚ğŒ©‚Â‚¯‚é
-	auto lostItem = remove_if(drawList.begin(), drawList.end(), [](const shared_ptr<DrawManager> &a) {
+	auto lostItem = remove_if(drawList.begin(), drawList.end(), [](const shared_ptr<DrawManager>& a) {
 		return a->IsRemove() == true;
 	});
 	drawList.erase(lostItem);
+}
+
+// Á‚·
+void DrawManager::SetRemove()
+{
+	for_each(drawList.begin(), drawList.end(), [](const shared_ptr<DrawManager>& draw) {
+		if (draw->copy) draw->isRemove = true;
+	});
+}
+
+// •`‰æ‚·‚é‘fŞ‚ğ•Ô‚·
+const shared_ptr<DrawManager>& DrawManager::GetDrawParts(string _fileName)
+{
+	auto parts = drawData.find(_fileName);
+	if (parts != drawData.end()) {
+		return parts->second;
+	}
 }
 
 void DrawManager::SetImage(string _fileName, int _layerNum)
 {
 	if (imgID != 0) return;
 
+	fileName = _fileName;
 	imgID = FileManager::Instance()->GetFileHandle(_fileName);
 	layer = _layerNum;
 	GetGraphSize(imgID, &width, &height);
@@ -34,16 +52,19 @@ void DrawManager::SetPosition(int _x, int _y)
 	x = _x; y = _y;
 }
 
-void DrawManager::SetRotate(bool _isRotate, int _rotaX, int _rotaY)
+void DrawManager::SetRotate(int _rotaX, int _rotaY)
 {
-	isRotate = _isRotate;
-	rotaX = _rotaX;
-	rotaY = _rotaY;
+	rotaX = _rotaX, rotaY = _rotaY;
 }
 
 void DrawManager::Draw()
 {
 	// ‰ñ“]‚ğ‰Á‚¦‚é‚©
-	if(isRotate) DrawGraph(x, y, imgID, TRUE);
+	if(isRotate == false) DrawGraph(x, y, imgID, TRUE);
 	else DrawRotaGraph(x, y, rotaX, rotaY, imgID, TRUE);
+}
+
+void DrawManager::Draw(string _fileName, int _x, int _y)
+{
+	DrawGraph(x, y, imgID, TRUE);
 }
