@@ -17,13 +17,13 @@ void DrawManager::RemoveDrawList()
 	auto lostItem = remove_if(drawList.begin(), drawList.end(), [](const shared_ptr<DrawManager>& a) {
 		return a->IsRemove() == true;
 	});
-	drawList.erase(lostItem);
+	if(lostItem != drawList.end()) drawList.erase(lostItem);
 }
 
-// è¡Ç∑
 void DrawManager::SetRemove()
 {
-	for_each(drawList.begin(), drawList.end(), [](const shared_ptr<DrawManager>& draw) {
+	for_each(drawList.begin(), drawList.end(), [](const shared_ptr<DrawManager>& draw)
+	{
 		if (draw->copy) draw->isRemove = true;
 	});
 }

@@ -12,6 +12,11 @@ void CharacterManager::Initialize()
 	FileManager::Instance()->GetFileHandle(HP_BARBOX);
 	FileManager::Instance()->GetFileHandle(DAMAGE_DETAIL);
 
+	shared_ptr<DrawManager> moveArea(new DrawParts(CAN_MOVE_AREA, true, 2));
+	DrawManager::Instance()->AddDrawList(moveArea);
+	shared_ptr<DrawManager> attackArea(new DrawParts(CAN_ATTACK_AREA, true, 1));
+	DrawManager::Instance()->AddDrawList(attackArea);
+
 	int allCharacter = StageCreate::Instance()->playerCount + StageCreate::Instance()->enemyCount;
 	// キャラクターの追加
 	for (size_t num = 0; num < allCharacter; num++) {

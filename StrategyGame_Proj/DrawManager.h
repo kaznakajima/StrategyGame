@@ -19,7 +19,7 @@ protected:
 	bool copy = false;
 public:
 	int layer;
-	bool isRemove;
+	bool isRemove = false;
 	bool isVisible = true;
 
 	// •`‰æƒp[ƒc‚ğŠi”[‚µ‚Ä‚¢‚­

@@ -8,8 +8,8 @@ Character::Character()
 {
 	itemCount = 0;
 
-	shared_ptr<DrawManager> attackDetail(new DrawParts(ATTACK_DETAIL, 1));
-	DrawManager::Instance()->AddDrawList(attackDetail);
+	/*shared_ptr<DrawManager> attackDetail(new DrawParts(ATTACK_DETAIL, 1));
+	DrawManager::Instance()->AddDrawList(attackDetail);*/
 	/*FileManager::Instance()->GetFileHandle(CAN_MOVE_AREA);
 	FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA);
 	FileManager::Instance()->GetFileHandle(ATTACK_DETAIL);*/
@@ -284,10 +284,6 @@ void Character::MoveRange(int x, int y, int moveCost)
 	if (StageCreate::Instance()->stageList[_valueY][_valueX] > 0 && moveCost >= 0 || 
 		StageCreate::Instance()->onUnit[valueY][valueX] != "NONE" && StageCreate::Instance()->onUnit[valueY][valueX] != myStatus->myTeam) 
 	{
-		shared_ptr<DrawManager> attackArea(new DrawParts(CAN_ATTACK_AREA, 0));
-		attackArea->SetPosition(x, y);
-		DrawManager::Instance()->AddDrawList(attackArea);
-		//SpriteDraw(x, y, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
 		moveToPos[valueY][valueX] = 0;
 		return;
 	}
@@ -296,10 +292,6 @@ void Character::MoveRange(int x, int y, int moveCost)
 	// 移動範囲表示していないなら表示
 	if (StageCreate::Instance()->checkMove[valueY][valueX] != true) {
 		StageCreate::Instance()->checkMove[valueY][valueX] = true; 
-		shared_ptr<DrawManager> moveArea(new DrawParts(CAN_MOVE_AREA, 0));
-		moveArea->SetPosition(x, y);
-		DrawManager::Instance()->AddDrawList(moveArea);
-		//SpriteDraw(x, y, FileManager::Instance()->GetFileHandle(CAN_MOVE_AREA));
 	}
 
 	// 上へ行けるかチェック
@@ -319,9 +311,6 @@ void Character::AttackRange()
 	for (int y = 0; y < StageCreate::Instance()->MAP_SIZEY; y++) {
 		for (int x = 0; x < StageCreate::Instance()->MAP_SIZEX; x++) {
 			if (moveToPos[y][x] == 0) {
-				shared_ptr<DrawManager> attackArea(new DrawParts(CAN_ATTACK_AREA, 0));
-				attackArea->SetPosition(x * CHIP_SIZE, y * CHIP_SIZE);
-				DrawManager::Instance()->AddDrawList(attackArea);
 				//SpriteDraw(x * CHIP_SIZE, y * CHIP_SIZE, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
 			}
 		}
@@ -459,27 +448,15 @@ void Character::AttackableDraw()
 	int valueX = myStatus->xPos / CHIP_SIZE, valueY = myStatus->yPos / CHIP_SIZE;
 	// 攻撃可能な位置の描画
 	if (valueX + 1 <= 14 && StageCreate::Instance()->onUnit[valueY][valueX + 1] != "NONE" && StageCreate::Instance()->onUnit[valueY][valueX + 1] != myStatus->myTeam) {
-		shared_ptr<DrawManager> attackArea(new DrawParts(CAN_ATTACK_AREA, 1));
-		attackArea->SetPosition(myStatus->xPos + CHIP_SIZE, myStatus->yPos);
-		DrawManager::Instance()->AddDrawList(attackArea);
 		//SpriteDraw(myStatus->xPos + CHIP_SIZE, myStatus->yPos, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
 	}
 	if (valueX - 1 >= 0 && StageCreate::Instance()->onUnit[valueY][valueX - 1] != "NONE" && StageCreate::Instance()->onUnit[valueY][valueX - 1] != myStatus->myTeam) {
-		shared_ptr<DrawManager> attackArea(new DrawParts(CAN_ATTACK_AREA, 1));
-		attackArea->SetPosition(myStatus->xPos - CHIP_SIZE, myStatus->yPos);
-		DrawManager::Instance()->AddDrawList(attackArea);
 		//SpriteDraw(myStatus->xPos - CHIP_SIZE, myStatus->yPos, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
 	}
 	if (valueY + 1 <= 9 && StageCreate::Instance()->onUnit[valueY + 1][valueX] != "NONE" && StageCreate::Instance()->onUnit[valueY + 1][valueX] != myStatus->myTeam) {
-		shared_ptr<DrawManager> attackArea(new DrawParts(CAN_ATTACK_AREA, 1));
-		attackArea->SetPosition(myStatus->xPos, myStatus->yPos + CHIP_SIZE);
-		DrawManager::Instance()->AddDrawList(attackArea);
 		//SpriteDraw(myStatus->xPos, myStatus->yPos + CHIP_SIZE, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
 	}
 	if (valueY - 1 >= 0 && StageCreate::Instance()->onUnit[valueY - 1][valueX] != "NONE" && StageCreate::Instance()->onUnit[valueY - 1][valueX] != myStatus->myTeam) {
-		shared_ptr<DrawManager> attackArea(new DrawParts(CAN_ATTACK_AREA, 1));
-		attackArea->SetPosition(myStatus->xPos, myStatus->yPos - CHIP_SIZE);
-		DrawManager::Instance()->AddDrawList(attackArea);
 		//SpriteDraw(myStatus->xPos, myStatus->yPos - CHIP_SIZE, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
 	}
 }

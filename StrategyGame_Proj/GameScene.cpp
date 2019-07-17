@@ -151,6 +151,7 @@ void GameScene::Draw()
 	for_each(DrawManager::Instance()->drawList.begin(), DrawManager::Instance()->drawList.end(), [](shared_ptr<DrawManager>& draw) {
 		draw->Draw();
 	});
+
 }
 
 // ƒL[“ü—Íˆ—
