@@ -3,6 +3,7 @@
 #include "KeyInput.h"
 #include "FileManager.h"
 #include "TimeCount.h"
+#include "DrawManager.h"
 
 #define FADE_IMAGE "Fade.png"
 #define CLOSE_IMG "GameClose.png"

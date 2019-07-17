@@ -1,10 +1,12 @@
 #include "GameScene.h"
 #include "CharacterManager.h"
 #include "AIManager.h"
+#include <algorithm>
 
 // コンストラクタ
 GameScene::GameScene()
 {
+	LoadFile();
 	Initialize();
 }
 
@@ -16,15 +18,21 @@ void GameScene::Initialize()
 	CharacterManager::Instance()->SetCameraOffset(-1, true);
 	AudioManager::Instance()->playBGM(BGM_PLAYER);
 	type = GAMESTATE::TITLE;
-	LoadFile();
 }
 
 void GameScene::LoadFile()
 {
 	// 画像の読み込み
-	FileManager::Instance()->GetFileHandle(FIELD_IMG);
+	shared_ptr<DrawManager> field(new DrawParts(FIELD_IMG, 0));
+	DrawManager::Instance()->AddDrawList(field);
+	shared_ptr<DrawManager> cursor(new DrawParts(CURSOR_IMG, 1));
+	DrawManager::Instance()->AddDrawList(cursor);
+	shared_ptr<DrawManager> playerTurn(new DrawParts(PLAYERTURN_IMG, 2, 1.0f, 0.0f));
+	playerTurn->isRemove = true;
+	DrawManager::Instance()->AddDrawList(playerTurn);
+	/*FileManager::Instance()->GetFileHandle(FIELD_IMG);
 	FileManager::Instance()->GetFileHandle(CURSOR_IMG);
-	turnChangeImg = FileManager::Instance()->GetFileHandle(PLAYERTURN_IMG);
+	turnChangeImg = FileManager::Instance()->GetFileHandle(PLAYERTURN_IMG);*/
 }
 
 // ターン開始
@@ -35,13 +43,17 @@ void GameScene::TurnChange(bool playerTurn)
 	// 位置変更
 	moveX -= 24;
 
+	DrawManager::Instance()->GetDrawParts(PLAYERTURN_IMG)->isVisible = true;
+
 	// プレイヤーターン
 	if (playerTurn) {
-		DrawRotaGraph((int)moveX, 240, 1.0f, 0.0f, turnChangeImg, true);
+		DrawManager::Instance()->GetDrawParts(PLAYERTURN_IMG)->SetPosition((int)moveX, 240);
+		//DrawRotaGraph((int)moveX, 240, 1.0f, 0.0f, turnChangeImg, true);
 	}
 	// エネミーターン
 	else {
-		DrawRotaGraph((int)moveX, 240, 1.0f, 0.0f, turnChangeImg, true);
+		DrawManager::Instance()->GetDrawParts(PLAYERTURN_IMG)->SetPosition((int)moveX, 240);
+		//DrawRotaGraph((int)moveX, 240, 1.0f, 0.0f, turnChangeImg, true);
 	}
 
 	// 移動完了したら
@@ -51,16 +63,17 @@ void GameScene::TurnChange(bool playerTurn)
 
 		WaitTimer(1000);
 		moveX = 672;
+		DrawManager::Instance()->GetDrawParts(PLAYERTURN_IMG)->isVisible = false;
 		CharacterManager::Instance()->turnAnim = false;
 
 		if (playerTurn) { 
-			turnChangeImg = FileManager::Instance()->GetFileHandle(ENEMYTURN_IMG);
+			//turnChangeImg = FileManager::Instance()->GetFileHandle(ENEMYTURN_IMG);
 			AudioManager::Instance()->playBGM(BGM_PLAYER);
 		}
 		// 敵ターン
 		else {
 			AIManager::Instance()->Play();
-			turnChangeImg = FileManager::Instance()->GetFileHandle(PLAYERTURN_IMG);
+			//turnChangeImg = FileManager::Instance()->GetFileHandle(PLAYERTURN_IMG);
 			AudioManager::Instance()->playBGM(BGM_ENEMY);
 		}
 	}
@@ -69,7 +82,6 @@ void GameScene::TurnChange(bool playerTurn)
 // シーン全体の更新
 void GameScene::Update()
 {
-
 	// 自分のターン
 	if (CharacterManager::Instance()->playerTurn) {
 		// 入力待機
@@ -122,7 +134,9 @@ void GameScene::Update()
 void GameScene::Draw()
 {
 	// 描画
-	DrawGraph(0 - (int)KeyInput::Instance()->cameraPos.x, 0 - (int)KeyInput::Instance()->cameraPos.y, FileManager::Instance()->GetFileHandle(FIELD_IMG), true);
+	DrawManager::Instance()->GetDrawParts(FIELD_IMG)->SetPosition(0 - (int)KeyInput::Instance()->cameraPos.x, 0 - (int)KeyInput::Instance()->cameraPos.y);
+	//DrawGraph(0 - (int)KeyInput::Instance()->cameraPos.x, 0 - (int)KeyInput::Instance()->cameraPos.y, FileManager::Instance()->GetFileHandle(FIELD_IMG), true);
+
 
 	// キャラクター選択
 	if (KeyInput::Instance()->isSelect == true && CharacterManager::Instance()->attack == false) {
@@ -131,7 +145,12 @@ void GameScene::Draw()
 	}
 
 	// カーソル表示
-	DrawGraph(xPos, yPos, FileManager::Instance()->GetFileHandle(CURSOR_IMG), true);
+	DrawManager::Instance()->GetDrawParts(CURSOR_IMG)->SetPosition(xPos, yPos);
+	//DrawGraph(xPos, yPos, FileManager::Instance()->GetFileHandle(CURSOR_IMG), true);
+
+	for_each(DrawManager::Instance()->drawList.begin(), DrawManager::Instance()->drawList.end(), [](shared_ptr<DrawManager>& draw) {
+		draw->Draw();
+	});
 }
 
 // キー入力処理
