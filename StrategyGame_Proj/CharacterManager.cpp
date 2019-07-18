@@ -12,11 +12,6 @@ void CharacterManager::Initialize()
 	FileManager::Instance()->GetFileHandle(HP_BARBOX);
 	FileManager::Instance()->GetFileHandle(DAMAGE_DETAIL);
 
-	shared_ptr<DrawManager> moveArea(new DrawParts(CAN_MOVE_AREA, true, 1));
-	DrawManager::Instance()->AddDrawList(moveArea);
-	shared_ptr<DrawManager> attackArea(new DrawParts(CAN_ATTACK_AREA, true, 2));
-	DrawManager::Instance()->AddDrawList(attackArea);
-
 	int allCharacter = StageCreate::Instance()->playerCount + StageCreate::Instance()->enemyCount;
 	// ƒLƒƒƒ‰ƒNƒ^[‚Ì’Ç‰Á
 	for (size_t num = 0; num < allCharacter; num++) {
@@ -32,7 +27,7 @@ void CharacterManager::Initialize()
 
 	// “GAI‚Ì‰Šú‰»
 	for (size_t num = 0; num < _character.size(); ++num) {
-		CharacterCount(_character[num]);
+		CharacterCount(_character[num]); 
 	}
 	AIManager::Instance()->Initialize();
 
@@ -54,6 +49,8 @@ void CharacterManager::CanSelectCharacter(shared_ptr<Character> const & characte
 			character->myStatus->AnimHandle = 4.0f;
 			isSelect = true;
 			attack = false;
+			character->MoveRange(character->myStatus->xPos, character->myStatus->yPos, character->myStatus->myParam.MOVERANGE);
+			character->AttackRange();
 		}
 	}
 }
@@ -209,13 +206,10 @@ void CharacterManager::DrawCheck(int x, int y)
 void CharacterManager::Draw()
 {
 	for (size_t num = 0; num < _character.size(); num++) {
-		MoveAreaClear();
 		// ˆÚ“®‡˜H‚ğ‹L˜^‚µ‚Â‚ÂˆÚ“®”ÍˆÍ‚ÆUŒ‚”ÍˆÍ‚Ì•`‰æ
 		if (_character[num]->myStatus->isSelect) {
 			_character[num]->OldPosX.push_back(_character[num]->myStatus->xPos);
 			_character[num]->OldPosY.push_back(_character[num]->myStatus->yPos);
-			_character[num]->MoveRange(_character[num]->myStatus->xPos, _character[num]->myStatus->yPos, _character[num]->myStatus->myParam.MOVERANGE);
-			_character[num]->AttackRange();
 			return;
 		}
 	}
@@ -242,6 +236,7 @@ void CharacterManager::CharacterMove(int x, int y)
 				&& _character[num]->myStatus->canAttack == false) {
 				moveableUnit--;
 				moveEnd = true;
+				MoveAreaClear();
 			}
 		}
 	}
@@ -291,6 +286,7 @@ void CharacterManager::MoveAreaClear()
 			}
 		}
 	}
+	DrawManager::Instance()->SetRemove();
 }
 
 // UŒ‚‰Â”\ƒGƒŠƒAæ“¾

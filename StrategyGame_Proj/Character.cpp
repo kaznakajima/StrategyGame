@@ -66,6 +66,8 @@ Character::Character()
 	 myStatus->myParam.ATTACK_AVO = myStatus->myParam.ATTACK_SPEED * 2 + myStatus->myParam.LUCKY;
 	 // 命中率 (武器命中 + 技パラメータ * 2 + 幸運パラメータ / 2)
 	 myStatus->myParam.ATTACK_HIT = Item[0]->myParam.HIT + (int)(myStatus->myParam.TECHNIQUE * 2) + (int)(myStatus->myParam.LUCKY / 2);
+	 shared_ptr<DrawManager> draw(new DrawParts(myStatus->NAME, 3));
+	 DrawManager::Instance()->AddDrawList(draw);
  }
 
  // ユニットの詳細情報の描画
@@ -116,7 +118,9 @@ void Character::CharacterAnim()
 	}
 
 	// xPos, yPosの位置にキャラクターを描画
-	DrawGraph(myStatus->xPos, myStatus->yPos, myStatus->Image[(int)myStatus->AnimHandle], true);
+	DrawManager::Instance()->GetDrawParts(myStatus->NAME)->SetImgID(myStatus->Image[(int)myStatus->AnimHandle]);
+	DrawManager::Instance()->GetDrawParts(myStatus->NAME)->SetPosition(myStatus->xPos, myStatus->yPos);
+	//DrawGraph(myStatus->xPos, myStatus->yPos, myStatus->Image[(int)myStatus->AnimHandle], true);
 }
 
 // キャラクターの移動
@@ -281,18 +285,23 @@ void Character::MoveRange(int x, int y, int moveCost)
 	if (moveToPos[valueY][valueX] < moveCost) moveToPos[valueY][valueX] = moveCost;
 
 	// もう動けないもしくは進めない場所の場合、敵陣営がいる場合はリターン
-	if (StageCreate::Instance()->stageList[_valueY][_valueX] > 0 && moveCost >= 0 || 
-		StageCreate::Instance()->onUnit[valueY][valueX] != "NONE" && StageCreate::Instance()->onUnit[valueY][valueX] != myStatus->myTeam) 
+	if (StageCreate::Instance()->stageList[_valueY][_valueX] > 0 && moveCost >= 0 ||
+		StageCreate::Instance()->onUnit[valueY][valueX] != "NONE" && StageCreate::Instance()->onUnit[valueY][valueX] != myStatus->myTeam)
 	{
-		if(moveCost == 0) StageCreate::Instance()->checkMove[valueY][valueX] = true;
 		moveToPos[valueY][valueX] = 0;
+		shared_ptr<DrawManager> attackArea(new DrawParts(CAN_ATTACK_AREA, true, 2));
+		attackArea->SetPosition(x, y);
+		DrawManager::Instance()->AddDrawList(attackArea);
 		return;
 	}
 	else if (StageCreate::Instance()->stageList[_valueY][_valueX] > 0 || moveCost == 0) return;
 
 	// 移動範囲表示していないなら表示
 	if (StageCreate::Instance()->checkMove[valueY][valueX] != true) {
-		StageCreate::Instance()->checkMove[valueY][valueX] = true; 
+		StageCreate::Instance()->checkMove[valueY][valueX] = true;
+		shared_ptr<DrawManager> moveArea(new DrawParts(CAN_MOVE_AREA, true, 1));
+		moveArea->SetPosition(x, y);
+		DrawManager::Instance()->AddDrawList(moveArea);
 	}
 
 	// 上へ行けるかチェック
@@ -312,7 +321,9 @@ void Character::AttackRange()
 	for (int y = 0; y < StageCreate::Instance()->MAP_SIZEY; y++) {
 		for (int x = 0; x < StageCreate::Instance()->MAP_SIZEX; x++) {
 			if (moveToPos[y][x] == 0) {
-				//SpriteDraw(x * CHIP_SIZE, y * CHIP_SIZE, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
+				shared_ptr<DrawManager> attackArea(new DrawParts(CAN_ATTACK_AREA, true, 2));
+				attackArea->SetPosition(x * CHIP_SIZE, y * CHIP_SIZE);
+				DrawManager::Instance()->AddDrawList(attackArea);
 			}
 		}
 	}
@@ -449,15 +460,27 @@ void Character::AttackableDraw()
 	int valueX = myStatus->xPos / CHIP_SIZE, valueY = myStatus->yPos / CHIP_SIZE;
 	// 攻撃可能な位置の描画
 	if (valueX + 1 <= 14 && StageCreate::Instance()->onUnit[valueY][valueX + 1] != "NONE" && StageCreate::Instance()->onUnit[valueY][valueX + 1] != myStatus->myTeam) {
+		shared_ptr<DrawManager> attackArea(new DrawParts(CAN_ATTACK_AREA, true, 2));
+		attackArea->SetPosition(myStatus->xPos + CHIP_SIZE, myStatus->yPos);
+		DrawManager::Instance()->AddDrawList(attackArea);
 		//SpriteDraw(myStatus->xPos + CHIP_SIZE, myStatus->yPos, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
 	}
 	if (valueX - 1 >= 0 && StageCreate::Instance()->onUnit[valueY][valueX - 1] != "NONE" && StageCreate::Instance()->onUnit[valueY][valueX - 1] != myStatus->myTeam) {
+		shared_ptr<DrawManager> attackArea(new DrawParts(CAN_ATTACK_AREA, true, 2));
+		attackArea->SetPosition(myStatus->xPos - CHIP_SIZE, myStatus->yPos);
+		DrawManager::Instance()->AddDrawList(attackArea);
 		//SpriteDraw(myStatus->xPos - CHIP_SIZE, myStatus->yPos, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
 	}
 	if (valueY + 1 <= 9 && StageCreate::Instance()->onUnit[valueY + 1][valueX] != "NONE" && StageCreate::Instance()->onUnit[valueY + 1][valueX] != myStatus->myTeam) {
+		shared_ptr<DrawManager> attackArea(new DrawParts(CAN_ATTACK_AREA, true, 2));
+		attackArea->SetPosition(myStatus->xPos, myStatus->yPos + CHIP_SIZE);
+		DrawManager::Instance()->AddDrawList(attackArea);
 		//SpriteDraw(myStatus->xPos, myStatus->yPos + CHIP_SIZE, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
 	}
 	if (valueY - 1 >= 0 && StageCreate::Instance()->onUnit[valueY - 1][valueX] != "NONE" && StageCreate::Instance()->onUnit[valueY - 1][valueX] != myStatus->myTeam) {
+		shared_ptr<DrawManager> attackArea(new DrawParts(CAN_ATTACK_AREA, true, 2));
+		attackArea->SetPosition(myStatus->xPos, myStatus->yPos - CHIP_SIZE);
+		DrawManager::Instance()->AddDrawList(attackArea);
 		//SpriteDraw(myStatus->xPos, myStatus->yPos - CHIP_SIZE, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
 	}
 }

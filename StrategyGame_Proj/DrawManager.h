@@ -28,6 +28,7 @@ public:
 	void RemoveDrawList();
 
 	void SetImage(string, int);
+	void SetImgID(int);
 	void SetPosition(int, int);
 	void SetRotate(int, int);
 	bool IsRemove() { return isRemove; }

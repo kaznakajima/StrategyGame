@@ -2,6 +2,9 @@
 
 void DrawManager::AddDrawList(shared_ptr<DrawManager>& _drawItem)
 {
+	// 中身がない場合、既に登録されている場合は除く
+	if (_drawItem->fileName == "") return;
+
 	drawList.push_back(_drawItem);
 	// レイヤー番号順にソート
 	std::sort(drawList.begin(), drawList.end(), [](const shared_ptr<DrawManager> &a, const shared_ptr<DrawManager> &b) {
@@ -15,9 +18,12 @@ void DrawManager::RemoveDrawList()
 {
 	// 取り除くものを見つける
 	auto lostItem = remove_if(drawList.begin(), drawList.end(), [](const shared_ptr<DrawManager>& a) {
-		return a->IsRemove() == true;
+		return a->isRemove == true;
 	});
-	if(lostItem != drawList.end()) drawList.erase(lostItem);
+	if (lostItem != drawList.end()) {
+		drawList.erase(lostItem);
+		RemoveDrawList();
+	}
 }
 
 void DrawManager::SetRemove()
@@ -26,6 +32,7 @@ void DrawManager::SetRemove()
 	{
 		if (draw->copy) draw->isRemove = true;
 	});
+	RemoveDrawList();
 }
 
 // 描画する素材を返す
@@ -35,6 +42,11 @@ const shared_ptr<DrawManager>& DrawManager::GetDrawParts(string _fileName)
 	if (parts != drawData.end()) {
 		return parts->second;
 	}
+}
+
+void DrawManager::SetImgID(int _ID)
+{
+	imgID = _ID;
 }
 
 void DrawManager::SetImage(string _fileName, int _layerNum)
