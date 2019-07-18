@@ -66,8 +66,6 @@ Character::Character()
 	 myStatus->myParam.ATTACK_AVO = myStatus->myParam.ATTACK_SPEED * 2 + myStatus->myParam.LUCKY;
 	 // 命中率 (武器命中 + 技パラメータ * 2 + 幸運パラメータ / 2)
 	 myStatus->myParam.ATTACK_HIT = Item[0]->myParam.HIT + (int)(myStatus->myParam.TECHNIQUE * 2) + (int)(myStatus->myParam.LUCKY / 2);
-	 shared_ptr<DrawManager> draw(new DrawParts(myStatus->NAME, 3));
-	 DrawManager::Instance()->AddDrawList(draw);
  }
 
  // ユニットの詳細情報の描画
@@ -118,9 +116,7 @@ void Character::CharacterAnim()
 	}
 
 	// xPos, yPosの位置にキャラクターを描画
-	DrawManager::Instance()->GetDrawParts(myStatus->NAME)->SetImgID(myStatus->Image[(int)myStatus->AnimHandle]);
-	DrawManager::Instance()->GetDrawParts(myStatus->NAME)->SetPosition(myStatus->xPos, myStatus->yPos);
-	//DrawGraph(myStatus->xPos, myStatus->yPos, myStatus->Image[(int)myStatus->AnimHandle], true);
+	DrawGraph(myStatus->xPos, myStatus->yPos, myStatus->Image[(int)myStatus->AnimHandle], true);
 }
 
 // キャラクターの移動

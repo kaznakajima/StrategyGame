@@ -8,14 +8,14 @@ GameScene::GameScene()
 {
 	LoadFile();
 	Initialize();
+	CharacterManager::Instance()->Initialize();
+	CharacterManager::Instance()->SetCameraOffset(-1, true);
 }
 
 // ‰Šú‰»
 void GameScene::Initialize()
 {
 	KeyInput::Instance()->Initialize();
-	CharacterManager::Instance()->Initialize();
-	CharacterManager::Instance()->SetCameraOffset(-1, true);
 	AudioManager::Instance()->playBGM(BGM_PLAYER);
 	type = GAMESTATE::TITLE;
 }
