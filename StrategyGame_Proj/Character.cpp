@@ -284,6 +284,7 @@ void Character::MoveRange(int x, int y, int moveCost)
 	if (StageCreate::Instance()->stageList[_valueY][_valueX] > 0 && moveCost >= 0 || 
 		StageCreate::Instance()->onUnit[valueY][valueX] != "NONE" && StageCreate::Instance()->onUnit[valueY][valueX] != myStatus->myTeam) 
 	{
+		if(moveCost == 0) StageCreate::Instance()->checkMove[valueY][valueX] = true;
 		moveToPos[valueY][valueX] = 0;
 		return;
 	}
@@ -675,19 +676,10 @@ void Character::SetCameraOffset(int dir, bool horizontal)
 	}
 }
 
-void Character::MoveAreaClear(vector<shared_ptr<Character>> const &_character)
+void Character::ResetArea(int x, int y)
 {
-	for (int y = 0; y < StageCreate::Instance()->MAP_SIZEY; y++) {
-		for (int x = 0; x < StageCreate::Instance()->MAP_SIZEX; x++) {
-			moveToPos[y][x] = -1;
-			moveArrow[y][x] = false;
-			StageCreate::Instance()->StageUpdate(x, y);
-			for (size_t num = 0; num < _character.size();++num) {
-				if (_character[num]->myStatus->xPos == x * CHIP_SIZE
-					&& _character[num]->myStatus->yPos == y * CHIP_SIZE) StageCreate::Instance()->CheckOnUnit(x, y, _character[num]->myStatus->myTeam);
-			}
-		}
-	}
+	moveToPos[y][x] = -1;
+	moveArrow[y][x] = false;
 }
 
 // ƒAƒCƒeƒ€‚Ì’Ç‰Á

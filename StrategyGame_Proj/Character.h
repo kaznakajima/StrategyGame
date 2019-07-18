@@ -117,8 +117,8 @@ public:
 	// カメラとのオフセット計算
 	void SetCameraOffset(int dir, bool horizontal);
 
-	// 移動エリアのリセット
-	void MoveAreaClear(vector<shared_ptr<Character>> const &_character);
+	// 自身のエリアのリセット
+	void ResetArea(int x, int y);
 
 private:
 	// 自身のパラメータデータ名

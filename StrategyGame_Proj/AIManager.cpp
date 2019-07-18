@@ -50,7 +50,7 @@ void AIManager::MoveSelect(shared_ptr<Character> const &character)
 	// 敵の移動先の候補を検出
 	x = character->myStatus->xPos, y = character->myStatus->yPos;
 	CharacterManager::Instance()->DrawCheck(x, y);
-	character->MoveAreaClear(CharacterManager::Instance()->_character);
+	CharacterManager::Instance()->MoveAreaClear();
 	character->MoveRange(character->myStatus->xPos, character->myStatus->yPos, character->myStatus->myParam.MOVERANGE);
 
 	// プレイヤーユニットの周囲を検索

@@ -12,9 +12,9 @@ void CharacterManager::Initialize()
 	FileManager::Instance()->GetFileHandle(HP_BARBOX);
 	FileManager::Instance()->GetFileHandle(DAMAGE_DETAIL);
 
-	shared_ptr<DrawManager> moveArea(new DrawParts(CAN_MOVE_AREA, true, 2));
+	shared_ptr<DrawManager> moveArea(new DrawParts(CAN_MOVE_AREA, true, 1));
 	DrawManager::Instance()->AddDrawList(moveArea);
-	shared_ptr<DrawManager> attackArea(new DrawParts(CAN_ATTACK_AREA, true, 1));
+	shared_ptr<DrawManager> attackArea(new DrawParts(CAN_ATTACK_AREA, true, 2));
 	DrawManager::Instance()->AddDrawList(attackArea);
 
 	int allCharacter = StageCreate::Instance()->playerCount + StageCreate::Instance()->enemyCount;
@@ -209,9 +209,9 @@ void CharacterManager::DrawCheck(int x, int y)
 void CharacterManager::Draw()
 {
 	for (size_t num = 0; num < _character.size(); num++) {
+		MoveAreaClear();
 		// ˆÚ“®‡˜H‚ğ‹L˜^‚µ‚Â‚ÂˆÚ“®”ÍˆÍ‚ÆUŒ‚”ÍˆÍ‚Ì•`‰æ
 		if (_character[num]->myStatus->isSelect) {
-			_character[num]->MoveAreaClear(_character);
 			_character[num]->OldPosX.push_back(_character[num]->myStatus->xPos);
 			_character[num]->OldPosY.push_back(_character[num]->myStatus->yPos);
 			_character[num]->MoveRange(_character[num]->myStatus->xPos, _character[num]->myStatus->yPos, _character[num]->myStatus->myParam.MOVERANGE);
@@ -279,6 +279,20 @@ void CharacterManager::GetMoveArrow(int x, int y)
 	}
 }
 
+void CharacterManager::MoveAreaClear()
+{
+	for (int y = 0; y < StageCreate::Instance()->MAP_SIZEY; y++) {
+		for (int x = 0; x < StageCreate::Instance()->MAP_SIZEX; x++) {
+			for (size_t num = 0; num < _character.size(); ++num) {
+				_character[num]->ResetArea(x, y);
+				StageCreate::Instance()->StageUpdate(x, y);
+				if (_character[num]->myStatus->xPos == x * CHIP_SIZE
+					&& _character[num]->myStatus->yPos == y * CHIP_SIZE) StageCreate::Instance()->CheckOnUnit(x, y, _character[num]->myStatus->myTeam);
+			}
+		}
+	}
+}
+
 // UŒ‚‰Â”\ƒGƒŠƒAæ“¾
 void CharacterManager::GetAttackArea(int x, int y)
 {
@@ -286,7 +300,6 @@ void CharacterManager::GetAttackArea(int x, int y)
 	for (size_t num = 0; num < _character.size(); num++) {
 		if (_character[num]->myStatus->canAttack) {
 			_myCharacter = _character[num];
-			_myCharacter->MoveAreaClear(_character);
 			_myCharacter->AttackableDraw();
 			attack = true;
 		}

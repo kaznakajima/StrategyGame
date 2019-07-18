@@ -71,6 +71,8 @@ public:
 	void GetMoveCount(int x, int y);
 	// 移動方向取得
 	void GetMoveArrow(int x, int y);
+	// 移動エリアのリセット
+	void MoveAreaClear();
 
 	// カメラとのオフセット計算
 	void SetCameraOffset(int dir, bool horizontal);
