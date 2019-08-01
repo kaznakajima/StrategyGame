@@ -12,11 +12,6 @@ void CharacterManager::Initialize()
 	FileManager::Instance()->GetFileHandle(HP_BARBOX);
 	FileManager::Instance()->GetFileHandle(DAMAGE_DETAIL);
 
-	shared_ptr<DrawManager> moveArea(new DrawParts(CAN_MOVE_AREA, true, 1));
-	DrawManager::Instance()->AddDrawList(moveArea);
-	shared_ptr<DrawManager> attackArea(new DrawParts(CAN_ATTACK_AREA, true, 2));
-	DrawManager::Instance()->AddDrawList(attackArea);
-
 	int allCharacter = StageCreate::Instance()->playerCount + StageCreate::Instance()->enemyCount;
 	// キャラクターの追加
 	for (size_t num = 0; num < allCharacter; num++) {
@@ -36,6 +31,19 @@ void CharacterManager::Initialize()
 	}
 	AIManager::Instance()->Initialize();
 
+	for (int y = 0; y < StageCreate::Instance()->MAP_SIZEY; y++) {
+		for (int x = 0; x < StageCreate::Instance()->MAP_SIZEX; x++) {
+			shared_ptr<Renderer> ren = make_shared<Renderer>(FileManager::Instance()->GetFileHandle(CAN_MOVE_AREA), 2, 0);
+			ren->SetPosition(x * CHIP_SIZE, y * CHIP_SIZE);
+			ren->SetVisible(false);
+			DrawManager::Instance()->AddDrawList(ren);
+			ren = make_shared<Renderer>(FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA), 2, 0);
+			ren->SetPosition(x * CHIP_SIZE, y * CHIP_SIZE);
+			ren->SetVisible(false);
+			DrawManager::Instance()->AddDrawList(ren);
+		}
+	}
+
 	playerTurn = false;
 	isGame = true;
 	StartTurn();
@@ -54,6 +62,7 @@ void CharacterManager::CanSelectCharacter(shared_ptr<Character> const & characte
 			character->myStatus->AnimHandle = 4.0f;
 			isSelect = true;
 			attack = false;
+			Draw();
 		}
 	}
 }
@@ -209,7 +218,6 @@ void CharacterManager::DrawCheck(int x, int y)
 void CharacterManager::Draw()
 {
 	for (size_t num = 0; num < _character.size(); num++) {
-		MoveAreaClear();
 		// 移動順路を記録しつつ移動範囲と攻撃範囲の描画
 		if (_character[num]->myStatus->isSelect) {
 			_character[num]->OldPosX.push_back(_character[num]->myStatus->xPos);
@@ -242,6 +250,7 @@ void CharacterManager::CharacterMove(int x, int y)
 				&& _character[num]->myStatus->canAttack == false) {
 				moveableUnit--;
 				moveEnd = true;
+				MoveAreaClear();
 			}
 		}
 	}
@@ -283,6 +292,9 @@ void CharacterManager::MoveAreaClear()
 {
 	for (int y = 0; y < StageCreate::Instance()->MAP_SIZEY; y++) {
 		for (int x = 0; x < StageCreate::Instance()->MAP_SIZEX; x++) {
+			int posX = x * CHIP_SIZE, posY = y * CHIP_SIZE;
+			DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(CAN_MOVE_AREA), posX, posY)->SetVisible(false);
+			DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA), posX, posY)->SetVisible(false);
 			for (size_t num = 0; num < _character.size(); ++num) {
 				_character[num]->ResetArea(x, y);
 				StageCreate::Instance()->StageUpdate(x, y);
@@ -426,7 +438,7 @@ void CharacterManager::SetCameraOffset(int dir, bool horizontal)
 
 // 入力した地点のチェック
 void CharacterManager::KeyCheck(int x, int y)
-{
+{ 
 	for (size_t num = 0; num < _character.size(); num++) {
 		// カーソルが合っていなければ選択状態を解除
 		if (_character[num]->myStatus->xPos != x || _character[num]->myStatus->yPos != y) {

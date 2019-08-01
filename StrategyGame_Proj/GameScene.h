@@ -41,16 +41,14 @@ private:
 	// ゲーム終了
 	void GameEnd(bool isClear);
 
-	unique_ptr<DrawManager> drawMgr;
-	// ステージ画像
-	int stageImg;
-	// カーソル画像
-	int cursorImg;
-	// ターン変更用画像
-	int turnChangeImg = 0;
 	// アニメーション用変数
 	float moveX = 672;
-	float moveY = -48;
+	float moveY = -48; 
+
+	// 必要な素材
+	shared_ptr<Renderer> fieldImg;
+	shared_ptr<Renderer> cursorImg;
+	shared_ptr<Renderer> turnImg;
 
 	// 現在の座標
 	int xPos = 480, yPos = 240;

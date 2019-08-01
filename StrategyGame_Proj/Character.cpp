@@ -22,6 +22,8 @@ Character::Character()
 			StageCreate::Instance()->StageUpdate((int)x, (int)y);
 		}
 	}
+	myRen = make_shared<Renderer>(myStatus->Image[0], 3, 0);
+	DrawManager::Instance()->AddDrawList(myRen);
 }
 
  void Character::Character_Initialize(string pass, string team, int posX, int posY)
@@ -116,7 +118,9 @@ void Character::CharacterAnim()
 	}
 
 	// xPos, yPosの位置にキャラクターを描画
-	DrawGraph(myStatus->xPos, myStatus->yPos, myStatus->Image[(int)myStatus->AnimHandle], true);
+	myRen->SetImageID(myStatus->Image[(int)myStatus->AnimHandle]);
+	myRen->SetPosition(myStatus->xPos, myStatus->yPos);
+	//DrawGraph(myStatus->xPos, myStatus->yPos, myStatus->Image[(int)myStatus->AnimHandle], true);
 }
 
 // キャラクターの移動
@@ -286,6 +290,8 @@ void Character::MoveRange(int x, int y, int moveCost)
 	{
 		if(moveCost == 0) StageCreate::Instance()->checkMove[valueY][valueX] = true;
 		moveToPos[valueY][valueX] = 0;
+		if (DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA), x, y) != nullptr)
+			DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA), x, y)->SetVisible(true);
 		return;
 	}
 	else if (StageCreate::Instance()->stageList[_valueY][_valueX] > 0 || moveCost == 0) return;
@@ -293,6 +299,8 @@ void Character::MoveRange(int x, int y, int moveCost)
 	// 移動範囲表示していないなら表示
 	if (StageCreate::Instance()->checkMove[valueY][valueX] != true) {
 		StageCreate::Instance()->checkMove[valueY][valueX] = true; 
+		if (DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(CAN_MOVE_AREA), x, y) != nullptr)
+			DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(CAN_MOVE_AREA), x, y)->SetVisible(true);
 	}
 
 	// 上へ行けるかチェック
@@ -312,7 +320,9 @@ void Character::AttackRange()
 	for (int y = 0; y < StageCreate::Instance()->MAP_SIZEY; y++) {
 		for (int x = 0; x < StageCreate::Instance()->MAP_SIZEX; x++) {
 			if (moveToPos[y][x] == 0) {
-				//SpriteDraw(x * CHIP_SIZE, y * CHIP_SIZE, FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA));
+				int posX = x * CHIP_SIZE, posY = y * CHIP_SIZE;
+				if (DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA), posX, posY) != nullptr)
+					DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA), posX, posY)->SetVisible(true);
 			}
 		}
 	}

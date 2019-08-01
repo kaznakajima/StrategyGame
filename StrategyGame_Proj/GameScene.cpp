@@ -23,16 +23,13 @@ void GameScene::Initialize()
 void GameScene::LoadFile()
 {
 	// 画像の読み込み
-	shared_ptr<DrawManager> field(new DrawParts(FIELD_IMG, 0));
-	DrawManager::Instance()->AddDrawList(field);
-	shared_ptr<DrawManager> cursor(new DrawParts(CURSOR_IMG, 1));
-	DrawManager::Instance()->AddDrawList(cursor);
-	shared_ptr<DrawManager> playerTurn(new DrawParts(PLAYERTURN_IMG, 2, 1.0f, 0.0f));
-	playerTurn->isRemove = true;
-	DrawManager::Instance()->AddDrawList(playerTurn);
-	/*FileManager::Instance()->GetFileHandle(FIELD_IMG);
-	FileManager::Instance()->GetFileHandle(CURSOR_IMG);
-	turnChangeImg = FileManager::Instance()->GetFileHandle(PLAYERTURN_IMG);*/
+	fieldImg = make_shared<Renderer>(FileManager::Instance()->GetFileHandle(FIELD_IMG), 0, 0);
+	DrawManager::Instance()->AddDrawList(fieldImg);
+	cursorImg = make_shared<Renderer>(FileManager::Instance()->GetFileHandle(CURSOR_IMG), 1, 0);
+	DrawManager::Instance()->AddDrawList(cursorImg);
+	turnImg = make_shared<Renderer>(FileManager::Instance()->GetFileHandle(PLAYERTURN_IMG), 2, 1);
+	turnImg->SetRotate(1.0f, 0.0f);
+	DrawManager::Instance()->AddDrawList(turnImg);
 }
 
 // ターン開始
@@ -43,16 +40,16 @@ void GameScene::TurnChange(bool playerTurn)
 	// 位置変更
 	moveX -= 24;
 
-	DrawManager::Instance()->GetDrawParts(PLAYERTURN_IMG)->isVisible = true;
+	turnImg->isVisible = true;
 
 	// プレイヤーターン
 	if (playerTurn) {
-		DrawManager::Instance()->GetDrawParts(PLAYERTURN_IMG)->SetPosition((int)moveX, 240);
+		turnImg->SetPosition((int)moveX, 240);
 		//DrawRotaGraph((int)moveX, 240, 1.0f, 0.0f, turnChangeImg, true);
 	}
 	// エネミーターン
 	else {
-		DrawManager::Instance()->GetDrawParts(PLAYERTURN_IMG)->SetPosition((int)moveX, 240);
+		turnImg->SetPosition((int)moveX, 240);
 		//DrawRotaGraph((int)moveX, 240, 1.0f, 0.0f, turnChangeImg, true);
 	}
 
@@ -63,7 +60,7 @@ void GameScene::TurnChange(bool playerTurn)
 
 		WaitTimer(1000);
 		moveX = 672;
-		DrawManager::Instance()->GetDrawParts(PLAYERTURN_IMG)->isVisible = false;
+		turnImg->isVisible = false;
 		CharacterManager::Instance()->turnAnim = false;
 
 		if (playerTurn) { 
@@ -134,24 +131,20 @@ void GameScene::Update()
 void GameScene::Draw()
 {
 	// 描画
-	DrawManager::Instance()->GetDrawParts(FIELD_IMG)->SetPosition(0 - (int)KeyInput::Instance()->cameraPos.x, 0 - (int)KeyInput::Instance()->cameraPos.y);
+	fieldImg->SetPosition(0 - (int)KeyInput::Instance()->cameraPos.x, 0 - (int)KeyInput::Instance()->cameraPos.y);
 	//DrawGraph(0 - (int)KeyInput::Instance()->cameraPos.x, 0 - (int)KeyInput::Instance()->cameraPos.y, FileManager::Instance()->GetFileHandle(FIELD_IMG), true);
-
-
+	
 	// キャラクター選択
 	if (KeyInput::Instance()->isSelect == true && CharacterManager::Instance()->attack == false) {
-		CharacterManager::Instance()->Draw();
+		//CharacterManager::Instance()->Draw();
 		CharacterManager::Instance()->GetMoveArrow(xPos, yPos);
 	}
 
 	// カーソル表示
-	DrawManager::Instance()->GetDrawParts(CURSOR_IMG)->SetPosition(xPos, yPos);
+	cursorImg->SetPosition(xPos, yPos);
 	//DrawGraph(xPos, yPos, FileManager::Instance()->GetFileHandle(CURSOR_IMG), true);
 
-	for_each(DrawManager::Instance()->drawList.begin(), DrawManager::Instance()->drawList.end(), [](shared_ptr<DrawManager>& draw) {
-		draw->Draw();
-	});
-
+	DrawManager::Instance()->Draw();
 }
 
 // キー入力処理

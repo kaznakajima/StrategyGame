@@ -139,6 +139,7 @@
     <ClCompile Include="GameScene.cpp" />
     <ClCompile Include="KeyInput.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="StageCreate.cpp" />
     <ClCompile Include="TimeCount.cpp" />
@@ -156,6 +157,7 @@
     <ClInclude Include="FileManager.h" />
     <ClInclude Include="GameScene.h" />
     <ClInclude Include="KeyInput.h" />
+    <ClInclude Include="Renderer.h" />
     <ClInclude Include="Singleton.h" />
     <ClInclude Include="StageCreate.h" />
     <ClInclude Include="TimeCount.h" />

@@ -124,6 +124,9 @@ private:
 	// 自身のパラメータデータ名
 	string myData;
 
+	// 自身の画像
+	shared_ptr<Renderer> myRen;
+
 	// 移動経路
 	int ArrowImage[6];
 

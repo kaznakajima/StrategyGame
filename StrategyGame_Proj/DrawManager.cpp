@@ -10,14 +10,24 @@ void DrawManager::AddDrawList(shared_ptr<DrawManager>& _drawItem)
 	drawData.emplace(_drawItem->fileName, _drawItem);
 }
 
+// 描画パーツの格納
+void DrawManager::AddDrawList(shared_ptr<Renderer>& _drawItem)
+{
+	rendererList.push_back(_drawItem);
+	// レイヤー番号順にソート
+	std::sort(rendererList.begin(), rendererList.end(), [](const shared_ptr<Renderer> &a, const shared_ptr<Renderer> &b) {
+		return a->layerNum < b->layerNum;
+	});
+}
+
 // 描画パーツを取り除く
 void DrawManager::RemoveDrawList()
 {
 	// 取り除くものを見つける
-	auto lostItem = remove_if(drawList.begin(), drawList.end(), [](const shared_ptr<DrawManager>& a) {
-		return a->IsRemove() == true;
+	auto lostItem = remove_if(rendererList.begin(), rendererList.end(), [](const shared_ptr<Renderer>& a) {
+		return a->GetRemove() == true;
 	});
-	if(lostItem != drawList.end()) drawList.erase(lostItem);
+	if(lostItem != rendererList.end()) rendererList.erase(lostItem);
 }
 
 void DrawManager::SetRemove()
@@ -35,6 +45,17 @@ const shared_ptr<DrawManager>& DrawManager::GetDrawParts(string _fileName)
 	if (parts != drawData.end()) {
 		return parts->second;
 	}
+}
+
+// 指定座標に存在する描画パーツを返す
+const shared_ptr<Renderer>& DrawManager::GetDrawParts(int _id, int _x, int _y)
+{
+	// 配列の中身を調べる
+	for (int num = 0; num < rendererList.size(); num++) {
+		if (rendererList[num]->imgID == _id && rendererList[num]->x == _x && rendererList[num]->y == _y) return rendererList[num];
+	}
+
+	return nullptr;
 }
 
 void DrawManager::SetImage(string _fileName, int _layerNum)
@@ -59,9 +80,10 @@ void DrawManager::SetRotate(int _rotaX, int _rotaY)
 
 void DrawManager::Draw()
 {
-	// 回転を加えるか
-	if(isRotate == false) DrawGraph(x, y, imgID, TRUE);
-	else DrawRotaGraph(x, y, rotaX, rotaY, imgID, TRUE);
+	for_each(rendererList.begin(), rendererList.end(), [](const shared_ptr<Renderer>& _ren)
+	{
+		_ren->Draw();
+	});
 }
 
 void DrawManager::Draw(string _fileName, int _x, int _y)

@@ -2,6 +2,7 @@
 #include "DxLib.h"
 #include "Singleton.h"
 #include "FileManager.h"
+#include "Renderer.h"
 #include <memory>
 #include <vector>
 #include <algorithm>
@@ -24,6 +25,7 @@ public:
 
 	// 描画パーツを格納していく
 	void AddDrawList(shared_ptr<DrawManager>&);
+	void AddDrawList(shared_ptr<Renderer>&);
 	// 描画パーツを取り除く
 	void RemoveDrawList();
 
@@ -38,7 +40,11 @@ public:
 
 	// 実際に表示するリスト
 	vector<shared_ptr<DrawManager>> drawList;
+	vector<shared_ptr<Renderer>> rendererList;
 	map<string, shared_ptr<DrawManager>> drawData;
+	// 移動先、攻撃先エリア表示用
+	vector<shared_ptr<Renderer>> characterParts;
 
 	const shared_ptr<DrawManager>& GetDrawParts(string);
+	const shared_ptr<Renderer>& GetDrawParts(int, int, int);
 };
