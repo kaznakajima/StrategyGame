@@ -13,7 +13,6 @@ Character::Character()
 	/*FileManager::Instance()->GetFileHandle(CAN_MOVE_AREA);
 	FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA);
 	FileManager::Instance()->GetFileHandle(ATTACK_DETAIL);*/
-	LoadDivGraph(ARROW, 6, 6, 1, CHIP_SIZE, CHIP_SIZE, ArrowImage);
 
 	for (size_t y = 0; y < StageCreate::Instance()->MAP_SIZEY; y++) {
 		for (size_t x = 0; x < StageCreate::Instance()->MAP_SIZEX; x++) {
@@ -336,12 +335,10 @@ void Character::DrawMoveArrow(int x, int y, int moveValue)
 
 	// 移動範囲でないなら表示しない
 	if (StageCreate::Instance()->checkMove[valueY][valueX] == false) {
-		// 入力座標のリセット
-		OldPosX.clear(); 
-		OldPosY.clear();
 		// 移動値はカウント
 		moveCount++;
-		moveArrow[valueY][valueX] = false;
+		// 入力座標のリセット
+		InputArrowReset();
 	}
 
 	// 敵の行動
@@ -351,7 +348,9 @@ void Character::DrawMoveArrow(int x, int y, int moveValue)
 
 			// ユニットの位置でないならここから逆探知
 			if (myStatus->xPos != x || myStatus->yPos != y) {
-				DrawGraph(x, y, ArrowImage[moveValue], true);
+				if (DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(ARROW), x, y) != nullptr)
+					DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(ARROW), x, y)->SetVisible(true);
+				//DrawGraph(x, y, ArrowImage[moveValue], true);
 				moveArrow[valueY][valueX] = true;
 			}
 
@@ -388,7 +387,9 @@ void Character::DrawMoveArrow(int x, int y, int moveValue)
 	if (myStatus->myParam.MOVERANGE - moveToPos[valueY][valueX] >= moveCount || OldPosX.size() == moveCount) {
 		for (unsigned int num = 0; num < OldPosX.size(); num++) {
 			if (StageCreate::Instance()->checkMove[OldPosY[num] / CHIP_SIZE][OldPosX[num] / CHIP_SIZE] == true) {
-				DrawGraph(OldPosX[num], OldPosY[num], ArrowImage[moveValue], true);
+				if (DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(ARROW), x, y) != nullptr)
+					DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(ARROW), x, y)->SetVisible(true);
+				//DrawGraph(OldPosX[num], OldPosY[num], ArrowImage[moveValue], true);
 				moveArrow[OldPosY[num] / CHIP_SIZE][OldPosX[num] / CHIP_SIZE] = true;
 			}
 		}
@@ -404,7 +405,9 @@ void Character::DrawMoveArrow(int x, int y, int moveValue)
 
 			// ユニットの位置でないならここから逆探知
 			if (myStatus->xPos != x || myStatus->yPos != y) {
-				DrawGraph(x, y, ArrowImage[moveValue], true);
+				if (DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(ARROW), x, y) != nullptr)
+					DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(ARROW), x, y)->SetVisible(true);
+				//DrawGraph(x, y, ArrowImage[moveValue], true);
 				moveArrow[y / CHIP_SIZE][x / CHIP_SIZE] = true;
 			}
 
@@ -432,6 +435,23 @@ void Character::DrawMoveArrow(int x, int y, int moveValue)
 				DrawMoveArrow(x - CHIP_SIZE, y, 5);
 				return;
 			}
+		}
+	}
+}
+
+// 入力情報のリセット
+void Character::InputArrowReset()
+{
+	// 入力方向のリセット
+	OldPosX.clear();
+	OldPosY.clear();
+
+	for (int y = 0; y < StageCreate::Instance()->MAP_SIZEY; y++) {
+		for (int x = 0; x < StageCreate::Instance()->MAP_SIZEX; x++) {
+			int posX = x * CHIP_SIZE, posY = y * CHIP_SIZE;
+			moveArrow[y][x] = false;
+			if(DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(ARROW), posX, posY) != nullptr)
+				DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(ARROW), posX, posY)->SetVisible(false);
 		}
 	}
 }

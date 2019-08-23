@@ -15,7 +15,7 @@ using namespace std;
 #define CAN_ATTACK_AREA "CanAttack.png"
 #define ATTACK_DETAIL "AttackGraph.png"
 #define CHARACTER_DETAIL "CharacterParam.png"
-#define ARROW "Resources\\Image\\Arrow.png"
+#define ARROW "Arrow.png"
 #define P_CHARACTER_IMG "Resources\\Image\\Character_48×48_P.png"
 #define E_CHARACTER_IMG "Resources\\Image\\Character_48×48_E.png"
 
@@ -98,6 +98,8 @@ public:
 	void AttackRange();
 	// 移動方向描画
 	void DrawMoveArrow(int x, int y, int moveValue);
+	// 移動方向情報のリセット
+	void InputArrowReset();
 	// キャラクターの移動
 	bool CharacterMove(int moveX, int moveY);
 
@@ -126,9 +128,6 @@ private:
 
 	// 自身の画像
 	shared_ptr<Renderer> myRen;
-
-	// 移動経路
-	int ArrowImage[6];
 
 	// アイテムの所持数
 	int itemCount = 0;

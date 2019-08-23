@@ -31,6 +31,7 @@ void CharacterManager::Initialize()
 	}
 	AIManager::Instance()->Initialize();
 
+	// 必要な画像を登録しておく
 	for (int y = 0; y < StageCreate::Instance()->MAP_SIZEY; y++) {
 		for (int x = 0; x < StageCreate::Instance()->MAP_SIZEX; x++) {
 			shared_ptr<Renderer> ren = make_shared<Renderer>(FileManager::Instance()->GetFileHandle(CAN_MOVE_AREA), 2, 0);
@@ -38,6 +39,14 @@ void CharacterManager::Initialize()
 			ren->SetVisible(false);
 			DrawManager::Instance()->AddDrawList(ren);
 			ren = make_shared<Renderer>(FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA), 2, 0);
+			ren->SetPosition(x * CHIP_SIZE, y * CHIP_SIZE);
+			ren->SetVisible(false);
+			DrawManager::Instance()->AddDrawList(ren);
+			ren = make_shared<Renderer>(FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA), 2, 0);
+			ren->SetPosition(x * CHIP_SIZE, y * CHIP_SIZE);
+			ren->SetVisible(false);
+			DrawManager::Instance()->AddDrawList(ren);
+			ren = make_shared<Renderer>(FileManager::Instance()->GetFileHandle(ARROW), 3, 0);
 			ren->SetPosition(x * CHIP_SIZE, y * CHIP_SIZE);
 			ren->SetVisible(false);
 			DrawManager::Instance()->AddDrawList(ren);
@@ -63,6 +72,7 @@ void CharacterManager::CanSelectCharacter(shared_ptr<Character> const & characte
 			isSelect = true;
 			attack = false;
 			Draw();
+			return;
 		}
 	}
 }
@@ -208,8 +218,8 @@ void CharacterManager::DrawCheck(int x, int y)
 		return;
 	}
 
+	// ユニットが選択可能かチェック
 	for (size_t num = 0; num < _character.size(); num++) {
-		// ユニットが選択可能かチェック
 		CanSelectCharacter(_character[num], x, y);
 	}
 }
@@ -220,6 +230,7 @@ void CharacterManager::Draw()
 	for (size_t num = 0; num < _character.size(); num++) {
 		// 移動順路を記録しつつ移動範囲と攻撃範囲の描画
 		if (_character[num]->myStatus->isSelect) {
+			MoveAreaClear();
 			_character[num]->OldPosX.push_back(_character[num]->myStatus->xPos);
 			_character[num]->OldPosY.push_back(_character[num]->myStatus->yPos);
 			_character[num]->MoveRange(_character[num]->myStatus->xPos, _character[num]->myStatus->yPos, _character[num]->myStatus->myParam.MOVERANGE);
@@ -263,28 +274,28 @@ void CharacterManager::CharacterMove(int x, int y)
 // 移動値の取得
 void CharacterManager::GetMoveCount(int x, int y) {
 	for (size_t num = 0; num < _character.size(); num++) {
-		_character[num]->OldPosX.push_back(x);
-		_character[num]->OldPosY.push_back(y);
-		_character[num]->moveCount++;
+		if (_character[num]->myStatus->isSelect) {
+			_character[num]->OldPosX.push_back(x);
+			_character[num]->OldPosY.push_back(y);
+			_character[num]->moveCount++;
+			GetMoveArrow(_character[num], x, y);
+		}
 	}
 }
 
-void CharacterManager::GetMoveArrow(int x, int y)
+void CharacterManager::GetMoveArrow(shared_ptr<Character> const &character, int x, int y)
 {
 	// 移動順路を描画
-	for (size_t num = 0; num < _character.size(); num++) {
-		if (_character[num]->myStatus->isSelect) {
-			if (playerTurn && _character[num]->myStatus->myTeam == "Enemy") return;
+	if (playerTurn && character->myStatus->myTeam == "Enemy") return;
 
-			_character[num]->DrawMoveArrow(x, y, 5);
+	character->DrawMoveArrow(x, y, 5);
 
-			// ユニットの位置に戻ったら順路をクリア
-			if (_character[num]->myStatus->xPos == x && _character[num]->myStatus->yPos == y) {
-				_character[num]->OldPosX.clear();
-				_character[num]->OldPosY.clear();
-				_character[num]->moveCount = 0;
-			}
-		}
+	// ユニットの位置に戻ったら順路をクリア
+	if (character->myStatus->xPos == x && character->myStatus->yPos == y) {
+		character->OldPosX.clear();
+		character->OldPosY.clear();
+		character->moveCount = 0;
+		character->InputArrowReset();
 	}
 }
 
@@ -295,6 +306,7 @@ void CharacterManager::MoveAreaClear()
 			int posX = x * CHIP_SIZE, posY = y * CHIP_SIZE;
 			DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(CAN_MOVE_AREA), posX, posY)->SetVisible(false);
 			DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA), posX, posY)->SetVisible(false);
+			DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(ARROW), posX, posY)->SetVisible(false);
 			for (size_t num = 0; num < _character.size(); ++num) {
 				_character[num]->ResetArea(x, y);
 				StageCreate::Instance()->StageUpdate(x, y);
@@ -445,7 +457,9 @@ void CharacterManager::KeyCheck(int x, int y)
 			_character[num]->OldPosX.clear();
 			_character[num]->OldPosY.clear();
 			_character[num]->moveCount = 0;
-			isSelect = false;
+			isSelect = false; 
+			if (DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(CAN_MOVE_AREA), x, y)->GetVisible() == false)
+				MoveAreaClear();
 		}
 	}
 }

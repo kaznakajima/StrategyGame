@@ -70,7 +70,7 @@ public:
 	// 移動値の取得
 	void GetMoveCount(int x, int y);
 	// 移動方向取得
-	void GetMoveArrow(int x, int y);
+	void GetMoveArrow(shared_ptr<Character> const &character, int x, int y);
 	// 移動エリアのリセット
 	void MoveAreaClear();
 

@@ -137,7 +137,6 @@ void GameScene::Draw()
 	// キャラクター選択
 	if (KeyInput::Instance()->isSelect == true && CharacterManager::Instance()->attack == false) {
 		//CharacterManager::Instance()->Draw();
-		CharacterManager::Instance()->GetMoveArrow(xPos, yPos);
 	}
 
 	// カーソル表示
