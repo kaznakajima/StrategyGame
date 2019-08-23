@@ -328,17 +328,20 @@ void Character::AttackRange()
 }
 
 // ガイドライン表示
-void Character::DrawMoveArrow(int x, int y, int moveValue)
+void Character::DrawMoveArrow(int x, int y, bool isFirst)
 {
 	// 現在の地点の二次元配列用データ
 	int valueX = x / CHIP_SIZE, valueY = y / CHIP_SIZE;
 
 	// 移動範囲でないなら表示しない
-	if (StageCreate::Instance()->checkMove[valueY][valueX] == false) {
-		// 移動値はカウント
-		moveCount++;
-		// 入力座標のリセット
-		InputArrowReset();
+	if (moveToPos[valueY][valueX] < 1) {
+		// 初回のみカウント
+		if (isFirst) { 
+			moveCount++; 
+			InputArrowReset();
+			return;
+		}
+		else return;
 	}
 
 	// 敵の行動
@@ -350,32 +353,31 @@ void Character::DrawMoveArrow(int x, int y, int moveValue)
 			if (myStatus->xPos != x || myStatus->yPos != y) {
 				if (DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(ARROW), x, y) != nullptr)
 					DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(ARROW), x, y)->SetVisible(true);
-				//DrawGraph(x, y, ArrowImage[moveValue], true);
 				moveArrow[valueY][valueX] = true;
 			}
 
 			// ユニットに向かってルートを逆探知していく
 			// 下
 			if (valueY + 1 < 9 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY + 1][valueX] && StageCreate::Instance()->checkMove[valueY + 1][valueX] == true) {
-				DrawMoveArrow(x, y + CHIP_SIZE, 5);
+				DrawMoveArrow(x, y + CHIP_SIZE, false);
 				return;
 			}
 			// ユニットに向かってルートを逆探知していく
 			// 上
 			if (valueY - 1 > 0 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY - 1][valueX] && StageCreate::Instance()->checkMove[valueY - 1][valueX] == true) {
-				DrawMoveArrow(x, y - CHIP_SIZE, 5);
+				DrawMoveArrow(x, y - CHIP_SIZE, false);
 				return;
 			}
 			// ユニットに向かってルートを逆探知していく
 			// 右
 			if (valueX + 1 < 14 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY][valueX + 1] && StageCreate::Instance()->checkMove[valueY][valueX + 1] == true) {
-				DrawMoveArrow(x + CHIP_SIZE, y, 5);
+				DrawMoveArrow(x + CHIP_SIZE, y, false);
 				return;
 			}
 			// ユニットに向かってルートを逆探知していく
 			// 左
 			if (valueX - 1 > 0 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY][valueX - 1] && StageCreate::Instance()->checkMove[valueY][valueX - 1] == true) {
-				DrawMoveArrow(x - CHIP_SIZE, y, 5);
+				DrawMoveArrow(x - CHIP_SIZE, y, false);
 				return;
 			}
 		}
@@ -384,57 +386,49 @@ void Character::DrawMoveArrow(int x, int y, int moveValue)
 	// 以下からはプレイヤーターンのみ実行
 
 	// 入力順にガイドライン表示
-	if (myStatus->myParam.MOVERANGE - moveToPos[valueY][valueX] >= moveCount || OldPosX.size() == moveCount) {
-		for (unsigned int num = 0; num < OldPosX.size(); num++) {
-			if (StageCreate::Instance()->checkMove[OldPosY[num] / CHIP_SIZE][OldPosX[num] / CHIP_SIZE] == true) {
-				if (DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(ARROW), x, y) != nullptr)
-					DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(ARROW), x, y)->SetVisible(true);
-				//DrawGraph(OldPosX[num], OldPosY[num], ArrowImage[moveValue], true);
-				moveArrow[OldPosY[num] / CHIP_SIZE][OldPosX[num] / CHIP_SIZE] = true;
-			}
-		}
+	if (myStatus->myParam.MOVERANGE - moveToPos[valueY][valueX] >= moveCount) {
+		if (DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(ARROW), x, y) != nullptr)
+			DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(ARROW), x, y)->SetVisible(true);
+		moveArrow[valueY][valueX] = true;
 	}
 	// 最短で行けるルートを表示
 	else if(myStatus->myParam.MOVERANGE - moveToPos[valueY][valueX] < moveCount || OldPosX.size() != moveCount) {
 
 		// これまでの入力情報をクリア
-		OldPosX.clear();
-		OldPosY.clear();
+		if(isFirst) InputArrowReset();
 
-		if (StageCreate::Instance()->checkMove[valueY][valueX] == true) {
+		// ユニットの位置でないならここから逆探知
+		if (myStatus->xPos != x || myStatus->yPos != y) {
+			if (DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(ARROW), x, y) != nullptr) {
+				DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(ARROW), x, y)->SetVisible(true);
+				moveArrow[valueY][valueX] = true;
+			}
+			else return;
+		}
 
-			// ユニットの位置でないならここから逆探知
-			if (myStatus->xPos != x || myStatus->yPos != y) {
-				if (DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(ARROW), x, y) != nullptr)
-					DrawManager::Instance()->GetDrawParts(FileManager::Instance()->GetFileHandle(ARROW), x, y)->SetVisible(true);
-				//DrawGraph(x, y, ArrowImage[moveValue], true);
-				moveArrow[y / CHIP_SIZE][x / CHIP_SIZE] = true;
-			}
-
-			// ユニットに向かってルートを逆探知していく
-			// 下
-			if (valueY + 1 < 9 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY + 1][valueX] && StageCreate::Instance()->checkMove[valueY + 1][valueX] == true) {
-				DrawMoveArrow(x, y + CHIP_SIZE, 5);
-				return;
-			}
-			// ユニットに向かってルートを逆探知していく
-			// 上
-			if (valueY - 1 > 0 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY - 1][valueX] && StageCreate::Instance()->checkMove[valueY - 1][valueX] == true) {
-				DrawMoveArrow(x, y - CHIP_SIZE, 5);
-				return;
-			}
-			// ユニットに向かってルートを逆探知していく
-			// 右
-			if (valueX + 1 < 14 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY][valueX + 1] && StageCreate::Instance()->checkMove[valueY][valueX + 1] == true) {
-				DrawMoveArrow(x + CHIP_SIZE, y, 5);
-				return;
-			}
-			// ユニットに向かってルートを逆探知していく
-			// 左
-			if (valueX - 1 > 0 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY][valueX - 1] && StageCreate::Instance()->checkMove[valueY][valueX - 1] == true) {
-				DrawMoveArrow(x - CHIP_SIZE, y, 5);
-				return;
-			}
+		// ユニットに向かってルートを逆探知していく
+		// 下
+		if (valueY + 1 < 9 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY + 1][valueX] && moveToPos[valueY + 1][valueX] > 0) {
+			DrawMoveArrow(x, y + CHIP_SIZE, false);
+			return;
+		}
+		// ユニットに向かってルートを逆探知していく
+		// 上
+		if (valueY - 1 > 0 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY - 1][valueX] && moveToPos[valueY - 1][valueX] > 0) {
+			DrawMoveArrow(x, y - CHIP_SIZE, false);
+			return;
+		}
+		// ユニットに向かってルートを逆探知していく
+		// 右
+		if (valueX + 1 < 14 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY][valueX + 1] && moveToPos[valueY][valueX + 1] > 0) {
+			DrawMoveArrow(x + CHIP_SIZE, y, false);
+			return;
+		}
+		// ユニットに向かってルートを逆探知していく
+		// 左
+		if (valueX - 1 > 0 && moveToPos[valueY][valueX] + 1 == moveToPos[valueY][valueX - 1] && moveToPos[valueY][valueX - 1] > 0) {
+			DrawMoveArrow(x - CHIP_SIZE, y, false);
+			return;
 		}
 	}
 }
@@ -444,7 +438,7 @@ void Character::InputArrowReset()
 {
 	// 入力方向のリセット
 	OldPosX.clear();
-	OldPosY.clear();
+	OldPosY.clear(); 
 
 	for (int y = 0; y < StageCreate::Instance()->MAP_SIZEY; y++) {
 		for (int x = 0; x < StageCreate::Instance()->MAP_SIZEX; x++) {

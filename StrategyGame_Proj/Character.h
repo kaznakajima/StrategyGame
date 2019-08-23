@@ -65,7 +65,7 @@ public:
 	}STATUS ;
 
 	// 移動値
-	int moveCount;
+	int moveCount = 0;
 	// 道筋
 	vector<int> OldPosX;
 	vector<int> OldPosY;
@@ -97,7 +97,7 @@ public:
 	// 攻撃範囲描画
 	void AttackRange();
 	// 移動方向描画
-	void DrawMoveArrow(int x, int y, int moveValue);
+	void DrawMoveArrow(int x, int y, bool isFirst);
 	// 移動方向情報のリセット
 	void InputArrowReset();
 	// キャラクターの移動

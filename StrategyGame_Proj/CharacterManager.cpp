@@ -288,15 +288,14 @@ void CharacterManager::GetMoveArrow(shared_ptr<Character> const &character, int 
 	// ˆÚ“®‡˜H‚ð•`‰æ
 	if (playerTurn && character->myStatus->myTeam == "Enemy") return;
 
-	character->DrawMoveArrow(x, y, 5);
-
 	// ƒ†ƒjƒbƒg‚ÌˆÊ’u‚É–ß‚Á‚½‚ç‡˜H‚ðƒNƒŠƒA
 	if (character->myStatus->xPos == x && character->myStatus->yPos == y) {
-		character->OldPosX.clear();
-		character->OldPosY.clear();
 		character->moveCount = 0;
 		character->InputArrowReset();
+		return;
 	}
+
+	character->DrawMoveArrow(x, y, true);
 }
 
 void CharacterManager::MoveAreaClear()
