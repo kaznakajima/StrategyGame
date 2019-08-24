@@ -23,6 +23,9 @@ public:
 	// プレイヤー側のキャラクターのリスト
 	vector<shared_ptr<Character>> _playerList;
 
+	// 現在操作中のキャラクター
+	shared_ptr<Character> currentCharacter = nullptr;
+
 	// 攻撃するユニット
 	int attackUnitNum = 0;
 	shared_ptr<Character> _myCharacter = nullptr;

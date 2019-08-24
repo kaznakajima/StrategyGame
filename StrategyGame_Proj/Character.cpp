@@ -8,12 +8,6 @@ Character::Character()
 {
 	itemCount = 0;
 
-	/*shared_ptr<DrawManager> attackDetail(new DrawParts(ATTACK_DETAIL, 1));
-	DrawManager::Instance()->AddDrawList(attackDetail);*/
-	/*FileManager::Instance()->GetFileHandle(CAN_MOVE_AREA);
-	FileManager::Instance()->GetFileHandle(CAN_ATTACK_AREA);
-	FileManager::Instance()->GetFileHandle(ATTACK_DETAIL);*/
-
 	for (size_t y = 0; y < StageCreate::Instance()->MAP_SIZEY; y++) {
 		for (size_t x = 0; x < StageCreate::Instance()->MAP_SIZEX; x++) {
 			moveToPos[y][x] = -1;

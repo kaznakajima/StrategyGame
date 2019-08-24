@@ -52,7 +52,6 @@ void AIManager::MoveSelect(shared_ptr<Character> const &character)
 	CharacterManager::Instance()->DrawCheck(x, y);
 	CharacterManager::Instance()->MoveAreaClear();
 	CharacterManager::Instance()->Draw();
-	//character->MoveRange(character->myStatus->xPos, character->myStatus->yPos, character->myStatus->myParam.MOVERANGE);
 
 	// プレイヤーユニットの周囲を検索
 	for (size_t num = 0; num < _playerList.size(); ++num) {

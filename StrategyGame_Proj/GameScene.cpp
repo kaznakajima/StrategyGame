@@ -45,12 +45,10 @@ void GameScene::TurnChange(bool playerTurn)
 	// プレイヤーターン
 	if (playerTurn) {
 		turnImg->SetPosition((int)moveX, 240);
-		//DrawRotaGraph((int)moveX, 240, 1.0f, 0.0f, turnChangeImg, true);
 	}
 	// エネミーターン
 	else {
 		turnImg->SetPosition((int)moveX, 240);
-		//DrawRotaGraph((int)moveX, 240, 1.0f, 0.0f, turnChangeImg, true);
 	}
 
 	// 移動完了したら
